@@ -111,6 +111,16 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                                         'Sex':,
                                         'long_genwebid':
                                       }
+
+            persons_xml_dict =
+                {'person_info':        [persons_id,mothers_id],
+                 'artifacts_info':
+                    {artifact_id: {'type':'picture','title':'title txt here', ...
+                    }
+                    {artifact_id: {'type':'picture','title':'title txt here',...
+                    }
+                     ...
+                }
     """
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -245,17 +255,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             # load the xml info for this person
             current_file = dictionaries_path + "/" + long_genwebid + ".pkl"
             persons_xml_dict = self._load_dictionary(current_file)
-            """
-            persons_xml_dict =
-                {'person_info':        [persons_id,mothers_id],
-                 'artifacts_info':
-                    {artifact_id: {'type':'picture','title':'title txt here', ...
-                    }
-                    {artifact_id: {'type':'picture','title':'title txt here',...
-                    }
-                     ...
-                }
-            """
 
             if long_genwebid in families_dict:
                 family_dict = families_dict[long_genwebid]
@@ -354,7 +353,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
 
         try:
             family_id_family_table_entry = family_id_family_table[parent_id]
-        except:
+        except:  # pylint: disable=bare-except  # noqa: E722
             long_genwebid = tgt_short_genweb_id + "-"
             revised_tgt_name_table_entry["long_genwebid"] = long_genwebid.replace(
                 " ", ""
@@ -367,7 +366,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
         if mother_id != "0":  # test for mother else set mother_short_genweb_id = '-'
             try:
                 mother_name_table_entry = ownerid_name_table[mother_id]
-            except:
+            except:  # pylint: disable=bare-except  # noqa: E722
                 # print('mother_id = ', mother_id)
                 long_genwebid = tgt_short_genweb_id + "-"
                 revised_tgt_name_table_entry["long_genwebid"] = long_genwebid.replace(
@@ -462,6 +461,29 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                                         'Sex':,
                                         'long_genwebid':
                                       }
+
+        Given a target person's PersonID (OwnerID in name_table)
+            1. get the person's Sex from the PersonTable by searching the owner_id
+            2. fetch the spouse IDs from the family_table
+            3. using the spouse IDs fetch the spouse(s) info from the NameTable
+
+        Given a target person's PersonID (OwnerID in name_table)
+            1. get the person's Sex from the PersonTable by searching the owner_id
+            2. fetch the FamilyID from the family_table
+            3. using the FamilyID fetch the ChildID for each child in the
+                ChildTable
+            4. Using the ChildID as the OwnerID get each child's info from
+                NameTable
+
+         family_dict =
+           'target: name_table_entry for target
+           'parents': {'mother: name_table_entry for mother,
+                        'father: name_table_entry for father}
+           'spouses' : [{name_table_entry for spouse1},...]
+           'children' : [{name_table_entry for child1},...]
+         where each name_table entry will have the addition key: 'long_genwebid'
+         and the appropriate value.
+         The key for each target is their long_genwebid
         """
         # Given a person's PersonID (AKA OwnerID) generate the long_genwebid
         # The return is the long_genwebid
@@ -494,7 +516,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             revised_mother_name_table_entry = self._get_long_genwebid(
                 mother_name_table_entry
             )
-        except:
+        except:  # pylint: disable=bare-except  # noqa: E722
             revised_mother_name_table_entry = {}
 
         # FATHER
@@ -505,20 +527,14 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             revised_father_name_table_entry = self._get_long_genwebid(
                 father_name_table_entry
             )
-        except:
+        except:  # pylint: disable=bare-except  # noqa: E722
             revised_father_name_table_entry = {}
 
         # SPOUSES
         spouses = rmagic.fetch_spouses_from_id(
             name_table, person_table, family_table, owner_id
         )
-        """
 
-        Given a target person's PersonID (OwnerID in name_table)
-            1. get the person's Sex from the PersonTable by searching the owner_id
-            2. fetch the spouse IDs from the family_table
-            3. using the spouse IDs fetch the spouse(s) info from the NameTable
-        """
         # print('spouses = ', str(spouses))
         revised_spouses = []
 
@@ -539,15 +555,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
         children = rmagic.fetch_children_from_id(
             child_table, name_table, person_table, family_table, owner_id
         )
-        """
-        Given a target person's PersonID (OwnerID in name_table)
-            1. get the person's Sex from the PersonTable by searching the owner_id
-            2. fetch the FamilyID from the family_table
-            3. using the FamilyID fetch the ChildID for each child in the
-                ChildTable
-            4. Using the ChildID as the OwnerID get each child's info from
-                NameTable
-        """
+
         # print('children = ', str(children))
         revised_children = []
         if len(children) > 0:
@@ -567,17 +575,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
         family_dict["spouses"] = revised_spouses
         family_dict["children"] = revised_children
         # print('family_dict = ', family_dict)
-        """
-         family_dict =
-           'target: name_table_entry for target
-           'parents': {'mother: name_table_entry for mother,
-                        'father: name_table_entry for father}
-           'spouses' : [{name_table_entry for spouse1},...]
-           'children' : [{name_table_entry for child1},...]
-         where each name_table entry will have the addition key: 'long_genwebid'
-         and the appropriate value.
-         The key for each target is their long_genwebid
-        """
         return family_dict
 
     # -------------------------------------------------- end of _get_family
@@ -615,94 +612,83 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             "a",
             encoding="utf-8",
         )
+
         if not proper_format.match(target_genwebid):
-            chg_to_long_id_file = open(
+            with open(
                 os.path.join(folders_path, "zzz_xml_file_name_issue.txt"),
                 "a",
                 encoding="utf-8",
-            )
-            chg_to_long_id_file.write(
-                "_get_mothers_child line 84- improper format for target genwebid "
-                + target_genwebid
-                + "\n"
-            )
-            chg_to_long_id_file.close()
-            return ""
-        else:
-            if target_genwebid == "CoxSusan1785":
-                debug = True
-            person_id_dict = self._separate_names(target_genwebid)
-            person_matches = rmagic.fetch_person_from_name(
-                self._tables["NameTable"], self._tables["PersonTable"], person_id_dict
-            )
-            if debug:
-                print(
-                    "\n _get_mothers_child line 105 - person_matches = ",
-                    person_matches,
-                    "\n\t  for person_id_dict = ",
-                    person_id_dict,
+            ) as chg_to_long_id_file:
+                chg_to_long_id_file.write(
+                    "_get_mothers_child line 84- improper format for target genwebid "
+                    + target_genwebid
+                    + "\n"
                 )
-            null_person = {
-                "Surname": "",
-                "OwnerID": "",
-                "Nickname": "",
-                "Suffix": "",
-                "BirthYear": "",
-                "Prefix": "",
-                "DeathYear": "",
-                "Sex": "",
-                "GenWebID": "",
-                "Given": [""],
-                "IsPrimary": "",
-                "FullName": "",
-            }
+            return ""
 
-            if len(person_matches) == 0:
-                with open(
-                    os.path.join(folders_path, "zzz_xml_file_name_issue.txt"),
-                    "a",
-                    encoding="utf-8",
-                ) as chg_to_long_id_file:
+        if target_genwebid == "CoxSusan1785":
+            debug = True
+
+        person_id_dict = self._separate_names(target_genwebid)
+        person_matches = rmagic.fetch_person_from_name(
+            self._tables["NameTable"], self._tables["PersonTable"], person_id_dict
+        )
+        if debug:
+            print(
+                "\n _get_mothers_child line 105 - person_matches = ",
+                person_matches,
+                "\n\t  for person_id_dict = ",
+                person_id_dict,
+            )
+        null_person = rmagic.empty_person(is_primary="")
+
+        if len(person_matches) == 0:
+            with open(
+                os.path.join(folders_path, "zzz_xml_file_name_issue.txt"),
+                "a",
+                encoding="utf-8",
+            ) as chg_to_long_id_file:
+                chg_to_long_id_file.write(
+                    "_get_mothers_child line 123- Could not find"
+                    + " rmagic match for person with target_genwebid = "
+                    + target_genwebid
+                    + "\n",
+                )
+            return null_person
+
+        if len(person_matches) >= 1:
+            for match_person in person_matches:
+                if debug:
+                    chg_to_long_id_file = open(
+                        os.path.join(folders_path, "zzz_xml_file_name_issue.txt"),
+                        "a",
+                        encoding="utf-8",
+                    )
                     chg_to_long_id_file.write(
-                        "_get_mothers_child line 123- Could not find",
-                        +" rmagic match for person with target_genwebid = "
-                        + target_genwebid
-                        + "\n",
+                        "line 129 _get_mothers_child"
+                        + " - Multiple matches for rmagic person. Match = "
+                        + match_person["GenWebID"]
+                        + "\n"
                     )
-                return null_person
-            elif len(person_matches) >= 1:
-                for match_person in person_matches:
-                    if debug:
-                        chg_to_long_id_file = open(
-                            os.path.join(folders_path, "zzz_xml_file_name_issue.txt"),
-                            "a",
-                            encoding="utf-8",
-                        )
-                        chg_to_long_id_file.write(
-                            "line 129 _get_mothers_child",
-                            +" - Multiple matches for rmagic person. Match = "
-                            + match_person["GenWebID"]
-                            + "\n",
-                        )
-                    parents = rmagic.fetch_parents_from_id(
-                        self._tables["PersonTable"],
-                        self._tables["NameTable"],
-                        self._tables["FamilyTable"],
-                        match_person["OwnerID"],
-                    )
-                    if debug:
-                        print("\n line 135 _get_mothers_child - parents = ", parents)
-                    mother_id_dict = self._separate_names(parents["Mother"]["GenWebID"])
-                    if (
-                        len(mother_id_dict["Given"]) == 0
-                        or len(mother_id_dict["Surname"]) == 0
-                    ):
-                        mothers_genwebid = ""
-                    else:
-                        mothers_genwebid = parents["Mother"]["GenWebID"]
-                    if mothers_genwebid == targets_mother:
-                        chg_to_long_id_file.close()
-                        return match_person
+                parents = rmagic.fetch_parents_from_id(
+                    self._tables["PersonTable"],
+                    self._tables["NameTable"],
+                    self._tables["FamilyTable"],
+                    match_person["OwnerID"],
+                )
+                if debug:
+                    print("\n line 135 _get_mothers_child - parents = ", parents)
+                mother_id_dict = self._separate_names(parents["Mother"]["GenWebID"])
+                if (
+                    len(mother_id_dict["Given"]) == 0
+                    or len(mother_id_dict["Surname"]) == 0
+                ):
+                    mothers_genwebid = ""
+                else:
+                    mothers_genwebid = parents["Mother"]["GenWebID"]
+                if mothers_genwebid == targets_mother:
+                    chg_to_long_id_file.close()
+                    return match_person
 
         chg_to_long_id_file.write(
             "_get_mothers_child line 173 - Multiple matches not resolved - \n"
@@ -751,6 +737,33 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
                 'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
                 'FullName': 'Page, Robert Kenneth'}]
+
+        tgt_person_facts =
+        [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
+            'Suffix': '', 'BirthYear': '1953','Prefix': '',
+            'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
+            'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
+            'FullName': 'Page, Robert Kenneth'}...]
+
+        Given a person's PersonID (AKA OwnerID) fetch the spouse's NameTable
+        entries for that person.
+        The fetch_person_from_ID return is of the form spouse =
+            [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
+              'Suffix': '', 'BirthYear': '1953','Prefix': '',
+              'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
+              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
+              'FullName': 'Page, Robert Kenneth'}]
+        three_gen_family['spouse_list'] is a list of spouse NameTable entries
+
+        Given a person's PersonID (AKA OwnerID) fetch the children's NameTable
+        entries for that person.
+        The fetch_person_from_ID return is of the form child =
+            [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
+              'Suffix': '', 'BirthYear': '1953','Prefix': '',
+              'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
+              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
+              'FullName': 'Page, Robert Kenneth'}]
+        three_gen_family['child_list'] is a list of children NameTable entries
         """
         debug = False
         if targets_long_genwebid == "":
@@ -768,7 +781,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
         # tgt_person_stuff of the form: ['PersondateMotherdate','Persondate','Motherdate']
         try:
             tgt_person_stuff = people_re.findall(targets_long_genwebid)  # [0]
-        except:
+        except:  # pylint: disable=bare-except  # noqa: E722
             print(
                 "\n _get_3g_family - line 695 targets_long_genwebid = ",
                 targets_long_genwebid,
@@ -777,34 +790,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 " couldn't set tgt_person_stuff = people_re.findall(targets_long_genwebid)[0]"
             )
             three_gen_family["tgt_parents"] = {
-                "Father": {
-                    "Given": [""],
-                    "IsPrimary": "1",
-                    "DeathYear": "",
-                    "Prefix": "",
-                    "BirthYear": "",
-                    "Nickname": "",
-                    "Suffix": "",
-                    "Surname": "",
-                    "OwnerID": "",
-                    "Sex": "",
-                    "GenWebID": "",
-                    "FullName": "",
-                },
-                "Mother": {
-                    "Given": [""],
-                    "IsPrimary": "1",
-                    "DeathYear": "",
-                    "Prefix": "",
-                    "BirthYear": "",
-                    "Nickname": "",
-                    "Suffix": "",
-                    "Surname": "",
-                    "OwnerID": "",
-                    "Sex": "",
-                    "GenWebID": "",
-                    "FullName": "",
-                },
+                "Father": rmagic.empty_person(),
+                "Mother": rmagic.empty_person(),
             }
             return three_gen_family
 
@@ -822,7 +809,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 )[
                     0
                 ]
-            except:
+            except:  # pylint: disable=bare-except  # noqa: E722
                 tgt_person_facts = three_gen_family[
                     "tgt_person_facts"
                 ] = rmagic.fetch_person_from_name(
@@ -842,14 +829,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
 
             three_gen_family["tgt_person_facts"] = tgt_person_facts
 
-        """
-        tgt_person_facts =
-        [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
-            'Suffix': '', 'BirthYear': '1953','Prefix': '',
-            'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
-            'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
-            'FullName': 'Page, Robert Kenneth'}...]
-        """
         if debug:
             print(
                 "\n _get_3g_family - line 186 \
@@ -886,7 +865,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 self._tables["FamilyTable"],
                 three_gen_family["tgt_person_facts"]["OwnerID"],
             )
-        except:
+        except:  # pylint: disable=bare-except  # noqa: E722  # noqa: E722
             print(
                 "\n _get_3g_family - line 222 \
                 three_gen_family[tgt_person_facts] = ",
@@ -896,34 +875,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             )
 
             three_gen_family["tgt_parents"] = {
-                "Father": {
-                    "Given": [""],
-                    "IsPrimary": "1",
-                    "DeathYear": "",
-                    "Prefix": "",
-                    "BirthYear": "",
-                    "Nickname": "",
-                    "Suffix": "",
-                    "Surname": "",
-                    "OwnerID": "",
-                    "Sex": "",
-                    "GenWebID": "",
-                    "FullName": "",
-                },
-                "Mother": {
-                    "Given": [""],
-                    "IsPrimary": "1",
-                    "DeathYear": "",
-                    "Prefix": "",
-                    "BirthYear": "",
-                    "Nickname": "",
-                    "Suffix": "",
-                    "Surname": "",
-                    "OwnerID": "",
-                    "Sex": "",
-                    "GenWebID": "",
-                    "FullName": "",
-                },
+                "Father": rmagic.empty_person(),
+                "Mother": rmagic.empty_person(),
             }
 
         if debug:
@@ -975,17 +928,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 str(three_gen_family["spouse_list"]),
             )
 
-        """
-        Given a person's PersonID (AKA OwnerID) fetch the spouse's NameTable
-        entries for that person.
-        The fetch_person_from_ID return is of the form spouse =
-            [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
-              'Suffix': '', 'BirthYear': '1953','Prefix': '',
-              'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
-              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
-              'FullName': 'Page, Robert Kenneth'}]
-        three_gen_family['spouse_list'] is a list of spouse NameTable entries
-        """
         # add children
         three_gen_family["child_list"] = rmagic.fetch_children_from_id(
             self._tables["ChildTable"],
@@ -1001,18 +943,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 str(three_gen_family["child_list"]),
             )
 
-        """
-        Given a person's PersonID (AKA OwnerID) fetch the children's NameTable
-        entries for that person.
-        The fetch_person_from_ID return is of the form child =
-            [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
-              'Suffix': '', 'BirthYear': '1953','Prefix': '',
-              'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
-              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
-              'FullName': 'Page, Robert Kenneth'}]
-        three_gen_family['child_list'] is a list of children NameTable entries
-        """
-
         return three_gen_family
 
     # --------------------------------------------------_get_3g_family
@@ -1024,8 +954,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
     def _load_dictionary(self, file_name):
         if not os.path.isfile(file_name):
             print("_load_dictionary with file_name= ", file_name, "  not found")
-            dict = {"person_info": [], "artifacts_info": {}}
-            return dict
+            return {"person_info": [], "artifacts_info": {}}
+
         with open(file_name, "rb") as my_file:
             dictionary = pickle.load(my_file)
             return dictionary
@@ -1072,7 +1002,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
         person_dict = {}
 
         for folder in folders:  # step through each folder
-            person_info = []
             long_genwebid = folder.strip()
             if folder != long_genwebid:
                 print(
@@ -1104,7 +1033,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 # person_stuff of the form:
                 #               ['PersondateMotherdate','Persondate','Motherdate']
                 person_stuff = people_re.findall(folder)[0]
-            except:
+            except:  # pylint: disable=bare-except  # noqa: E722
                 print(
                     "*** _get_proj_dict_from_xml line 937 folder either and incomplete "
                     + "xml reference or an incorrect folder name "
@@ -1150,7 +1079,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                     debug = True
 
                 # if  xml file name doesn't match the folder name
-                if not long_genwebid in xml_file_name:
+                if long_genwebid not in xml_file_name:
                     with open(
                         os.path.join(folders_path, "zzz_xml_file_name_issue.txt"),
                         "a",
@@ -1203,10 +1132,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                     types = ["<inline>", "<picture>", "<href>"]
                     tags_types = tags + types
                     # extract all data from the current xml file
-
-                    for (
-                        line
-                    ) in current_xml_file:  # pylint: disable=too-many-nested-blocks
+                    # pylint: disable=too-many-nested-blocks
+                    for line in current_xml_file:
                         line = line.lstrip(" ")
                         line = line.replace("<![CDATA[", "")
                         line = line.replace("]]>", "")
@@ -1232,7 +1159,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                                         "<>/"
                                     )
                                     break
-                                elif tag_type in tags:
+
+                                if tag_type in tags:
                                     line = line.replace(tag_type, "")
                                     line = line.replace("</" + tag_type[1:], "")
                                     if tag_type == "<people>":
@@ -1306,7 +1234,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                                                             person_stuff[2],
                                                         ]
                                                     }
-                                                except:
+                                                except:  # pylint: disable=bare-except  # noqa: E722
                                                     print(
                                                         "\n _get_proj_dict_from_xml line 441 person_in_artifact_stripped = ",
                                                         person_in_artifact_stripped,
@@ -1319,16 +1247,14 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                                             people_list.append(
                                                 person_in_artifact_stripped
                                             )
+
                                         artifact_dictionary[
                                             tag_type.strip("<>/")
                                         ] = people_list  # final list of people
                                         break
-                                    else:
-                                        artifact_dictionary[
-                                            tag_type.strip("<>/")
-                                        ] = line
-                                        break
-                                    pass
+
+                                    artifact_dictionary[tag_type.strip("<>/")] = line
+                                    break
                     if debug:
                         print(
                             "\n _get_proj_dict_from_xml line 270 \
@@ -1364,7 +1290,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
         # the dictionary for each person appearing in that artifact
 
         for folder in folders:  # step through each folder's dictionary
-            person_info = []
             long_genwebid = folder.strip()
 
             current_file = dictionaries_path + "/" + long_genwebid + ".pkl"
@@ -1404,10 +1329,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 )
 
             for genwebid_artifact_dict_id in genwebid_artifacts_dict:
-                if genwebid_artifact_dict_id == "":
-                    debug = True
-                else:
-                    debug = False
+                debug = genwebid_artifact_dict_id == ""
+
                 if debug:
                     print(
                         "\n \n _get_proj_dict_from_xml line 1131 \
@@ -1419,7 +1342,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                     genwebid_artifact_dict_people = genwebid_artifacts_dict[
                         genwebid_artifact_dict_id
                     ]["people"]
-                except:
+                except:  # pylint: disable=bare-except  # noqa: E722
                     print(
                         "line 1166: genwebid_artifacts_dict[genwebid_artifact_dict_id][people] Probable KeyError: people"
                     )
@@ -1489,9 +1412,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                             dictionary_file.write(str(artifact_person_dict))
 
                     debug = False
-                    pass
-
-        return
 
     # --------------------------------------------------_get_proj_dict_from_xml
 
@@ -1620,12 +1540,12 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             BuildWebPages._first_letter(people_info, k) for k in people_info
         }
         return {
-            l: [
+            fl: [
                 people_info[k]["target"]
                 for k in people_info
-                if BuildWebPages._first_letter(people_info, k) == l
+                if BuildWebPages._first_letter(people_info, k) == fl
             ]
-            for l in first_letters
+            for fl in first_letters
         }
 
     def _generate_toc_web(self, people_info, folders_path):
@@ -1723,12 +1643,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                  ...
             }
 
-        """
-
-        debug = False
-
-        person_facts = family_dict["target"]
-        """
             where the keys for person_facts are:
             'OwnerID'
             'Surname'
@@ -1742,6 +1656,8 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             'long_genwebid':
         """
 
+        debug = False
+        person_facts = family_dict["target"]
         long_genwebid = person_facts["long_genwebid"]
 
         if long_genwebid == "":
@@ -2169,20 +2085,19 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                         )
 
                     if not proper_format.match(artifact):
-                        src_file_name_issue_file = open(
+                        with open(
                             folders_path + "/zzz_src_file_name_issue.txt",
                             "a",
                             encoding="utf-8",
-                        )
-                        src_file_name_issue_file.write(
-                            "*****_generate_person_web - inline: file name "
-                            + artifact_folder_path
-                            + "/"
-                            + artifact
-                            + ".src"
-                            + " does not have the proper data format\n"
-                        )
-                        src_file_name_issue_file.close()
+                        ) as src_file_name_issue_file:
+                            src_file_name_issue_file.write(
+                                "*****_generate_person_web - inline: file name "
+                                + artifact_folder_path
+                                + "/"
+                                + artifact
+                                + ".src"
+                                + " does not have the proper data format\n"
+                            )
                     continue
 
             if persons_xml_dict["artifacts_info"][artifact]["tag_type"] == "href":
@@ -2258,27 +2173,23 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                     )
                     artifacts_tbl_lines.append("\t\t\n")
                 else:
-                    artifact_issue = open(
+                    with open(
                         folders_path + "/zzz_Artifact_xml_issue.txt",
                         "a",
                         encoding="utf-8",
-                    )
-                    artifact_issue.write(
-                        "*****BuildWebPages line 793: href file Not Found\n"
-                    )
-                    artifact_issue.write(
-                        "*****BuildWebPages line 794:"
-                        + artifact_folder_path
-                        + "/"
-                        + persons_xml_dict["artifacts_info"][artifact]["folder"]
-                        + "/"
-                        + persons_xml_dict["artifacts_info"][artifact]["file"]
-                        + "\n"
-                    )
-                    artifact_issue.close()
-                    pass
-
-            pass
+                    ) as artifact_issue:
+                        artifact_issue.write(
+                            "*****BuildWebPages line 793: href file Not Found\n"
+                        )
+                        artifact_issue.write(
+                            "*****BuildWebPages line 794:"
+                            + artifact_folder_path
+                            + "/"
+                            + persons_xml_dict["artifacts_info"][artifact]["folder"]
+                            + "/"
+                            + persons_xml_dict["artifacts_info"][artifact]["file"]
+                            + "\n"
+                        )
 
         index_tbl_lines.append("\t\t</table>\n")
 
@@ -2292,9 +2203,6 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             index_html_file.write(line)
 
         index_html_file.close()
-        pass
-
-        return  # return from _generate_person_web
 
     # -------------------------------------------------- end of _generate_person_web
 
@@ -2350,6 +2258,17 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
               'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
               'FullName': 'Page, Robert Kenneth'}]
         three_gen_family['child_list'] is a list of children NameTable entries
+
+        father = {'Given': [''], 'IsPrimary': '1', 'DeathYear': '', \
+                    'Prefix': '', 'BirthYear': '', 'Nickname': '', \
+                    'Suffix': '', 'Surname': '', 'OwnerID': '',
+                    'Sex': '', 'GenWebID': '', 'FullName': ''}
+        mother = {'Given': [''], 'IsPrimary': '1', 'DeathYear': '', \
+                    'Prefix': '', 'BirthYear': '', 'Nickname': '', \
+                    'Suffix': '', 'Surname': '', 'OwnerID': '',
+                    'Sex': '', 'GenWebID': '', 'FullName': ''}
+
+        tgt_fathers_parents = {'Father': father, 'Mother': mother}
         """
         debug = False
         long_genwebid = family_dict["target"]["long_genwebid"]
@@ -2432,30 +2351,30 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 )
 
             return
-        else:
-            # c5r4 target person picture
-            if os.path.isfile(
-                folders_path + "/" + long_genwebid + "/" + long_genwebid + ".jpg"
-            ):
-                hourglass_table["c5r4"] = (
-                    '    <td align="center "><img src="../'
-                    + long_genwebid
-                    + "/"
-                    + long_genwebid
-                    + '.jpg" height="75"></td><!--c5r4-->\n'
-                )
-            else:
-                hourglass_table[
-                    "c5r4"
-                ] = '    <td align="center "><img src="../images/silhouette.jpg" \
-                    height="75"></td><!--c5r4-->\n'
 
-            # c5r5 target person name and link
-            hourglass_table["c5r5"] = (
-                '    <td align="center "><a href=index.html><p>'
-                + person_facts["FullName"]
-                + "</p></a></td><!--c5r5-->\n"
+        # c5r4 target person picture
+        if os.path.isfile(
+            folders_path + "/" + long_genwebid + "/" + long_genwebid + ".jpg"
+        ):
+            hourglass_table["c5r4"] = (
+                '    <td align="center "><img src="../'
+                + long_genwebid
+                + "/"
+                + long_genwebid
+                + '.jpg" height="75"></td><!--c5r4-->\n'
             )
+        else:
+            hourglass_table[
+                "c5r4"
+            ] = '    <td align="center "><img src="../images/silhouette.jpg" \
+                height="75"></td><!--c5r4-->\n'
+
+        # c5r5 target person name and link
+        hourglass_table["c5r5"] = (
+            '    <td align="center "><a href=index.html><p>'
+            + person_facts["FullName"]
+            + "</p></a></td><!--c5r5-->\n"
+        )
 
         # add parents (family_dict['parents'])
         #            Build father - possibilities are that:
@@ -2538,48 +2457,10 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             )
         else:
             fathers_mother_genwebid = "-"
-            father = {
-                "Given": [""],
-                "IsPrimary": "1",
-                "DeathYear": "",
-                "Prefix": "",
-                "BirthYear": "",
-                "Nickname": "",
-                "Suffix": "",
-                "Surname": "",
-                "OwnerID": "",
-                "Sex": "",
-                "GenWebID": "",
-                "FullName": "",
-            }
-            mother = {
-                "Given": [""],
-                "IsPrimary": "1",
-                "DeathYear": "",
-                "Prefix": "",
-                "BirthYear": "",
-                "Nickname": "",
-                "Suffix": "",
-                "Surname": "",
-                "OwnerID": "",
-                "Sex": "",
-                "GenWebID": "",
-                "FullName": "",
-            }
+            father = rmagic.empty_person()
+            mother = rmagic.empty_person()
             tgt_fathers_parents = {"Father": father, "Mother": mother}
-        """
 
-        father = {'Given': [''], 'IsPrimary': '1', 'DeathYear': '', \
-                    'Prefix': '', 'BirthYear': '', 'Nickname': '', \
-                    'Suffix': '', 'Surname': '', 'OwnerID': '',
-                    'Sex': '', 'GenWebID': '', 'FullName': ''}
-        mother = {'Given': [''], 'IsPrimary': '1', 'DeathYear': '', \
-                    'Prefix': '', 'BirthYear': '', 'Nickname': '', \
-                    'Suffix': '', 'Surname': '', 'OwnerID': '',
-                    'Sex': '', 'GenWebID': '', 'FullName': ''}
-
-        tgt_fathers_parents = {'Father': father, 'Mother': mother}
-        """
         if debug:
             print(
                 "_generate_all_hourglass_webs line 1926 - long_genwebid = ",
@@ -2721,48 +2602,9 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             )
         else:
             mothers_mother_genwebid = "-"
-            father = {
-                "Given": [""],
-                "IsPrimary": "1",
-                "DeathYear": "",
-                "Prefix": "",
-                "BirthYear": "",
-                "Nickname": "",
-                "Suffix": "",
-                "Surname": "",
-                "OwnerID": "",
-                "Sex": "",
-                "GenWebID": "",
-                "FullName": "",
-            }
-            mother = {
-                "Given": [""],
-                "IsPrimary": "1",
-                "DeathYear": "",
-                "Prefix": "",
-                "BirthYear": "",
-                "Nickname": "",
-                "Suffix": "",
-                "Surname": "",
-                "OwnerID": "",
-                "Sex": "",
-                "GenWebID": "",
-                "FullName": "",
-            }
+            father = rmagic.empty_person()
+            mother = rmagic.empty_person()
             tgt_fathers_parents = {"Father": father, "Mother": mother}
-        """
-
-        father = {'Given': [''], 'IsPrimary': '1', 'DeathYear': '', \
-                    'Prefix': '', 'BirthYear': '', 'Nickname': '', \
-                    'Suffix': '', 'Surname': '', 'OwnerID': '',
-                    'Sex': '', 'GenWebID': '', 'FullName': ''}
-        mother = {'Given': [''], 'IsPrimary': '1', 'DeathYear': '', \
-                    'Prefix': '', 'BirthYear': '', 'Nickname': '', \
-                    'Suffix': '', 'Surname': '', 'OwnerID': '',
-                    'Sex': '', 'GenWebID': '', 'FullName': ''}
-
-        tgt_fathers_parents = {'Father': father, 'Mother': mother}
-        """
 
         mothers_mother_genwebid = "-"
         if "GenWebID" not in family_dict["parents"]["mother"]:
@@ -2876,20 +2718,19 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
 
         row = 6
         debug = False
+
         if long_genwebid == "-":
             debug = True
+
         if debug:
             print("line 2112 - ********* spouse_list = ", spouse_list)
             print("********* len(spouse_list) = ", len(spouse_list))
-        for spouse_num in range(len(spouse_list)):
+
+        for spouse_num, spouse in enumerate(spouse_list):
             if debug:
                 print("********* spouse_num = ", spouse_num)
-            if spouse_list[spouse_num] == {}:
-                continue
-            if not short_genwebid_re.match(spouse_list[spouse_num]["GenWebID"]):
-                continue
-            spouse = spouse_list[spouse_num]
-            if spouse == {}:
+
+            if not spouse and not short_genwebid_re.match(spouse["GenWebID"]):
                 continue
 
             if debug:
@@ -2920,35 +2761,35 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 )
 
             # c5r6,8,10,12 target person picture
-            if len(spouse_list[spouse_num]) > 0:
+            if len(spouse) > 0:
                 key = "c5r" + str(row)
                 if debug:
                     print(
                         folders_path
                         + "/"
-                        + spouse_list[spouse_num]["GenWebID"]
+                        + spouse["GenWebID"]
                         + spouses_mothers_genwebid
                         + "/"
-                        + spouse_list[spouse_num]["GenWebID"]
+                        + spouse["GenWebID"]
                         + spouses_mothers_genwebid
                         + ".jpg"
                     )
                 if os.path.isfile(
                     folders_path
                     + "/"
-                    + spouse_list[spouse_num]["GenWebID"]
+                    + spouse["GenWebID"]
                     + spouses_mothers_genwebid
                     + "/"
-                    + spouse_list[spouse_num]["GenWebID"]
+                    + spouse["GenWebID"]
                     + spouses_mothers_genwebid
                     + ".jpg"
                 ):
                     hourglass_table[key] = (
                         '    <td align="center "><img src="../'
-                        + spouse_list[spouse_num]["GenWebID"]
+                        + spouse["GenWebID"]
                         + spouses_mothers_genwebid
                         + "/"
-                        + spouse_list[spouse_num]["GenWebID"]
+                        + spouse["GenWebID"]
                         + spouses_mothers_genwebid
                         + '.jpg" height="75"></td><!--'
                         + key
@@ -2968,10 +2809,10 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 key = "c5r" + str(row)
                 hourglass_table[key] = (
                     '    <td align="center "><a href="../'
-                    + spouse_list[spouse_num]["GenWebID"]
+                    + spouse["GenWebID"]
                     + spouses_mothers_genwebid
                     + '/index.html"><p>'
-                    + spouse_list[spouse_num]["FullName"]
+                    + spouse["FullName"]
                     + "</p></a></td><!--"
                     + key
                     + "-->\n"
@@ -2981,7 +2822,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
                 key = "c4r" + str(row)
                 hourglass_table[key] = (
                     '    <td align="center"><a href= ../'
-                    + spouse_list[spouse_num]["GenWebID"]
+                    + spouse["GenWebID"]
                     + spouses_mothers_genwebid
                     + "/HourGlass.html><img src=../images/Right_Arrow_Maroon.gif></a></td><!--"
                     + key
@@ -3137,7 +2978,7 @@ class BuildWebPages:  # pylint: disable=too-few-public-methods
             '    <link href="../css/individual.css" type="text/css" rel="stylesheet" />'
             + "\n"
         )
-        hourglasshtml_list.append('    <style type="text/css">' "\n")
+        hourglasshtml_list.append('    <style type="text/css">' + "\n")
         hourglasshtml_list.append("    /*<![CDATA[*/" + "\n")
         hourglasshtml_list.append(" div.ReturnToTop {text-align: right}" + "\n")
         hourglasshtml_list.append("    /*]]>*/" + "\n")

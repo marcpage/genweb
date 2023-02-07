@@ -27,6 +27,24 @@ DEBUG_FILE = os.path.join(
 )
 
 
+def empty_person(is_primary="1"):
+    """Returns a new, empty person"""
+    return {
+        "BirthYear": "",
+        "DeathYear": "",
+        "FullName": "",
+        "GenWebID": "",
+        "Given": [""],
+        "IsPrimary": is_primary,
+        "Nickname": "",
+        "OwnerID": "",
+        "Prefix": "",
+        "Sex": "",
+        "Suffix": "",
+        "Surname": "",
+    }
+
+
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def _load_rmagic(rm_db):
     try:
@@ -630,36 +648,8 @@ def fetch_parents_from_id(person_table, name_table, family_table, person_id):
     father = fetch_person_from_id(name_table, person_table, father_id)
     mother = fetch_person_from_id(name_table, person_table, mother_id)
 
-    if father == {}:
-        father = {
-            "Given": [""],
-            "IsPrimary": "1",
-            "DeathYear": "",
-            "Prefix": "",
-            "BirthYear": "",
-            "Nickname": "",
-            "Suffix": "",
-            "Surname": "",
-            "OwnerID": "",
-            "Sex": "",
-            "GenWebID": "",
-            "FullName": "",
-        }
-    if mother == {}:
-        mother = {
-            "Given": [""],
-            "IsPrimary": "1",
-            "DeathYear": "",
-            "Prefix": "",
-            "BirthYear": "",
-            "Nickname": "",
-            "Suffix": "",
-            "Surname": "",
-            "OwnerID": "",
-            "Sex": "",
-            "GenWebID": "",
-            "FullName": "",
-        }
+    father = father if father else empty_person()
+    mother = mother if mother else empty_person()
 
     parents = {"Father": father, "Mother": mother}
 
