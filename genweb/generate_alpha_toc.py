@@ -5,6 +5,7 @@ import os
 
 import mako.lookup
 
+
 def render(template_path, *search_dirs, **args):
     """Render a template file searching for includes in given directories and using given args"""
     script_dir = os.path.split(os.path.realpath(__file__))[0]
@@ -35,6 +36,6 @@ def render(template_path, *search_dirs, **args):
     return template.render(**args)
 
 
-def save(path, people):
-    with open(path, 'w', encoding='utf-8') as html_file:
-        html_file.write(render('alpha_toc.html.mako', people=people))
+def save(path, list_of_people):
+    with open(path, "w", encoding="utf-8") as html_file:
+        html_file.write(render("alpha_toc.html.mako", people=list_of_people))

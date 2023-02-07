@@ -10,6 +10,7 @@ import pickle
 import sys
 
 from genweb import rmagic
+import genweb.generate_alpha_toc
 
 import mako.lookup
 
@@ -166,7 +167,7 @@ class build_web_pages(object):
                 ] = family_dict
             self._save_dictionary(revised_name_table, file_name)
 
-            with open(file_name + ".dict", "w", encoding='utf-8') as dict_txt_file:
+            with open(file_name + ".dict", "w", encoding="utf-8") as dict_txt_file:
                 dict_txt_file.write(f"line 137 dict_txt_file: {revised_name_table}")
 
         else:
@@ -620,10 +621,12 @@ class build_web_pages(object):
         if target_genwebid == "CoxSusan1785":
             debug = True
         proper_format = re.compile("[A-Za-z']+[A-Z][a-z]*[0-9][0-9][0-9][0-9]")
-        chg_to_long_id_file = open(folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding='utf-8')
+        chg_to_long_id_file = open(
+            folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding="utf-8"
+        )
         if not proper_format.match(target_genwebid):
             chg_to_long_id_file = open(
-                folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding='utf-8'
+                folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding="utf-8"
             )
             chg_to_long_id_file.write(
                 "_get_mothers_child line 84- improper format for target genwebid "
@@ -674,7 +677,7 @@ class build_web_pages(object):
 
             if len(person_matches) == 0:
                 chg_to_long_id_file = open(
-                    folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding='utf-8'
+                    folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding="utf-8"
                 )
                 chg_to_long_id_file.write(
                     "_get_mothers_child line 123- Could not find",
@@ -688,7 +691,9 @@ class build_web_pages(object):
                 for match_person in person_matches:
                     if debug:
                         chg_to_long_id_file = open(
-                            folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding='utf-8'
+                            folders_path + "/zzz_xml_file_name_issue.txt",
+                            "a",
+                            encoding="utf-8",
                         )
                         chg_to_long_id_file.write(
                             "line 129 _get_mothers_child",
@@ -1148,7 +1153,7 @@ class build_web_pages(object):
                 self._save_dictionary(person_dict, current_file)
                 current_file = dictionaries_path + "/" + long_genwebid + ".dic"
 
-                with open(current_file, "w", encoding='utf-8') as dictionary_file:
+                with open(current_file, "w", encoding="utf-8") as dictionary_file:
                     dictionary_file.write(str(person_dict))
 
                 continue  # move on to the next folder
@@ -1161,7 +1166,9 @@ class build_web_pages(object):
                 # if  xml file name doesn't match the folder name
                 if not long_genwebid in xml_file_name:
                     with open(
-                        folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding='utf-8'
+                        folders_path + "/zzz_xml_file_name_issue.txt",
+                        "a",
+                        encoding="utf-8",
                     ) as xml_file_name_issue_file:
                         xml_file_name_issue_file.write(
                             "*****\
@@ -1176,7 +1183,9 @@ class build_web_pages(object):
                 xml_id = xml_file_name.rstrip(".xml")
                 if not proper_format.match(xml_id):
                     xml_file_name_issue_file = open(
-                        folders_path + "/zzz_xml_file_name_issue.txt", "a", encoding='utf-8'
+                        folders_path + "/zzz_xml_file_name_issue.txt",
+                        "a",
+                        encoding="utf-8",
                     )
                     xml_file_name_issue_file.write(
                         "*****\
@@ -1190,7 +1199,7 @@ class build_web_pages(object):
                     continue
 
                 # create a dictionary of xml file contents
-                with open(xml_file_name, "r", encoding='utf-8') as current_xml_file:
+                with open(xml_file_name, "r", encoding="utf-8") as current_xml_file:
                     # print("xml file name = ", xml_file_name)
                     file_data = []
                     artifact_dictionary = {}
@@ -1271,7 +1280,8 @@ class build_web_pages(object):
                                                 person_no_folder = open(
                                                     folders_path
                                                     + "/zzz_People with no folder.txt",
-                                                    "a", encoding='utf-8'
+                                                    "a",
+                                                    encoding="utf-8",
                                                 )
                                                 person_no_folder.write(
                                                     "person_in_artifact with no folder = "
@@ -1353,7 +1363,7 @@ class build_web_pages(object):
             current_file = dictionaries_path + "/" + long_genwebid + ".pkl"
             self._save_dictionary(person_dict, current_file)
             current_file = dictionaries_path + "/" + long_genwebid + ".dic"
-            dictionary_file = open(current_file, "w", encoding='utf-8')
+            dictionary_file = open(current_file, "w", encoding="utf-8")
             dictionary_file.write(str(person_dict))
             dictionary_file.close()
 
@@ -1445,7 +1455,9 @@ class build_web_pages(object):
                     # if the person has no artifacts assigned
                     if person_in_artifact == "-":
                         not_found_file = open(
-                            folders_path + "/zzz_PeopleNotFound.txt", "a", encoding='utf-8'
+                            folders_path + "/zzz_PeopleNotFound.txt",
+                            "a",
+                            encoding="utf-8",
                         )
                         not_found_file.write(
                             "++++++++++++++++ "
@@ -1486,7 +1498,7 @@ class build_web_pages(object):
                         current_file = (
                             dictionaries_path + "/" + person_in_artifact + ".dic"
                         )
-                        dictionary_file = open(current_file, "w", encoding='utf-8')
+                        dictionary_file = open(current_file, "w", encoding="utf-8")
                         dictionary_file.write(str(artifact_person_dict))
                         dictionary_file.close()
 
@@ -1613,12 +1625,21 @@ class build_web_pages(object):
 
     @staticmethod
     def _first_letter(people_info, long_genwebid):
-        name = people_info[long_genwebid]['target']['Surname']
-        return 'de' if name.startswith('de') else name[0]
+        name = people_info[long_genwebid]["target"]["Surname"]
+        return "de" if name.startswith("de") else name[0]
 
     def _generate_alpha_toc_info(self, people_info):
-        return {build_web_pages._first_letter(people_info, k): people_info[k]["target"]
-                    for k in people_info}
+        first_letters = {
+            build_web_pages._first_letter(people_info, k) for k in people_info
+        }
+        return {
+            l: [
+                people_info[k]["target"]
+                for k in people_info
+                if build_web_pages._first_letter(people_info, k) == l
+            ]
+            for l in first_letters
+        }
 
     def _generate_toc_web(self, people_info, folders_path):
         """
@@ -1656,168 +1677,11 @@ class build_web_pages(object):
             'DeathYear'
             'long_genwebid'
         """
-        previous_letter = ""
-        table_cell_ct = 0
-        table_col = 0
-        for target_person in sorted(people_info.keys()):  # This is the long_genwebid
-            debug = False
-            person_facts = people_info[target_person]["target"]
-            long_genwebid = person_facts["long_genwebid"]
-            assert long_genwebid == target_person
+        people_by_alpha = self._generate_alpha_toc_info(people_info)
 
-            full_given = ""
-            given = ""
-            birth_year = ""
-            death_year = ""
-
-            surname = person_facts["Surname"]
-            if surname[0:2] == "de":
-                current_letter = surname[0:2]
-                debug = False
-            else:
-                current_letter = surname[0]
-
-            file_name = os.path.join(folders_path, f'{current_letter}.html')
-
-            if current_letter != previous_letter:
-                if previous_letter != "":
-                    with open(os.path.join(folders_path, f'{previous_letter}.html', "a", encoding='utf-8') as previous_alpha_file:
-                        previous_alpha_file.write("\t\t\t</tr>\n")
-                        previous_alpha_file.write("\t\t</table>\n")
-
-                    table_col = 0
-
-                with open(file_name, "w", encoding='utf-8') as html_file:
-                    html_file.write(render('toc.html.mako', ))
-                    html_file.write(
-                        '<!DOCTYPE html PUBLIC"-//W3C//DTD HTML 4.01 Transitional//EN" >\n'
-                    )
-                    html_file.write("<html>\n")
-                    html_file.write("\t<head>\n")
-                    html_file.write("\t\t<title>Family History</title>\n")
-                    html_file.write(
-                        '\t\t<link href="./css/index.css" type="text/css" rel="stylesheet">\n'
-                    )
-                    html_file.write(
-                        '\t\t<link href="./css/alphas.css" type="text/css" rel="stylesheet">\n'
-                    )
-                    html_file.write('\t\t<base target="right_frame">\n')
-                    html_file.write("\t</head>\n")
-                    html_file.write('\t<body background="./images/back.gif">\n')
-                    html_file.write(
-                        '\t\t<table align="center" cellpadding="0" cellspacing="0" cols="2" width="75%" frame="border" rules="none">\n'
-                    )
-                    html_file.write("\t\t\t<tr>\n")
-                    html_file.write('\t\t\t\t<td align="LEFT">\n')
-                    html_file.write('\t\t\t\t\t<img src="./images/HeaderPic.jpg" height="75">\n')
-                    html_file.write("\t\t\t\t</td>\n")
-                    html_file.write('\t\t\t\t<td align="LEFT">\n')
-                    html_file.write("\t\t\t\t\t<h2>Individual and Family Web Pages</h2>\n")
-                    html_file.write("\t\t\t\t</td>\n")
-                    html_file.write("\t\t\t</tr>\n")
-                    html_file.write("\t\t</table>\n")
-                    html_file.write(
-                        '\t\t<table align="center" background="./images/back.gif" border cellpadding="8" cellspacing="4" cols="3">\n'
-                    )
-                    html_file.write("\t\t\t<tr>\n")
-
-                    table_col = table_col + 1
-                    html_file.write('\t\t\t\t<td align="CENTER" valign="BOTTOM">\n')
-                    html_file.write(
-                        "\t\t\t\t\t<p><a name="
-                        + current_letter
-                        + '><font size="+3" weight="900">'
-                        + current_letter
-                        + "</font></a></p>\n"
-                    )
-                    html_file.write("\t\t\t\t</td>\n")
-
-                    table_col = table_col + 1
-                    html_file.write('\t\t\t\t<td align="CENTER" valign="BOTTOM">\n')
-                    full_given = ""
-                    for given in person_facts["Given"]:
-                        full_given = full_given + " " + given
-                    html_file.write(
-                        "\t\t\t\t\t<h5>"
-                        + person_facts["Surname"]
-                        + ", "
-                        + full_given
-                        + "\n"
-                    )
-                    html_file.write(
-                        '\t\t\t\t\t\t<a href= "./'
-                        + target_person
-                        + '/index.html"><img src="./images/individual.bmp"></a>\n'
-                    )
-                    html_file.write(
-                        '\t\t\t\t\t\t<a href= "./'
-                        + target_person
-                        + '/HourGlass.html"><img src="./images/family.bmp"></a>\n'
-                    )
-                    birth_year = (
-                        person_facts["BirthYear"]
-                        if len(person_facts["BirthYear"]) > 2
-                        else "?"
-                    )
-                    death_year = (
-                        person_facts["DeathYear"]
-                        if len(person_facts["DeathYear"]) > 2
-                        else "?"
-                    )
-                    html_file.write(
-                        "\t\t\t\t\t\t<br>" + birth_year + " - " + death_year + "</h5></p>\n"
-                    )
-                    html_file.write("\t\t\t\t</td>\n")
-
-                if current_letter == previous_letter:
-                    table_col = table_col + 1
-                    html_file.write('\t\t\t\t<td align="CENTER" valign="BOTTOM">\n')
-                    full_given = ""
-                    if debug:
-                        print("_generate_toc_web line 718 person_facts = ", person_facts)
-
-                    for given_no in range(len(person_facts["Given"])):
-                        given = person_facts["Given"][given_no]
-                        full_given = full_given + " " + given
-                    html_file.write(
-                        "\t\t\t\t\t<h5>"
-                        + person_facts["Surname"]
-                        + ", "
-                        + full_given
-                        + "\n"
-                    )
-                    if debug:
-                        print("******* _generate_toc_web line 724 person = ", person)
-                    html_file.write(
-                        '\t\t\t\t\t\t<a href= "./'
-                        + target_person
-                        + '/index.html"><img src="./images/individual.bmp"></a>\n'
-                    )
-                    html_file.write(
-                        '\t\t\t\t\t\t<a href= "./'
-                        + target_person
-                        + '/HourGlass.html"><img src="./images/family.bmp"></a>\n'
-                    )
-                    birth_year = (
-                        person_facts["BirthYear"]
-                        if len(person_facts["BirthYear"]) > 2
-                        else "?"
-                    )
-                    death_year = (
-                        person_facts["DeathYear"]
-                        if len(person_facts["DeathYear"]) > 2
-                        else "?"
-                    )
-                    html_file.write(
-                        "\t\t\t\t\t\t<br>" + birth_year + " - " + death_year + "</h5></p>\n"
-                    )
-                    html_file.write("\t\t\t\t</td>\n")
-
-                if table_col == 3:
-                    html_file.write("\t\t\t</tr>\n")
-                    html_file.write("\t\t\t<tr>\n")
-                    table_col = 0
-                previous_letter = current_letter
+        for first_letter, people_with_first_letter in sorted(people_by_alpha.items()):
+            alpha_index_path = os.path.join(folders_path, f"{first_letter}.html")
+            genweb.generate_alpha_toc.save(alpha_index_path, people_with_first_letter)
 
         return  # return from _generate_toc_web
 
@@ -1916,7 +1780,9 @@ class build_web_pages(object):
             )
             os.makedirs(person_folder_path)
 
-        index_html_file = open(person_folder_path + "/index.html", "w", encoding='utf-8')
+        index_html_file = open(
+            person_folder_path + "/index.html", "w", encoding="utf-8"
+        )
         index_html_file.write("<html>\n")
         index_html_file.write("\t<head>\n")
         index_html_file.write('\t\t<meta charset="UTF-8">\n')
@@ -2123,7 +1989,9 @@ class build_web_pages(object):
                     artifact_folder_path + "/" + artifact + ".jpg"
                 ) and (long_genwebid in artifact):
                     pic_issue_file = open(
-                        folders_path + "/zzz_Artifact_picture_issue.txt", "a", encoding='utf-8'
+                        folders_path + "/zzz_Artifact_picture_issue.txt",
+                        "a",
+                        encoding="utf-8",
                     )
                     pic_issue_file.write(
                         "*****build_web_pages picture Not Found: artifact = "
@@ -2191,7 +2059,11 @@ class build_web_pages(object):
                         + '" target="_blank"><img alt="comments" src="../images/comments.jpg" style="display: block; text-align: center; margin-left: auto; margin-right: auto" height="20"></a></p>\n'
                     )
                 else:
-                    f = open(folders_path + "/zzz_Artifact_xml_issue.txt", "a", encoding='utf-8')
+                    f = open(
+                        folders_path + "/zzz_Artifact_xml_issue.txt",
+                        "a",
+                        encoding="utf-8",
+                    )
                     f.write(
                         "*****_generate_person_web caption Not Found in persons_xml_dict[artifacts_info][artifact] = "
                     )
@@ -2256,7 +2128,9 @@ class build_web_pages(object):
                     )
                     artifacts_tbl_lines.append("\t\t\n")
                     artifact_source = open(
-                        artifact_folder_path + "/" + artifact + ".src", "r", encoding='utf-8'
+                        artifact_folder_path + "/" + artifact + ".src",
+                        "r",
+                        encoding="utf-8",
                     )
                     # print("line 1654 - " + artifact_folder_path + '/' + artifact + '.src') #Remove me
                     for line in artifact_source:
@@ -2270,7 +2144,9 @@ class build_web_pages(object):
                     artifacts_tbl_lines.append("\t\t\n")
                 else:
                     artifact_issue = open(
-                        folders_path + "/zzz_Artifact_xml_issue.txt", "a", encoding='utf-8'
+                        folders_path + "/zzz_Artifact_xml_issue.txt",
+                        "a",
+                        encoding="utf-8",
                     )
                     artifact_issue.write(
                         "*****build_web_pages line 1655: "
@@ -2300,7 +2176,9 @@ class build_web_pages(object):
                     artifact_issue.close()
                     if not proper_format.match(artifact):
                         src_file_name_issue_file = open(
-                            folders_path + "/zzz_src_file_name_issue.txt", "a", encoding='utf-8'
+                            folders_path + "/zzz_src_file_name_issue.txt",
+                            "a",
+                            encoding="utf-8",
                         )
                         src_file_name_issue_file.write(
                             "*****_generate_person_web - inline: file name "
@@ -2387,7 +2265,9 @@ class build_web_pages(object):
                     artifacts_tbl_lines.append("\t\t\n")
                 else:
                     artifact_issue = open(
-                        folders_path + "/zzz_Artifact_xml_issue.txt", "a", encoding='utf-8'
+                        folders_path + "/zzz_Artifact_xml_issue.txt",
+                        "a",
+                        encoding="utf-8",
                     )
                     artifact_issue.write(
                         "*****build_web_pages line 793: href file Not Found\n"
@@ -2525,7 +2405,7 @@ class build_web_pages(object):
                 )
 
         if "long_genwebid" not in person_facts:  # if person doesn't exist, return
-            f = open(folders_path + "/zzz_PeopleNotFound.txt", "a", encoding='utf-8')
+            f = open(folders_path + "/zzz_PeopleNotFound.txt", "a", encoding="utf-8")
             f.write(
                 "*****build_web_pages hourglass table row #1 ****** long_genwebid = \
                         "
@@ -3328,7 +3208,9 @@ class build_web_pages(object):
 
         if os.path.isdir(folders_path + "/" + long_genwebid):
             hourglassFile = open(
-                folders_path + "/" + long_genwebid + "/HourGlass.html", "w", encoding='utf-8'
+                folders_path + "/" + long_genwebid + "/HourGlass.html",
+                "w",
+                encoding="utf-8",
             )
 
             for row in hourglasshtmlList:  # commented out 1/22/2018 to minimize
@@ -3336,7 +3218,9 @@ class build_web_pages(object):
 
             hourglassFile.close()
         else:
-            folder_not_found = open(folders_path + "/zzz_FolderNotFound.txt", "a", encoding='utf-8')
+            folder_not_found = open(
+                folders_path + "/zzz_FolderNotFound.txt", "a", encoding="utf-8"
+            )
             folder_not_found.write(
                 "***** _generate_all_hourglass_webs ****** folder = "
                 + long_genwebid
