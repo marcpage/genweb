@@ -4,9 +4,9 @@ Generate a family history website
 
 # Setup
 
-`python3 -m venv .venv`
-Linux: `source .venv/bin/activate`
-`pip3 install -r requirements.txt`
+1. `python3 -m venv .venv`
+1. Linux: `source .venv/bin/activate`
+1. `pip3 install -r requirements.txt`
 
 
 # Usage
