@@ -1,6 +1,21 @@
+![status sheild](https://img.shields.io/static/v1?label=status&message=starting...&color=inactive&style=plastic)
+![GitHub](https://img.shields.io/github/license/marcpage/genweb?style=plastic)
+[![commit sheild](https://img.shields.io/github/last-commit/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/commits)
+[![activity sheild](https://img.shields.io/github/commit-activity/m/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/commits)
+![GitHub top language](https://img.shields.io/github/languages/top/marcpage/genweb?style=plastic)
+[![size sheild](https://img.shields.io/github/languages/code-size/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb)
+[![issues sheild](https://img.shields.io/github/issues-raw/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/issues)
+[![follow sheild](https://img.shields.io/github/followers/marcpage?label=Follow&style=social)](https://github.com/marcpage?tab=followers)
+[![watch sheild](https://img.shields.io/github/watchers/marcpage/genweb?label=Watch&style=social)](https://github.com/marcpage/genweb/watchers)
+
 # genweb
 Generate a family history website
 
+
+
+# Get source locally
+
+- `git clone https://github.com/marcpage/genweb.git`
 
 
 # Format source
