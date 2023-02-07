@@ -41,4 +41,8 @@ def render(template_path, *search_dirs, **args):
 
 def save_alpha_toc(path, list_of_people):
     with open(path, "w", encoding="utf-8") as html_file:
-        html_file.write(render("alpha_toc.html.mako", people=list_of_people))
+        html_file.write(
+            render(
+                os.path.join("templates", "alpha_toc.html.mako"), people=list_of_people
+            )
+        )
