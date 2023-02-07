@@ -10,7 +10,7 @@ import pickle
 import sys
 
 from genweb import rmagic
-import genweb.generate_alpha_toc
+import genweb.generate_html
 
 import mako.lookup
 
@@ -1681,7 +1681,9 @@ class build_web_pages(object):
 
         for first_letter, people_with_first_letter in sorted(people_by_alpha.items()):
             alpha_index_path = os.path.join(folders_path, f"{first_letter}.html")
-            genweb.generate_alpha_toc.save(alpha_index_path, people_with_first_letter)
+            genweb.generate_html.save_alpha_toc(
+                alpha_index_path, people_with_first_letter
+            )
 
         return  # return from _generate_toc_web
 

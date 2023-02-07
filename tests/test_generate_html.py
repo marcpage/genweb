@@ -4,7 +4,7 @@
 import os
 import tempfile
 
-import genweb.generate_alpha_toc
+import genweb.generate_html
 
 
 def test_gen_alpha_toc():
@@ -40,7 +40,7 @@ def test_gen_alpha_toc():
     ]
 
     with tempfile.TemporaryDirectory() as workspace:
-        genweb.generate_alpha_toc.save(os.path.join(workspace, 'alpha_toc.html'), people)
+        genweb.generate_html.save_alpha_toc(os.path.join(workspace, 'alpha_toc.html'), people)
         with open(os.path.join(workspace, 'alpha_toc.html'), 'r', encoding='utf-8') as html_file:
             print(html_file.read())
 

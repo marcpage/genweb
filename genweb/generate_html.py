@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+"""
+    Generate web pages
+"""
 
 import os
 
@@ -36,6 +39,6 @@ def render(template_path, *search_dirs, **args):
     return template.render(**args)
 
 
-def save(path, list_of_people):
+def save_alpha_toc(path, list_of_people):
     with open(path, "w", encoding="utf-8") as html_file:
         html_file.write(render("alpha_toc.html.mako", people=list_of_people))
