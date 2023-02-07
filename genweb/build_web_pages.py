@@ -17,7 +17,7 @@ from genweb import rmagic
 import genweb.generate_html
 
 
-class BuildWebPages:
+class BuildWebPages:  # pylint: disable=too-few-public-methods
     """
     This module will build the family history web pages:
         Build table of contents html files
@@ -89,9 +89,31 @@ class BuildWebPages:
             }
         }
 
+        where tgt_name_table_entry = { 'OwnerID': ,
+                                        'Surname': surname,
+                                        'Given': given,
+                                        'Prefix': ,
+                                        'Suffix': ,
+                                        'Nickname': ,
+                                        'IsPrimary': ,
+                                        'BirthYear': ,
+                                        'DeathYear': }
+
+        where revised_tgt_name_table_entry = { 'OwnerID': ,
+                                        'Surname': surname,
+                                        'Given': given,
+                                        'Prefix': ,
+                                        'Suffix': ,
+                                        'Nickname': ,
+                                        'IsPrimary': ,
+                                        'BirthYear': ,
+                                        'DeathYear':,
+                                        'Sex':,
+                                        'long_genwebid':
+                                      }
     """
 
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def __init__(self, rmagic_path, web_folder, admin_email):
         self.admin_email = admin_email
         folders_path = web_folder
@@ -253,6 +275,7 @@ class BuildWebPages:
 
     # --------------------------------------------------__init__
 
+    # pylint: disable=too-many-return-statements,too-many-branches,too-many-statements
     def _get_long_genwebid(self, tgt_name_table_entry):
         # Given a person's PersonID (AKA OwnerID) generate the long_genwebid
         # The return is the [long_genwebid, revised_tgt_name_table_entry]
@@ -271,32 +294,10 @@ class BuildWebPages:
         # print('tgt_name_table_entry = ', str(tgt_name_table_entry))
         if tgt_name_table_entry == {}:
             return {}
+
         if tgt_name_table_entry["OwnerID"] == "":
             debug = True
-        """
-        where tgt_name_table_entry = { 'OwnerID': ,
-                                        'Surname': surname,
-                                        'Given': given,
-                                        'Prefix': ,
-                                        'Suffix': ,
-                                        'Nickname': ,
-                                        'IsPrimary': ,
-                                        'BirthYear': ,
-                                        'DeathYear': }
 
-        where revised_tgt_name_table_entry = { 'OwnerID': ,
-                                        'Surname': surname,
-                                        'Given': given,
-                                        'Prefix': ,
-                                        'Suffix': ,
-                                        'Nickname': ,
-                                        'IsPrimary': ,
-                                        'BirthYear': ,
-                                        'DeathYear':,
-                                        'Sex':,
-                                        'long_genwebid':
-                                      }
-        """
         revised_tgt_name_table_entry = tgt_name_table_entry
         if person_id_person_table[tgt_name_table_entry["OwnerID"]]["Sex"] == "0":
             person_sex = "male"
@@ -446,7 +447,22 @@ class BuildWebPages:
 
     # -------------------------------------------------- end of get_long_genwebid
 
+    # pylint: disable=too-many-statements
     def _get_family(self, revised_tgt_name_table_entry):
+        """
+        where revised_tgt_name_table_entry = { 'OwnerID': ,
+                                        'Surname': surname,
+                                        'Given': given,
+                                        'Prefix': ,
+                                        'Suffix': ,
+                                        'Nickname': ,
+                                        'IsPrimary': ,
+                                        'BirthYear': ,
+                                        'DeathYear':
+                                        'Sex':,
+                                        'long_genwebid':
+                                      }
+        """
         # Given a person's PersonID (AKA OwnerID) generate the long_genwebid
         # The return is the long_genwebid
         # self._tables keys are:['ChildTable',
@@ -463,27 +479,12 @@ class BuildWebPages:
         name_table = self._tables["NameTable"]
         person_table = self._tables["PersonTable"]
         family_table = self._tables["FamilyTable"]
-        """
-        where revised_tgt_name_table_entry = { 'OwnerID': ,
-                                        'Surname': surname,
-                                        'Given': given,
-                                        'Prefix': ,
-                                        'Suffix': ,
-                                        'Nickname': ,
-                                        'IsPrimary': ,
-                                        'BirthYear': ,
-                                        'DeathYear':
-                                        'Sex':,
-                                        'long_genwebid':
-                                      }
-        """
+
         # PersonID ==  OwnerID ==  FatherID ==  MotherID ==  SpouseID ==  ChildID
         # ParentID ==  FamilyID
 
         # MOTHER
         owner_id = revised_tgt_name_table_entry["OwnerID"]
-        if owner_id == "":
-            debug_mother = True
         parent_id = person_id_person_table[owner_id]["ParentID"]
         revised_mother_name_table_entry = {}
         try:
@@ -581,6 +582,7 @@ class BuildWebPages:
 
     # -------------------------------------------------- end of _get_family
 
+    # pylint: disable=too-many-branches
     def _get_mothers_child(self, target_genwebid, targets_mother, folders_path):
         """
         Given the persons short genwebid (person, e.g. PageRobertK1953) and
@@ -714,6 +716,7 @@ class BuildWebPages:
 
     # --------------------------------------------------_get_mothers_child
 
+    # pylint: disable=too-many-branches,too-many-statements
     def _get_3g_family(self, targets_long_genwebid, folders_path):
         """
         Given the persons long_genwebid (person, e.g.
@@ -736,13 +739,13 @@ class BuildWebPages:
                         'Prefix': '', 'BirthYear': '', 'Nickname': '', 'Suffix': '', \
                         'Surname': '', 'OwnerID': '', 'Sex': '', 'GenWebID': '', \
                         'FullName': ''}}
-        'spouseList' =
+        'spouse_list' =
             [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
               'Suffix': '', 'BirthYear': '1953','Prefix': '',
               'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
               'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
               'FullName': 'Page, Robert Kenneth'}]
-        'childList' =
+        'child_list' =
               [{'Surname': 'Page', 'OwnerID': '1','Nickname': 'Bob',
                 'Suffix': '', 'BirthYear': '1953','Prefix': '',
                 'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
@@ -929,13 +932,13 @@ class BuildWebPages:
                 str(three_gen_family["tgt_parents"]),
             )
 
-        tgt_fathers_Owner_id = three_gen_family["tgt_parents"]["Father"]["OwnerID"]
-        if tgt_fathers_Owner_id != "":
+        tgt_fathers_owner_id = three_gen_family["tgt_parents"]["Father"]["OwnerID"]
+        if tgt_fathers_owner_id != "":
             three_gen_family["tgt_fathers_parents"] = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
-                tgt_fathers_Owner_id,
+                tgt_fathers_owner_id,
             )
             if debug:
                 print(
@@ -943,13 +946,13 @@ class BuildWebPages:
                     str(three_gen_family["tgt_fathers_parents"]),
                 )
 
-        tgt_mothers_Owner_id = three_gen_family["tgt_parents"]["Mother"]["OwnerID"]
-        if tgt_mothers_Owner_id != "":
+        tgt_mothers_owner_id = three_gen_family["tgt_parents"]["Mother"]["OwnerID"]
+        if tgt_mothers_owner_id != "":
             three_gen_family["tgt_mothers_parents"] = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
-                tgt_mothers_Owner_id,
+                tgt_mothers_owner_id,
             )
 
             if debug:
@@ -959,7 +962,7 @@ class BuildWebPages:
                 )
 
         # I now have the target person's spouse's info
-        three_gen_family["spouseList"] = rmagic.fetch_spouses_from_id(
+        three_gen_family["spouse_list"] = rmagic.fetch_spouses_from_id(
             self._tables["NameTable"],
             self._tables["PersonTable"],
             self._tables["FamilyTable"],
@@ -969,7 +972,7 @@ class BuildWebPages:
         if debug:
             print(
                 "\n _get_3g_family - line 262 spouselist = ",
-                str(three_gen_family["spouseList"]),
+                str(three_gen_family["spouse_list"]),
             )
 
         """
@@ -981,10 +984,10 @@ class BuildWebPages:
               'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
               'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
               'FullName': 'Page, Robert Kenneth'}]
-        three_gen_family['spouseList'] is a list of spouse NameTable entries
+        three_gen_family['spouse_list'] is a list of spouse NameTable entries
         """
         # add children
-        three_gen_family["childList"] = rmagic.fetch_children_from_id(
+        three_gen_family["child_list"] = rmagic.fetch_children_from_id(
             self._tables["ChildTable"],
             self._tables["NameTable"],
             self._tables["PersonTable"],
@@ -994,8 +997,8 @@ class BuildWebPages:
 
         if debug:
             print(
-                "\n _get_3g_family - line 240 childList = ",
-                str(three_gen_family["childList"]),
+                "\n _get_3g_family - line 240 child_list = ",
+                str(three_gen_family["child_list"]),
             )
 
         """
@@ -1007,7 +1010,7 @@ class BuildWebPages:
               'DeathYear': '0', 'Sex':'male,'GenWebID':'PageRobertK1953',
               'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
               'FullName': 'Page, Robert Kenneth'}]
-        three_gen_family['childList'] is a list of children NameTable entries
+        three_gen_family['child_list'] is a list of children NameTable entries
         """
 
         return three_gen_family
@@ -1015,20 +1018,21 @@ class BuildWebPages:
     # --------------------------------------------------_get_3g_family
 
     def _save_dictionary(self, dictionary, file_name):
-        with open(file_name, "wb") as myFile:
-            pickle.dump(dictionary, myFile)
+        with open(file_name, "wb") as my_file:
+            pickle.dump(dictionary, my_file)
 
     def _load_dictionary(self, file_name):
         if not os.path.isfile(file_name):
             print("_load_dictionary with file_name= ", file_name, "  not found")
             dict = {"person_info": [], "artifacts_info": {}}
             return dict
-        with open(file_name, "rb") as myFile:
-            dictionary = pickle.load(myFile)
+        with open(file_name, "rb") as my_file:
+            dictionary = pickle.load(my_file)
             return dictionary
 
     # -------------------------------------------------- pickle load and save
 
+    # pylint: disable=too-many-branches,too-many-statements
     def _get_proj_dict_from_xml(self, folders_path):
         """
         Build a dictionary with each person's genwebid as a key. Each person's
@@ -1065,7 +1069,6 @@ class BuildWebPages:
             "[+]*[0-9]{10}[A-Za-z']+[A-Z][a-z]*[0-9]{4}([-]|[A-Za-z']+[A-Z][a-z]*[0-9]{4})"
         )
         debug = False
-        folder_file_contents = []
         person_dict = {}
 
         for folder in folders:  # step through each folder
@@ -1183,7 +1186,6 @@ class BuildWebPages:
                 # create a dictionary of xml file contents
                 with open(xml_file_name, "r", encoding="utf-8") as current_xml_file:
                     # print("xml file name = ", xml_file_name)
-                    file_data = []
                     artifact_dictionary = {}
 
                     # used to create the dictionary of xml file contents
@@ -1202,14 +1204,16 @@ class BuildWebPages:
                     tags_types = tags + types
                     # extract all data from the current xml file
 
-                    for line in current_xml_file:
+                    for (
+                        line
+                    ) in current_xml_file:  # pylint: disable=too-many-nested-blocks
                         line = line.lstrip(" ")
                         line = line.replace("<![CDATA[", "")
                         line = line.replace("]]>", "")
                         line = line.replace("\n", "")
                         line = line.replace("\t", "")
                         lc_line = line.lower()
-                        for tag_type in tags_types:
+                        for tag_type in list(tags_types):
                             if tag_type in lc_line:
                                 if tag_type == "":
                                     debug = True
@@ -1410,9 +1414,7 @@ class BuildWebPages:
                         genwebid_artifact_dict_id = ",
                         genwebid_artifact_dict_id,
                     )
-                genwebid_artifact_dict = genwebid_artifacts_dict[
-                    genwebid_artifact_dict_id
-                ]
+
                 try:
                     genwebid_artifact_dict_people = genwebid_artifacts_dict[
                         genwebid_artifact_dict_id
@@ -1493,6 +1495,7 @@ class BuildWebPages:
 
     # --------------------------------------------------_get_proj_dict_from_xml
 
+    # pylint: disable=too-many-branches
     def _separate_names(self, item):
         """given a string that is a concatenation of names with their first
         letters capitalized [e.g. PageRobertK1953], separate them into
@@ -1678,6 +1681,7 @@ class BuildWebPages:
 
     # --------------------------------------------------
 
+    # pylint: disable=too-many-branches,too-many-statements
     def _generate_person_web(self, family_dict, persons_xml_dict, folders_path):
         """
         This is the new version!
@@ -2294,6 +2298,7 @@ class BuildWebPages:
 
     # -------------------------------------------------- end of _generate_person_web
 
+    # pylint: disable=too-many-branches,too-many-statements
     def _generate_all_hourglass_webs(self, family_dict, folders_path):
         """
         This is the new one! changing from person to family_dict
@@ -2325,6 +2330,26 @@ class BuildWebPages:
         Individual_Web_Pages folder in that person's folder. The source of the
         information is my rootsmagic database. Note that "person" is the same
         as person_facts['GenWebID']
+
+        Given a person's PersonID (AKA OwnerID), the NameTable entry for that
+        person.
+        The form of spouse =
+            [{'Surname': 'Page', 'OwnerID': '1', 'Nickname': 'Bob',
+              'Suffix': '', 'BirthYear': '1953', 'Prefix': '',
+              'DeathYear': '0', 'Sex':'male, 'GenWebID':'PageRobertK1953',
+              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
+              'FullName': 'Page, Robert Kenneth'}]
+        spouses is a list of spouse NameTable entries
+
+        Given a person's PersonID (AKA OwnerID) fetch the children's NameTable
+        entries for that person.
+        The fetch_person_from_ID return is of the form child =
+            [{'Surname': 'Page', 'OwnerID': '1', 'Nickname': 'Bob',
+              'Suffix': '', 'BirthYear': '1953', 'Prefix': '',
+              'DeathYear': '0', 'Sex':'male, 'GenWebID':'PageRobertK1953',
+              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
+              'FullName': 'Page, Robert Kenneth'}]
+        three_gen_family['child_list'] is a list of children NameTable entries
         """
         debug = False
         long_genwebid = family_dict["target"]["long_genwebid"]
@@ -2335,8 +2360,9 @@ class BuildWebPages:
         if debug:
             print("line 1763 family_dict = ", family_dict)
 
-        if long_genwebid == "" or long_genwebid == "StoriesPersonal0000-":
+        if long_genwebid in ["", "StoriesPersonal0000-"]:
             return
+
         short_genwebid_re = re.compile("[A-Za-z']+[A-Z][a-z]*[0-9]{4}")
         person_facts = family_dict["target"]
 
@@ -2395,14 +2421,16 @@ class BuildWebPages:
                 )
 
         if "long_genwebid" not in person_facts:  # if person doesn't exist, return
-            f = open(folders_path + "/zzz_PeopleNotFound.txt", "a", encoding="utf-8")
-            f.write(
-                "*****BuildWebPages hourglass table row #1 ****** long_genwebid = \
-                        "
-                + long_genwebid
-                + "\n"
-            )
-            f.close()
+            with open(
+                folders_path + "/zzz_PeopleNotFound.txt", "a", encoding="utf-8"
+            ) as not_found_file:
+                not_found_file.write(
+                    "*****BuildWebPages hourglass table row #1 ****** long_genwebid = \
+                            "
+                    + long_genwebid
+                    + "\n"
+                )
+
             return
         else:
             # c5r4 target person picture
@@ -2501,12 +2529,12 @@ class BuildWebPages:
             print("********* len(family_dict[parents]) = ", len(family_dict["parents"]))
         # Father
         if "OwnerID" in family_dict["parents"]["father"]:
-            tgt_fathers_Owner_id = family_dict["parents"]["father"]["OwnerID"]
+            tgt_fathers_owner_id = family_dict["parents"]["father"]["OwnerID"]
             tgt_fathers_parents = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
-                tgt_fathers_Owner_id,
+                tgt_fathers_owner_id,
             )
         else:
             fathers_mother_genwebid = "-"
@@ -2684,12 +2712,12 @@ class BuildWebPages:
             print("********* three_gen_family = ", family_dict)
         # Mother
         if "OwnerID" in family_dict["parents"]["mother"]:
-            tgt_mothers_Owner_id = family_dict["parents"]["mother"]["OwnerID"]
+            tgt_mothers_owner_id = family_dict["parents"]["mother"]["OwnerID"]
             tgt_mothers_parents = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
-                tgt_mothers_Owner_id,
+                tgt_mothers_owner_id,
             )
         else:
             mothers_mother_genwebid = "-"
@@ -2843,34 +2871,24 @@ class BuildWebPages:
             pass  # don't add any content if mother doesn't exist
 
         # Spouses
-        """
-        Given a person's PersonID (AKA OwnerID), the NameTable entry for that
-        person.
-        The form of spouse =
-            [{'Surname': 'Page', 'OwnerID': '1', 'Nickname': 'Bob',
-              'Suffix': '', 'BirthYear': '1953', 'Prefix': '',
-              'DeathYear': '0', 'Sex':'male, 'GenWebID':'PageRobertK1953',
-              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
-              'FullName': 'Page, Robert Kenneth'}]
-        spouses is a list of spouse NameTable entries
-        """
-        spouseList = family_dict["spouses"]
+        # Given a person's PersonID (AKA OwnerID), the NameTable entry
+        spouse_list = family_dict["spouses"]
 
         row = 6
         debug = False
         if long_genwebid == "-":
             debug = True
         if debug:
-            print("line 2112 - ********* spouseList = ", spouseList)
-            print("********* len(spouseList) = ", len(spouseList))
-        for spouse_num in range(len(spouseList)):
+            print("line 2112 - ********* spouse_list = ", spouse_list)
+            print("********* len(spouse_list) = ", len(spouse_list))
+        for spouse_num in range(len(spouse_list)):
             if debug:
                 print("********* spouse_num = ", spouse_num)
-            if spouseList[spouse_num] == {}:
+            if spouse_list[spouse_num] == {}:
                 continue
-            if not short_genwebid_re.match(spouseList[spouse_num]["GenWebID"]):
+            if not short_genwebid_re.match(spouse_list[spouse_num]["GenWebID"]):
                 continue
-            spouse = spouseList[spouse_num]
+            spouse = spouse_list[spouse_num]
             if spouse == {}:
                 continue
 
@@ -2902,35 +2920,35 @@ class BuildWebPages:
                 )
 
             # c5r6,8,10,12 target person picture
-            if len(spouseList[spouse_num]) > 0:
+            if len(spouse_list[spouse_num]) > 0:
                 key = "c5r" + str(row)
                 if debug:
                     print(
                         folders_path
                         + "/"
-                        + spouseList[spouse_num]["GenWebID"]
+                        + spouse_list[spouse_num]["GenWebID"]
                         + spouses_mothers_genwebid
                         + "/"
-                        + spouseList[spouse_num]["GenWebID"]
+                        + spouse_list[spouse_num]["GenWebID"]
                         + spouses_mothers_genwebid
                         + ".jpg"
                     )
                 if os.path.isfile(
                     folders_path
                     + "/"
-                    + spouseList[spouse_num]["GenWebID"]
+                    + spouse_list[spouse_num]["GenWebID"]
                     + spouses_mothers_genwebid
                     + "/"
-                    + spouseList[spouse_num]["GenWebID"]
+                    + spouse_list[spouse_num]["GenWebID"]
                     + spouses_mothers_genwebid
                     + ".jpg"
                 ):
                     hourglass_table[key] = (
                         '    <td align="center "><img src="../'
-                        + spouseList[spouse_num]["GenWebID"]
+                        + spouse_list[spouse_num]["GenWebID"]
                         + spouses_mothers_genwebid
                         + "/"
-                        + spouseList[spouse_num]["GenWebID"]
+                        + spouse_list[spouse_num]["GenWebID"]
                         + spouses_mothers_genwebid
                         + '.jpg" height="75"></td><!--'
                         + key
@@ -2950,10 +2968,10 @@ class BuildWebPages:
                 key = "c5r" + str(row)
                 hourglass_table[key] = (
                     '    <td align="center "><a href="../'
-                    + spouseList[spouse_num]["GenWebID"]
+                    + spouse_list[spouse_num]["GenWebID"]
                     + spouses_mothers_genwebid
                     + '/index.html"><p>'
-                    + spouseList[spouse_num]["FullName"]
+                    + spouse_list[spouse_num]["FullName"]
                     + "</p></a></td><!--"
                     + key
                     + "-->\n"
@@ -2963,7 +2981,7 @@ class BuildWebPages:
                 key = "c4r" + str(row)
                 hourglass_table[key] = (
                     '    <td align="center"><a href= ../'
-                    + spouseList[spouse_num]["GenWebID"]
+                    + spouse_list[spouse_num]["GenWebID"]
                     + spouses_mothers_genwebid
                     + "/HourGlass.html><img src=../images/Right_Arrow_Maroon.gif></a></td><!--"
                     + key
@@ -2974,35 +2992,22 @@ class BuildWebPages:
                 row = row + 1
 
         # children
-        childList = family_dict["children"]
-        """
-        Given a person's PersonID (AKA OwnerID) fetch the children's NameTable
-        entries for that person.
-        The fetch_person_from_ID return is of the form child =
-            [{'Surname': 'Page', 'OwnerID': '1', 'Nickname': 'Bob',
-              'Suffix': '', 'BirthYear': '1953', 'Prefix': '',
-              'DeathYear': '0', 'Sex':'male, 'GenWebID':'PageRobertK1953',
-              'Given': ['Robert', 'Kenneth'], 'IsPrimary': '1',
-              'FullName': 'Page, Robert Kenneth'}]
-        three_gen_family['childList'] is a list of children NameTable entries
-        """
+        # Given a person's PersonID (AKA OwnerID) fetch the children's NameTable
+        child_list = family_dict["children"]
 
         row = 2
         debug = False
         if long_genwebid == "-":
             debug = True
         if debug:
-            print("********* childList = ", childList)
-            print("********* len(childList) = ", len(childList))
-        for child_num in range(len(childList)):
+            print("********* child_list = ", child_list)
+            print("********* len(child_list) = ", len(child_list))
+        for child_num, child in enumerate(child_list):
             if debug:
                 print("********* child_num = ", child_num)
-            if childList[child_num] == {}:
-                continue
-            if not short_genwebid_re.match(childList[child_num]["GenWebID"]):
-                continue
 
-            child = childList[child_num]
+            if not child or not short_genwebid_re.match(child["GenWebID"]):
+                continue
 
             if debug:
                 print(
@@ -3012,13 +3017,10 @@ class BuildWebPages:
                     child,
                 )
 
-            if child == {}:
-                continue
-
             childs_long_genwebid = child["long_genwebid"]
 
             # c9r2, 4, 6, 8, ... 20 target person picture
-            if len(childList[child_num]) > 0:
+            if child:
                 key = "c9r" + str(row)
                 if debug:
                     print(
@@ -3072,7 +3074,7 @@ class BuildWebPages:
                     '    <td align="center "><a href="../'
                     + childs_long_genwebid
                     + '/index.html"><p>'
-                    + childList[child_num]["FullName"]
+                    + child["FullName"]
                     + "</p></a></td><!--"
                     + key
                     + "-->\n"
@@ -3116,10 +3118,10 @@ class BuildWebPages:
         # This builds the standard html header I use for the family history files
         # print('person = ', person, '  OwnerID = ', person_facts['OwnerID'])
         # print('person_facts = ', person_facts)
-        hourglasshtmlList = []
-        hourglasshtmlList.append("<html>\n")
-        hourglasshtmlList.append("<head>\n")
-        hourglasshtmlList.append(
+        hourglasshtml_list = []
+        hourglasshtml_list.append("<html>\n")
+        hourglasshtml_list.append("<head>\n")
+        hourglasshtml_list.append(
             '    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />'
             + "\n"
         )
@@ -3128,24 +3130,26 @@ class BuildWebPages:
         # for names in person_facts['Given']:
         #    given_names = given_names + ' ' + names
 
-        hourglasshtmlList.append(
+        hourglasshtml_list.append(
             "    <title>" + person_facts["FullName"] + "</title>" + "\n"
         )
-        hourglasshtmlList.append(
+        hourglasshtml_list.append(
             '    <link href="../css/individual.css" type="text/css" rel="stylesheet" />'
             + "\n"
         )
-        hourglasshtmlList.append('    <style type="text/css">' "\n")
-        hourglasshtmlList.append("    /*<![CDATA[*/" + "\n")
-        hourglasshtmlList.append(" div.ReturnToTop {text-align: right}" + "\n")
-        hourglasshtmlList.append("    /*]]>*/" + "\n")
-        hourglasshtmlList.append("    </style>\n")
-        hourglasshtmlList.append("</head>\n")
-        hourglasshtmlList.append('<body background="../images/back.gif">' + "\n")
+        hourglasshtml_list.append('    <style type="text/css">' "\n")
+        hourglasshtml_list.append("    /*<![CDATA[*/" + "\n")
+        hourglasshtml_list.append(" div.ReturnToTop {text-align: right}" + "\n")
+        hourglasshtml_list.append("    /*]]>*/" + "\n")
+        hourglasshtml_list.append("    </style>\n")
+        hourglasshtml_list.append("</head>\n")
+        hourglasshtml_list.append('<body background="../images/back.gif">' + "\n")
         nickname = ""
         if len(person_facts["Nickname"]) > 1:
             nickname = ' "' + person_facts["Nickname"] + '" '
-        buildString = '    <h1><a name="Top"></a>' + person_facts["FullName"] + nickname
+        build_string = (
+            '    <h1><a name="Top"></a>' + person_facts["FullName"] + nickname
+        )
         if debug:
             print(
                 "\n line 943 _generate_all_hourglass_webs:  person_facts[BirthYear] = ",
@@ -3156,7 +3160,7 @@ class BuildWebPages:
         if person_facts["BirthYear"] == "":
             person_facts["BirthYear"] = "????"  # if not birth year then pass
 
-        buildString = buildString + " - " + person_facts["BirthYear"]
+        build_string = build_string + " - " + person_facts["BirthYear"]
 
         if debug:
             print(
@@ -3169,63 +3173,63 @@ class BuildWebPages:
         if person_facts["DeathYear"] == "0":
             pass
         else:
-            buildString = buildString + " - " + person_facts["DeathYear"]
+            build_string = build_string + " - " + person_facts["DeathYear"]
 
-        buildString = buildString + "</h1>\n"
-        hourglasshtmlList.append(buildString)
+        build_string = build_string + "</h1>\n"
+        hourglasshtml_list.append(build_string)
 
         if persons_mother == "":
             persons_mother = "-"
-        commentString = (
+        comment_string = (
             f'\t\t\t<p><a href="mailto:{self.admin_email}?subject='
             + long_genwebid
             + '" target="_blank"><img alt="comments" src="../images/comments.jpg" style="display: block; text-align: left; margin-right: auto" height="20"></a>\n'
         )
-        hourglasshtmlList.append(commentString)
+        hourglasshtml_list.append(comment_string)
 
-        hourglasshtmlList.append(
+        hourglasshtml_list.append(
             '<table border="0" cellspacing="0" cellpadding="0" align="center">\n'
         )
         # add the table to the HourGlass
         for row in range(1, 21):
             for column in range(0, 11):
                 key = "c" + str(column) + "r" + str(row)
-                hourglasshtmlList.append(hourglass_table[key])
+                hourglasshtml_list.append(hourglass_table[key])
 
-        hourglasshtmlList.append("</table>")
-        hourglasshtmlList.append("</body>")
-        hourglasshtmlList.append("</html>")
+        hourglasshtml_list.append("</table>")
+        hourglasshtml_list.append("</body>")
+        hourglasshtml_list.append("</html>")
 
         if os.path.isdir(folders_path + "/" + long_genwebid):
-            hourglassFile = open(
+            with open(
                 folders_path + "/" + long_genwebid + "/HourGlass.html",
                 "w",
                 encoding="utf-8",
-            )
+            ) as hourglass_file:
+                for row in hourglasshtml_list:  # commented out 1/22/2018 to minimize
+                    hourglass_file.writelines(
+                        row
+                    )  # commented out 1/22/2018 to minimize
 
-            for row in hourglasshtmlList:  # commented out 1/22/2018 to minimize
-                hourglassFile.writelines(row)  # commented out 1/22/2018 to minimize
-
-            hourglassFile.close()
         else:
-            folder_not_found = open(
+            with open(
                 folders_path + "/zzz_FolderNotFound.txt", "a", encoding="utf-8"
-            )
-            folder_not_found.write(
-                "***** _generate_all_hourglass_webs ****** folder = "
-                + long_genwebid
-                + "\n"
-            )
-            folder_not_found.write(
-                "person_facts[FullName] = "
-                + person_facts["FullName"]
-                + "\n person_facts[BirthYear] = "
-                + person_facts["BirthYear"]
-                + "\n person_facts[DeathYear] = "
-                + person_facts["DeathYear"]
-                + "\n"
-            )
-            folder_not_found.close()
+            ) as folder_not_found:
+                folder_not_found.write(
+                    "***** _generate_all_hourglass_webs ****** folder = "
+                    + long_genwebid
+                    + "\n"
+                )
+                folder_not_found.write(
+                    "person_facts[FullName] = "
+                    + person_facts["FullName"]
+                    + "\n person_facts[BirthYear] = "
+                    + person_facts["BirthYear"]
+                    + "\n person_facts[DeathYear] = "
+                    + person_facts["DeathYear"]
+                    + "\n"
+                )
+
             # [{'Surname': 'Page', 'OwnerID': '1', 'Nickname': 'Bob',
             #  'Suffix': '', 'BirthYear': '1953', 'Prefix': '',
             #  'DeathYear': '0', 'Sex':'male, 'GenWebID':'PageRobertK1953',
@@ -3240,12 +3244,12 @@ class BuildWebPages:
 
 
 def main():
+    """main entrypoint"""
     # Get the RootsMagic database info
     rmagic_path = sys.argv[1]
     web_folder = sys.argv[2]
     admin_email = sys.argv[3]
-    build_web = BuildWebPages(rmagic_path, web_folder, admin_email)
-    build_web.__init__(rmagic_path)
+    BuildWebPages(rmagic_path, web_folder, admin_email)
 
 
 if __name__ == "__main__":
