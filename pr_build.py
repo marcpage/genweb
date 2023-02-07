@@ -19,16 +19,21 @@ def updated(file):
     return 0 if not os.path.isfile(file) else os.path.getmtime(file)
 
 
-MINIMUM_TEST_COVERAGE = 1
+MINIMUM_TEST_COVERAGE = 9  # percent
 COVERAGE_FLAGS = (
     "--show-missing --skip-covered --skip-empty --omit=financial_game/__main__.py"
 )
 PYTHON_SOURCE_DIR = "genweb"
-PYTHON_SOURCES = os.path.join(PYTHON_SOURCE_DIR, "*.py")
-LINT_SOURCES = os.path.join(PYTHON_SOURCE_DIR, "generate_alpha_toc.py")
+PYTHON_SOURCES = [os.path.join(PYTHON_SOURCE_DIR, "*.py")]
+LINT_SOURCES = [
+    os.path.join(PYTHON_SOURCE_DIR, n)
+    for n in ["generate_alpha_toc.py", "metaphone.py"]
+]
 REQUIREMENTS_PATH = "requirements.txt"
 VENV_PATH = ".venv"
 FLAKE8_FLAGS = "--max-line-length=100"
+FLAKE8_FLAGS += " --ignore=E203"  # whitespace before ':'
+FLAKE8_FLAGS += ",W503"  # line break before binary operator
 GITHUB_WORKFLOW = os.environ.get("GITHUB_WORKFLOW", "") == "CI"
 ERROR_PREFIX = "##[error]" if GITHUB_WORKFLOW else "💥💥"
 LINT_ERROR_PATTERN = re.compile(r"^(.*:.*:.*:)", re.MULTILINE)
@@ -72,8 +77,8 @@ def main():  # pylint: disable=too-many-branches,too-many-statements
     #
     #####################################
     black_check = "--check" if len(sys.argv) == 1 else ""
-    format_sources = " ".join(glob.glob(PYTHON_SOURCES)) + " " + __file__
-    lint_sources = " ".join(glob.glob(LINT_SOURCES)) + " " + __file__
+    format_sources = expand_files(__file__, *PYTHON_SOURCES)
+    lint_sources = expand_files(__file__, *LINT_SOURCES)
 
     github_log("##[group] Running black python source validation")
     github_log(f"##[command]python3 -m black {black_check} {format_sources}")
@@ -284,6 +289,11 @@ class Start(threading.Thread):  # pylint: disable=too-many-instance-attributes
             ), f"Return code = {self.return_code}"
 
         self.duration = time.perf_counter() - self.start_time
+
+
+def expand_files(*file_list):
+    """takes a list of file patterns and expands them into files separated by space"""
+    return " ".join([p for f in file_list for p in glob.glob(f)])
 
 
 def github_log(text: str):
