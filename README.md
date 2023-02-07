@@ -13,6 +13,11 @@ Generate a family history website
 
 
 
+# Get source locally
+
+- `git clone https://github.com/marcpage/genweb.git`
+
+
 # Format source
 
 On Linux:
