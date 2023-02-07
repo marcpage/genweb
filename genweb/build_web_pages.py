@@ -537,7 +537,7 @@ class build_web_pages(object):
             revised_father_name_table_entry = {}
 
         # SPOUSES
-        spouses = rmagic.fetch_spouses_from_ID(
+        spouses = rmagic.fetch_spouses_from_id(
             name_table, person_table, family_table, owner_id
         )
         """
@@ -560,7 +560,7 @@ class build_web_pages(object):
                 # print('revised_spouse = ', revised_spouse)
 
         # CHILDREN
-        children = rmagic.fetch_children_from_ID(
+        children = rmagic.fetch_children_from_id(
             child_table, name_table, person_table, family_table, owner_id
         )
         """
@@ -701,7 +701,7 @@ class build_web_pages(object):
                             + match_person["GenWebID"]
                             + "\n",
                         )
-                    parents = rmagic.fetch_parents_from_ID(
+                    parents = rmagic.fetch_parents_from_id(
                         self._tables["PersonTable"],
                         self._tables["NameTable"],
                         self._tables["FamilyTable"],
@@ -894,7 +894,7 @@ class build_web_pages(object):
         #                   'Sex': '', 'GenWebID': '', 'FullName': ''}
         #  where return = {'Father': father, 'Mother': mother}
         try:
-            three_gen_family["tgt_parents"] = rmagic.fetch_parents_from_ID(
+            three_gen_family["tgt_parents"] = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
@@ -948,7 +948,7 @@ class build_web_pages(object):
 
         tgt_fathers_Owner_ID = three_gen_family["tgt_parents"]["Father"]["OwnerID"]
         if tgt_fathers_Owner_ID != "":
-            three_gen_family["tgt_fathers_parents"] = rmagic.fetch_parents_from_ID(
+            three_gen_family["tgt_fathers_parents"] = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
@@ -962,7 +962,7 @@ class build_web_pages(object):
 
         tgt_mothers_Owner_ID = three_gen_family["tgt_parents"]["Mother"]["OwnerID"]
         if tgt_mothers_Owner_ID != "":
-            three_gen_family["tgt_mothers_parents"] = rmagic.fetch_parents_from_ID(
+            three_gen_family["tgt_mothers_parents"] = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
@@ -976,7 +976,7 @@ class build_web_pages(object):
                 )
 
         # I now have the target person's spouse's info
-        three_gen_family["spouseList"] = rmagic.fetch_spouses_from_ID(
+        three_gen_family["spouseList"] = rmagic.fetch_spouses_from_id(
             self._tables["NameTable"],
             self._tables["PersonTable"],
             self._tables["FamilyTable"],
@@ -1001,7 +1001,7 @@ class build_web_pages(object):
         three_gen_family['spouseList'] is a list of spouse NameTable entries
         """
         # add children
-        three_gen_family["childList"] = rmagic.fetch_children_from_ID(
+        three_gen_family["childList"] = rmagic.fetch_children_from_id(
             self._tables["ChildTable"],
             self._tables["NameTable"],
             self._tables["PersonTable"],
@@ -2514,7 +2514,7 @@ class build_web_pages(object):
         # Father
         if "OwnerID" in family_dict["parents"]["father"]:
             tgt_fathers_Owner_ID = family_dict["parents"]["father"]["OwnerID"]
-            tgt_fathers_parents = rmagic.fetch_parents_from_ID(
+            tgt_fathers_parents = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
@@ -2697,7 +2697,7 @@ class build_web_pages(object):
         # Mother
         if "OwnerID" in family_dict["parents"]["mother"]:
             tgt_mothers_Owner_ID = family_dict["parents"]["mother"]["OwnerID"]
-            tgt_mothers_parents = rmagic.fetch_parents_from_ID(
+            tgt_mothers_parents = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
@@ -2894,7 +2894,7 @@ class build_web_pages(object):
                     spouse,
                 )
 
-            spouses_parents = rmagic.fetch_parents_from_ID(
+            spouses_parents = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],

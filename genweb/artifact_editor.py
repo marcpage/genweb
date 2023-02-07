@@ -475,7 +475,7 @@ class Editor(object):
             self._tgt_family[target], self._matched_persons[person_no]
         )
 
-        parents = rmagic.fetch_parents_from_ID(
+        parents = rmagic.fetch_parents_from_id(
             self._tables["PersonTable"],
             self._tables["NameTable"],
             self._tables["FamilyTable"],
@@ -494,7 +494,7 @@ class Editor(object):
         mother = 2
         self._populate_target_relation(self._tgt_family[mother], parents["Mother"])
 
-        spouses = rmagic.fetch_spouses_from_ID(
+        spouses = rmagic.fetch_spouses_from_id(
             self._tables["NameTable"],
             self._tables["PersonTable"],
             self._tables["FamilyTable"],
@@ -507,7 +507,7 @@ class Editor(object):
                 self._tgt_family[fam_spouses + spouse_no], spouses[spouse_no]
             )
 
-        children = rmagic.fetch_children_from_ID(
+        children = rmagic.fetch_children_from_id(
             self._tables["ChildTable"],
             self._tables["NameTable"],
             self._tables["PersonTable"],
@@ -904,7 +904,7 @@ class Editor(object):
                     )
                 chg_to_long_id_file.close()
                 return ""
-            parents = rmagic.fetch_parents_from_ID(
+            parents = rmagic.fetch_parents_from_id(
                 self._tables["PersonTable"],
                 self._tables["NameTable"],
                 self._tables["FamilyTable"],
