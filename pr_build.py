@@ -27,7 +27,12 @@ PYTHON_SOURCE_DIR = "genweb"
 PYTHON_SOURCES = [os.path.join(PYTHON_SOURCE_DIR, "*.py")]
 LINT_SOURCES = [
     os.path.join(PYTHON_SOURCE_DIR, n)
-    for n in ["generate_alpha_toc.py", "metaphone.py", "rmagic.py"]
+    for n in [
+        "generate_alpha_toc.py",
+        "metaphone.py",
+        "rmagic.py",
+        # "build_web_pages.py",
+    ]
 ]
 REQUIREMENTS_PATH = "requirements.txt"
 VENV_PATH = ".venv"
