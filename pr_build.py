@@ -31,9 +31,12 @@ LINT_SOURCES = [
 ]
 REQUIREMENTS_PATH = "requirements.txt"
 VENV_PATH = ".venv"
+FLAKE8_DISABLES = [
+    "E203",  # whitespace before ':'
+    "W503",  # line break before binary operator
+]
 FLAKE8_FLAGS = "--max-line-length=100"
-FLAKE8_FLAGS += " --ignore=E203"  # whitespace before ':'
-FLAKE8_FLAGS += ",W503"  # line break before binary operator
+FLAKE8_FLAGS += f" --ignore={','.join(FLAKE8_DISABLES)}" if FLAKE8_DISABLES else ""
 GITHUB_WORKFLOW = os.environ.get("GITHUB_WORKFLOW", "") == "CI"
 ERROR_PREFIX = "##[error]" if GITHUB_WORKFLOW else "💥💥"
 LINT_ERROR_PATTERN = re.compile(r"^(.*:.*:.*:)", re.MULTILINE)
