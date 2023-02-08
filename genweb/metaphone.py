@@ -20,7 +20,7 @@
 def double_metaphone(string):  # pylint: disable=too-many-branches,too-many-statements
     """double_metaphone(string) -> (string, string or None)
     returns the double metaphone codes for given string - always a tuple
-    there are no checks done on the input string, but it should be a single    word or name.
+    there are no checks done on the input string, but it should be a single word or name.
     """
     vowels = ["A", "E", "I", "O", "U", "Y"]
     # string = string.decode('utf-8', 'ignore')

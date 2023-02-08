@@ -39,13 +39,24 @@ def test_double_metaphone():
         "Parachute": ("PRKT", None),
         "Nowhere": ("NR", None),
         "Tux": ("TKS", None),
+        "80210": ("", None),
+        "1600": ("", None),
+        "Pennsylvania": ("PNSLFN", None),
+        "Ave": ("AF", None),
+        "Avenue": ("AFN", None),
     }
+
     for name, metaphone in names.items():
+        print(f"name = {name}, Metaphone = {double_metaphone(name)}")
         assert double_metaphone(name) == metaphone
-        if double_metaphone(name) == metaphone:
-            print("name = ", name, "   Metaphone = ", double_metaphone(name)[0], ",", double_metaphone(name)[1])
-            # print('For ',name,'function returned ',double_metaphone(name),'. Should be ',metaphone))
+
+
+def test_homophones():
+    assert double_metaphone("Marc") == double_metaphone("Mark")
+    assert double_metaphone("Jon") == double_metaphone("John")
+    assert double_metaphone("Mathew") == double_metaphone("Matthew")
 
 
 if __name__ == "__main__":
     test_double_metaphone()
+    test_homophones()
