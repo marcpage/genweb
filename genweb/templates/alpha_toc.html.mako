@@ -2,11 +2,11 @@
 <!-- Variables: people
  -->
 <%
-    table_col = 0
     current_letter = 'de' if people[0]['Surname'][0].startswith('de') else people[0]['Surname'][0]
 %>
 <html>
     <head>
+		<meta charset="UTF-8">
         <title>Family History</title>
         <link href="css/index.css" type="text/css" rel="stylesheet">
         <link href="css/alphas.css" type="text/css" rel="stylesheet">
@@ -30,21 +30,22 @@
                     <p><a name='${current_letter}'><font size="+3" weight="900">${current_letter}</font></a></p>
                 </td>
 
-        % for person_facts in people:
+        % for person_index, person_facts in enumerate(people):
                 <td align="CENTER" valign="BOTTOM">
                     <h5>${person_facts["Surname"]}, ${' '.join(person_facts["Given"])}
                     <a href= "${person_facts['long_genwebid']}/index.html"><img src="images/individual.bmp"></a>
                     <a href= "${person_facts['long_genwebid']}/HourGlass.html"><img src="images/family.bmp"></a>
             <%
                 assert len(person_facts["BirthYear"]) in [0, 3, 4]
-                table_col += 1
             %>
-                    <br>${person_facts["BirthYear"] if person_facts["BirthYear"] else "?"} - ${person_facts["DeathYear"] if person_facts["DeathYear"] else "?"}</h5></p>
+                    <br>${person_facts["BirthYear"] if person_facts["BirthYear"] else "?"} - ${person_facts["DeathYear"] if person_facts["DeathYear"] else "?"}</h5>
                 </td>
-            % if table_col % 3 == 0:
+            % if person_index % 3 == 1:
             </tr>
             <tr>
             % endif
         % endfor
+            </tr>
+        </table>
     </body>
 </html>
