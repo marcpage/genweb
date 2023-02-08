@@ -9,6 +9,28 @@ import os
 import mako.lookup
 
 
+def save_alpha_toc(path, list_of_people):
+    write(path, "alpha_toc.html.mako", people=list_of_people)
+
+
+def save_personal(family_dict, persons_xml_dict, admin_email, folders_path):
+    path = os.path.join(folders_path, family_dict["target"]["long_genwebid"])
+    os.makedirs(path, exist_ok=True)
+    write(
+        os.path.join(path, "index.html"),
+        "person_index.html.mako",
+        family_dict=family_dict,
+        persons_xml_dict=persons_xml_dict,
+        admin_email=admin_email,
+        folders_path=folders_path,
+    )
+
+
+def write(path, template, **kwargs):
+    with open(path, "w", encoding="utf-8") as html_file:
+        html_file.write(render(os.path.join("templates", template), **kwargs))
+
+
 def render(template_path, *search_dirs, **args):
     """Render a template file searching for includes in given directories and using given args"""
     script_dir = os.path.split(os.path.realpath(__file__))[0]
@@ -37,12 +59,3 @@ def render(template_path, *search_dirs, **args):
     template = lookup.get_template(os.path.split(template_path)[1])
 
     return template.render(**args)
-
-
-def save_alpha_toc(path, list_of_people):
-    with open(path, "w", encoding="utf-8") as html_file:
-        html_file.write(
-            render(
-                os.path.join("templates", "alpha_toc.html.mako"), people=list_of_people
-            )
-        )

@@ -50,11 +50,15 @@
 				<a href= "../../index.html"><img src="../images/Home.jpg"></a>
 % else:
 		    <%
-		        nickname = f'"{}"' if family_dict["target"]['Nickname'] else ''
 		        birth_year = family_dict["target"]["BirthYear"]
 		        birth_year = birth_year if len(birth_year) > 2 else "?"
 		        death_year = family_dict["target"]["DeathYear"]
 		        death_year = death_year if len(death_year) > 2 else "?"
+
+		        if family_dict['target']['Nickname']:
+                    nickname = '"' + family_dict['target']['Nickname'] + '"'
+		        else:
+		            nickname = ''
 		    %>
 		<h1><a name="Top"></a>${family_dict["target"]["FullName"]}${nickname} - ${birth_year} - ${death_year}</h1>
 		<a href= "HourGlass.html"><img src="../images/family.bmp"></a>
