@@ -1,11 +1,41 @@
 #!/usr/bin/env python3
 
 """ Structure for storing data
+
+    A Person may be a user, but may just be a relative.
+        (open question) How do we connect new users to existing relative records?
+
+    You cannot make direct changes to a person's information.
+    Instead you make a Proposal.
+    Proposal's can be spotty information.
+
+    For example:
+        Person #58
+            Proposal #1
+                status = valid
+                Proposer = Person #22
+                Surname = Doe
+                First = John
+                Marriage year = 1923
+                Marriage Country = United States
+                Marriage State = Texas
+                Marriage County = Travis
+                Marriage City = Pflugerville
+                Marriage postal = 78660
+                Marriage street = North Heatherwilde
+                Marriage street class = Boulevard
+                Marriage address = 700
+                Comment (from Person #22): "I was at the wedding"
+                Comment (from Person #36): "Please provide the marriage date"
+
+    Only proposer can modify the proposal.
+    Proposals layer to fill in all information with the latest addition overriding.
 """
 
 
 import enum
 
+import genweb.database
 from genweb.table import Table, Identifier, String, IntEnum, ForeignKey, Integer
 
 # from genweb.metaphone import double_metaphone
@@ -176,3 +206,26 @@ class Contact(Table):
     id = Identifier()
     type = IntEnum(ContactType, allow_null=False)
     contact = String(128, allow_null=False)
+
+
+def connect(url):
+    """Connect to the database"""
+    tables = [
+        Person,
+        Name,
+        Metaphone,
+        Proposal,
+        PersonName,
+        Event,
+        EventLocation,
+        Relationship,
+        Comment,
+        Contact,
+    ]
+    database = genweb.database.Connection.connect(url, default_return_objects=False)
+    database.create_tables(**Table.database_description(*tables))
+
+    for table in tables:
+        table._db = database  # pylint: disable=protected-access
+
+    return database
