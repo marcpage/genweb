@@ -4,6 +4,7 @@
 
     A Person may be a user, but may just be a relative.
         (open question) How do we connect new users to existing relative records?
+        (open question) How do we handle privacy with living Person?
 
     You cannot make direct changes to a person's information.
     Instead you make a Proposal.
