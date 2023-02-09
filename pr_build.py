@@ -19,7 +19,7 @@ def updated(file):
     return 0 if not os.path.isfile(file) else os.path.getmtime(file)
 
 
-MINIMUM_TEST_COVERAGE = 27  # percent
+MINIMUM_TEST_COVERAGE = 29  # percent
 COVERAGE_FLAGS = (
     "--show-missing --skip-covered --skip-empty --omit=financial_game/__main__.py"
 )
