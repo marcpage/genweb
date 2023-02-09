@@ -2,32 +2,37 @@
 
 """ Structure for storing data
 
+    All names will be in the Name table.
     A Person may be a user, but may just be a relative.
         (open question) How do we connect new users to existing relative records?
         (open question) How do we handle privacy with living Person?
 
     You cannot make direct changes to a person's information.
     Instead you make a Proposal.
-    Proposal's can be spotty information.
+    Proposal's can have spotty information.
+    You can propose a Name, and Event, and/or a relationship.
+    Only the creator of the proposal can edit it.
+    The creator can invalidate a proposal.
+    Newer proposals can override existing (eg name).
+    The latest proposal is what is shown by default, but all proposals can be seen
+        and commented on.
+
 
     For example:
         Person #58
             Proposal #1
                 status = valid
                 Proposer = Person #22
-                Surname = Doe
-                First = John
-                Marriage year = 1923
-                Marriage Country = United States
-                Marriage State = Texas
-                Marriage County = Travis
-                Marriage City = Pflugerville
-                Marriage postal = 78660
-                Marriage street = North Heatherwilde
-                Marriage street class = Boulevard
-                Marriage address = 700
+                Name = Doe, "Jonny" John Alexander
+                Event = 1986-May Marriage @ US/California/Orange/Irvine
+                EventPerson = Marriage - John Doe
+                EventPerson = Marriage - Jane Austin
+                Relationship = Spouse John -> Jane
                 Comment (from Person #22): "I was at the wedding"
                 Comment (from Person #36): "Please provide the marriage date"
+        Person #22
+            Contact = 619-555-5309
+            Contact = JohnDoe@company.com
 
     Only proposer can modify the proposal.
     Proposals layer to fill in all information with the latest addition overriding.
@@ -48,40 +53,18 @@ from genweb.table import Table, Identifier, String, IntEnum, ForeignKey, Integer
 class EventType(enum.Enum):
     """type of life event"""
 
+    death = 0
     birth = 1
-    christening = 2
-    residence = 3
-    marriage = 4
-    sealing = 5
-    death = 6
+    residence = 2
+    marriage = 3
+    baptism = 4
+    christening = 5
+    endowment = 6
+    sealed_to_spouse = 7
+    sealed_to_child = 8
 
 
-class NameType(enum.Enum):
-    """type of name"""
-
-    surname = 0
-    first = 1
-    second = 2
-    third = 3
-    fourth = 4
-
-
-class LocationLevel(enum.Enum):
-    """scope of location"""
-
-    country = 1
-    province = 2
-    county = 3
-    city = 4
-    burrow = 5
-    street = 6
-    street_class = 7  # street, avenue, road, cicle, drive, etc
-    address = 8
-    apartment = 9
-    postal = 10
-
-
-class ProposalStatus(enum.Enum):
+class Status(enum.Enum):
     """status of proposal"""
 
     invalid = 0
@@ -110,16 +93,6 @@ class ContactType(enum.Enum):
     email = 2
 
 
-class Person(Table):
-    """Site user or relative"""
-
-    _db = None
-    id = Identifier()
-    login_email = String(50, allow_null=True)
-    password_hash = String(64, allow_null=True)
-    sex = IntEnum(Sex, allow_null=False)
-
-
 class Name(Table):
     """A single name"""
 
@@ -137,27 +110,41 @@ class Metaphone(Table):
     metaphone = String(128)
 
 
+class Person(Table):
+    """Site user or relative"""
+
+    _db = None
+    id = Identifier()
+    login_email = String(50, allow_null=True)
+    password_hash = String(64, allow_null=True)
+    sex = IntEnum(Sex, allow_null=False)
+
+
 class Proposal(Table):
+    """A proposed set of information"""
+
+    id = Identifier()
+    status = IntEnum(Status, allow_null=False)
+    proposer_id = ForeignKey("Person", allow_null=False)
+
+
+class ProposedName(Table):
     """Proposed information about a person"""
 
     _db = None
     id = Identifier()
-    person_id = ForeignKey("Person", allow_null=False)
-    proposer_id = ForeignKey("Person", allow_null=False)
-    status = IntEnum(ProposalStatus, allow_null=False)
-
-
-class PersonName(Table):
-    """A proposed name for a person"""
-
-    _db = None
-    id = Identifier()
     proposal_id = ForeignKey("Proposal", allow_null=False)
-    order = IntEnum(NameType, allow_null=False)
-    name_id = ForeignKey("Name", allow_null=False)
+    person_id = ForeignKey("Person", allow_null=False)
+    surname_id = ForeignKey("Name", allow_null=True)
+    nickname_id = ForeignKey("Name", allow_null=True)
+    first_id = ForeignKey("Name", allow_null=True)
+    second_id = ForeignKey("Name", allow_null=True)
+    third_id = ForeignKey("Name", allow_null=True)
+    fourth_id = ForeignKey("Name", allow_null=True)
+    fifth_id = ForeignKey("Name", allow_null=True)
 
 
-class Event(Table):
+class ProposedEvent(Table):
     """A proposed event"""
 
     _db = None
@@ -167,24 +154,36 @@ class Event(Table):
     year = Integer(allow_null=True)
     month = Integer(allow_null=True)
     day = Integer(allow_null=True)
+    country_id = ForeignKey("Name", allow_null=True)
+    province_id = ForeignKey("Name", allow_null=True)
+    county_id = ForeignKey("Name", allow_null=True)
+    city_id = ForeignKey("Name", allow_null=True)
+    postal_id = ForeignKey("Name", allow_null=True)
+    burrow_id = ForeignKey("Name", allow_null=True)
+    street_id = ForeignKey("Name", allow_null=True)
+    street_class_id = ForeignKey("Name", allow_null=True)  # street, avenue, road, etc
+    street_direction_id = ForeignKey("Name", allow_null=True)  # north, south, east, etc
+    address_id = ForeignKey("Name", allow_null=True)
+    apartment_id = ForeignKey("Name", allow_null=True)
 
 
-class EventLocation(Table):
-    """A proposed event"""
+class ProposedEventPerson(Table):
+    """A proposed person involved in event"""
 
     _db = None
     id = Identifier()
-    event_id = ForeignKey("Event", allow_null=False)
-    level = IntEnum(LocationLevel, allow_null=False)
-    name_id = ForeignKey("Name", allow_null=False)
+    proposal_id = ForeignKey("Proposal", allow_null=False)
+    event_id = ForeignKey("ProposedEvent", allow_null=False)
+    person_id = ForeignKey("Person", allow_null=False)
 
 
-class Relationship(Table):
+class ProposedRelationship(Table):
     """Relationship to another Person"""
 
     _db = None
     id = Identifier()
     proposal_id = ForeignKey("Proposal", allow_null=False)
+    person_id = ForeignKey("Person", allow_null=False)
     relation_id = ForeignKey("Person", allow_null=False)
     type = IntEnum(RelationshipType, allow_null=False)
 
@@ -196,6 +195,7 @@ class Comment(Table):
 
     _db = None
     id = Identifier()
+    proposal_id = ForeignKey("Proposal", allow_null=False)
     commentor_id = ForeignKey("Person", allow_null=False)
     comment = String(2048)
 
@@ -205,6 +205,8 @@ class Contact(Table):
 
     _db = None
     id = Identifier()
+    status = IntEnum(Status, allow_null=False)
+    person_id = ForeignKey("Person", allow_null=False)
     type = IntEnum(ContactType, allow_null=False)
     contact = String(128, allow_null=False)
 
@@ -212,14 +214,14 @@ class Contact(Table):
 def connect(url):
     """Connect to the database"""
     tables = [
-        Person,
         Name,
         Metaphone,
+        Person,
         Proposal,
-        PersonName,
-        Event,
-        EventLocation,
-        Relationship,
+        ProposedName,
+        ProposedEvent,
+        ProposedEventPerson,
+        ProposedRelationship,
         Comment,
         Contact,
     ]
