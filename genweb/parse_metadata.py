@@ -27,7 +27,7 @@ def read_xml(path: str) -> dict:
     root = doc.getroot()
     nodes = {n.tag for n in root}
     assert not nodes - KNOWN_TAGS, nodes - KNOWN_TAGS
-    assert root.tag in {"inline", "picture", "comment"}, root.tag
+    assert root.tag in {"inline", "picture", "comment", "href"}, root.tag
     return {
         k: root.findall(k)[0].text
         for k in ["path", "file", "title", "comment", "people"]
@@ -35,7 +35,7 @@ def read_xml(path: str) -> dict:
 
 
 def main() -> None:
-    for root, _, files in walk("/Users/marcp/Desktop/metadata"):
+    for root, _, files in walk("/home/pagerk/metadata/xml"):
         for file in [f for f in files if splitext(f)[1].lower() == ".xml"]:
             try:
                 _ = read_xml(join(root, file))
@@ -44,10 +44,9 @@ def main() -> None:
                 with open(join(root, file), "r", encoding="utf-8") as contents:
                     pass  # print(contents.read())
 
-                if "mismatch" in str(error):
-                    print(join(root, file))
-                    print(error)
-                    print("=" * 80)
+                print(join(root, file))
+                print(error)
+                print("=" * 80)
 
 
 if __name__ == "__main__":
