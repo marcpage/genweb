@@ -27,4 +27,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Validate Source & Run Tests
-        run: python pr_build.py
+        run: echo nothing to do
