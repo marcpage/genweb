@@ -27,4 +27,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Validate Source & Run Tests
-        run: echo nothing to do
+        run: make lint
