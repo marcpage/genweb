@@ -47,5 +47,6 @@ def main() -> None:
     with open("metadata.yml", "w", encoding="utf-8") as file:
         dump(metadata, file)
 
+
 if __name__ == "__main__":
     main()
