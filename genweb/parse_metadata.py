@@ -5,48 +5,37 @@
 from xml.etree.ElementTree import parse, ParseError
 from os import walk, unlink
 from os.path import join, splitext
+from yaml import dump
 
-
-KNOWN_TAGS = {
-    "path",
-    "file",
-    "title",
-    "comment",
-    "people",
-    "mod_date",
-    "width",
-    "height",
-    "caption",
-    "folder",
-    "href",
-}
 
 
 def read_xml(path: str) -> dict:
     doc = parse(path)
     root = doc.getroot()
     nodes = {n.tag for n in root}
-    assert not nodes - KNOWN_TAGS, nodes - KNOWN_TAGS
-    assert root.tag in {"inline", "picture", "comment", "href"}, root.tag
-    return {
-        k: root.findall(k)[0].text
-        for k in ["path", "file", "title", "comment", "people"]
-    }
+    result = {k: root.findall(k)[0].text for k in nodes}
+    result["type"] = root.tag
+    assert all(len(root.findall(k)) == 1 for k in nodes), path
+    
+    result["width"]=int(result["width"]) if result.get("width",None) else None
+    result["height"]=int(result["height"]) if result.get("height",None) else None
+    result["people"]=result["people"].split(";") if result.get("people",None) else None
+    return {k:v for k,v in result.items() if v}
 
 
 def main() -> None:
+    metadata = {}
+    
     for root, _, files in walk("/home/pagerk/metadata/xml"):
         for file in [f for f in files if splitext(f)[1].lower() == ".xml"]:
             try:
-                _ = read_xml(join(root, file))
+                metadata[splitext(file)[0]] = read_xml(join(root, file))
 
             except (ParseError, IndexError, AssertionError) as error:
-                with open(join(root, file), "r", encoding="utf-8") as contents:
-                    pass  # print(contents.read())
-
                 print(join(root, file))
                 print(error)
-                print("=" * 80)
+    with open("metadata.yml","w",encoding="utf-8") as file:
+        dump(metadata,file)
 
 
 if __name__ == "__main__":
