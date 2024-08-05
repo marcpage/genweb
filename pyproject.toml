@@ -1,0 +1,58 @@
+[project]
+name = "genweb"
+description = "Generate family picture website"
+readme = "README.md"
+license = {file = "LICENSE"}
+dynamic = ["version"]
+requires-python = ">= 3.9"
+dependencies = [
+  "PyYAML==6.0.1",
+  "Mako==1.3.5",
+]
+keywords = ["geneology", "familyhistory", "photos"]
+classifiers=[
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: The Unlicense (Unlicense)",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Utilities",
+]
+authors = [
+  {name = "Marc Page", email = "marcallenpage@gmail.com"},
+  {name = "Robert Page", email = "pagerk@gmail.com"},
+]
+
+[tool.setuptools.package-data]
+"*" = ["*.mako"]
+
+[tool.setuptools.packages.find]
+include = ["genweb*"]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.3.0",
+    "pylint>=3.1.0",
+]
+test = [
+    "pytest>=8.1.1",
+    "coverage>=7.4.4",
+]
+doc = []
+
+[project.urls]
+Homepage = "https://github.com/marcpage/genweb"
+Documentation = "https://github.com/marcpage/genweb"
+Repository = "https://github.com/marcpage/genweb.git"
+Issues = "https://github.com/marcpage/genweb/issues"
+Changelog = "https://github.com/marcpage/genweb/releases"
+
+[tool.setuptools.dynamic]
+version = {attr = "genweb.__version__"}
+
+[build-system]
+requires = ["setuptools >= 69.2"]
+build-backend = "setuptools.build_meta"
+
