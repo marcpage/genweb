@@ -10,6 +10,27 @@ from datetime import date
 from genweb.people import People
 
 
+def test_middle_initial() -> None:
+    gedcom_list = [
+        SimpleNamespace(
+            id="1",
+            given="John Smith",
+            surname="Doe",
+            gender="M",
+            birthdate=date(1973, 6, 30),
+            parents=set(),
+            spouses=set(),
+            children=set(),
+        ),
+    ]
+    
+    gedcom = {p.id: p for p in gedcom_list}
+    assert len(gedcom) == len(gedcom_list)
+    people = People(gedcom)
+    assert len(people) == 1, people
+    assert "DoeJohnS1973-" in people, people
+    assert people["DoeJohnS1973-"].given == "John Smith", people["DoeJohnS1973-"].given
+    
 def test_basic() -> None:
     gedcom_list = [
         SimpleNamespace(
@@ -57,15 +78,16 @@ def test_basic() -> None:
     assert len(gedcom) == len(gedcom_list)
     people = People(gedcom)
     assert len(people) == 4, people
-    assert "1-" in people, people
-    assert "2-" in people, people
-    assert "3-2" in people, people
-    assert "4-2" in people, people
-    assert people["1-"].given == "John", people["1-"]
-    assert people["2-"].given == "Sally", people["2-"]
-    assert people["3-2"].given == "James", people["3-2"]
-    assert people["4-2"].given == "Jane", people["4-2"]
+    assert "DoeJohn1973-" in people, people
+    assert "SmithSally1971-" in people, people
+    assert "DoeJane2007SmithSally1971" in people, people
+    assert "DoeJames2004SmithSally1971" in people, people
+    assert people["DoeJohn1973-"].given == "John", people["DoeJohn1973-"]
+    assert people["SmithSally1971-"].given == "Sally", people["SmithSally1971-"]
+    assert people["DoeJames2004SmithSally1971"].given == "James", people["DoeJames2004SmithSally1971"]
+    assert people["DoeJane2007SmithSally1971"].given == "Jane", people["DoeJane2007SmithSally1971"]
 
 
 if __name__ == "__main__":
     test_basic()
+    test_middle_initial()
