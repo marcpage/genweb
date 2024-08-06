@@ -18,8 +18,8 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
         individual (IndividualElement): individual information
 
     Returns:
-        SimpleNamespace: Objects that has given, surname, birthdate, id, father, mother, and
-                            husband and wife sets
+        SimpleNamespace: Objects that has given, surname, birthdate, id, and
+                            spouses, children and parents sets
     """
     return SimpleNamespace(
         given=individual.get_name()[0],
@@ -77,16 +77,15 @@ def parse_family(family: FamilyElement) -> dict:
     )
 
 
-def load_gedcom(path: str) -> dict[str, dict]:
+def load_gedcom(path: str) -> dict[str, SimpleNamespace]:
     """Returns a mapping of individual id to a dscription of that individual
 
     Args:
         path (str): The path to the GEDCOM file to parse
 
     Returns:
-        dict[str, dict]: Map of GEDCOM id for the indidivual to an object that has
-                            given, surname, birthdate, id, father, mother, and
-                            husband and wife sets
+        dict[str, SimpleNamespace]: Objects that has given, surname, birthdate, id, and
+                            spouses, children and parents sets
     """
     gedcom = Parser()
     gedcom.parse_file(path, strict=True)
