@@ -6,14 +6,21 @@
 
 from types import SimpleNamespace
 from datetime import date, datetime
-from re import compile as regex
+from re import compile as regex, IGNORECASE
 
 from gedcom.parser import Parser
 from gedcom.element.individual import IndividualElement
 from gedcom.element.family import FamilyElement
 
-
-BEF_PATTERN = regex(r"^BEF ([0-9]{4})$")
+BEF_PATTERN = regex(
+    r"^(BEF|CALC|ABT|CA|AFT|EST|WFT EST.|SINCE|D|AFTER)\s+(.+?)\s*(CENSU)?$", IGNORECASE
+)
+RANGE_PATTERN = regex(r"^(FROM|BET) (.+) (TO|AND) (.+)$", IGNORECASE)
+CHOICE_PATTERN = regex(r"^(.+) OR (.+)$", IGNORECASE)
+SMALL_YEAR = regex(r"^\d{3}$")
+YEAR_RANGE_PATTERN = regex(r"^(\d{4})\s*[-–]\s*(\d{4})")
+PARENTHESIS_PREFIX_PATTERN = regex(r"^\(.+\)\s*(.+)$")
+PARENTHESIS_SUFFIX_PATTERN = regex(r"^(.+)\s*\(.+\)$")
 
 
 def parse_date(given_date: str | None) -> date:
@@ -28,14 +35,83 @@ def parse_date(given_date: str | None) -> date:
     if given_date is None or given_date == "":
         return None
 
+    # @ 1740S ?
+    given_date = (
+        given_date.strip("@")
+        .strip("?")
+        .strip()
+        .rstrip("S")
+        .rstrip("s")
+        .replace("JULI", "JUL")
+    )
+
+    if given_date in {"DEAD", "INFANT", "UNKNOWN", "NOT SPECIFIED", "CHILD"}:
+        return date(1, 1, 1)
+
+    for character in ["/", "-", "–"]:
+        if character in given_date:  # 12 JAN 1727/8
+            given_date = given_date.split(character)[0]
+
+    is_range = RANGE_PATTERN.match(given_date)
+    is_choice = CHOICE_PATTERN.match(given_date)
     is_bef = BEF_PATTERN.match(given_date)
+    is_small = SMALL_YEAR.match(given_date)
+    is_year_range = YEAR_RANGE_PATTERN.match(given_date)
+    is_parenthesis_prefix = PARENTHESIS_PREFIX_PATTERN.match(given_date)
+    is_parenthesis_suffix = PARENTHESIS_SUFFIX_PATTERN.match(given_date)
 
-    if is_bef:
-        return datetime.strptime(
-            f"{is_bef.group(1)}-1-1", "%Y-%m-%d"
-        ).date()  # BEF 1863
+    if is_small:  # 844
+        return date(int(given_date), 1, 1)
 
-    return datetime.strptime(given_date, "%d %b %Y").date()  # 16 Mar 1864
+    if is_range:  # FROM 5 OCT 1831 TO 8 MAY 1832
+        return parse_date(is_range.group(2))
+
+    if is_choice:  # 3 NOV 1726 OR 3 NOV 1727
+        return parse_date(is_choice.group(1))
+
+    if is_bef:  # BEF 1863, CALC 1931
+        return parse_date(is_bef.group(2))
+
+    if is_year_range:  # 1824–1825
+        return parse_date(is_year_range.group(1))
+
+    if is_parenthesis_prefix:  # (OVER 70) 10 MAY 1807
+        return parse_date(is_parenthesis_prefix.group(1))
+
+    if is_parenthesis_suffix:  # 4 FEB 1784 (AE 49)
+        return parse_date(is_parenthesis_suffix.group(1))
+
+    try:
+        return datetime.strptime(given_date, "%d %b %Y").date()  # 16 Mar 1864
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(given_date, "%b %Y").date()  # NOV 1266
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(given_date, "%d %B %Y").date()  # 16 Mar 1864
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(given_date, "%Y").date()  # 1900
+    except ValueError:
+        pass
+
+    try:  # 29 FEB 1897 - no leap years between 1896 and 1904
+        if given_date.lower().startswith("29 feb"):
+            return parse_date("28" + given_date[2:])
+    except ValueError:
+        pass
+
+    try:
+        mon_day = datetime.strptime(given_date, "%d %b").date()  # 12 FEB
+        return date(1, mon_day.month, mon_day.day)
+    except ValueError as error:
+        raise ValueError(f"Unable to parse date: '{given_date}': {error}") from error
 
 
 def parse_individual(individual: IndividualElement) -> SimpleNamespace:
@@ -61,7 +137,7 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
     )
 
 
-def get_field(family: FamilyElement, field: str) -> [str]:
+def get_field(family: FamilyElement, field: str) -> list[str]:
     """Given a GEDCOM family, extract the fields of the given type
 
     Args:
@@ -74,7 +150,7 @@ def get_field(family: FamilyElement, field: str) -> [str]:
     return [e.get_value() for e in family.get_child_elements() if e.get_tag() == field]
 
 
-def get_spouses(family: FamilyElement) -> [str]:
+def get_spouses(family: FamilyElement) -> list[str]:
     """Get the husband or wife of the family
 
     Args:
