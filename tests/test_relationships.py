@@ -3,11 +3,23 @@
 """ Tests the relationships module """
 
 from os.path import join, dirname
+from datetime import date
 
-from genweb.relationships import load_gedcom
+from genweb.relationships import load_gedcom, parse_date
 
 
 DATA_DIR = join(dirname(__file__), "data")
+
+
+def test_date_parse() -> None:
+    dates = {"BEF 1828": date(1828, 1, 1), "16 Mar 1864": date(1864, 3, 16), None: None}
+
+    for description, value in dates.items():
+        assert parse_date(description) == value, [
+            description,
+            value,
+            parse_date(description),
+        ]
 
 
 def test_empty() -> None:
@@ -46,6 +58,7 @@ def test_general() -> None:
 
 
 if __name__ == "__main__":
+    test_date_parse()
     test_empty()
     test_marriage()
     test_remarriage()

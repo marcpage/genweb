@@ -5,10 +5,37 @@
 
 
 from types import SimpleNamespace
+from datetime import date, datetime
+from re import compile as regex
 
 from gedcom.parser import Parser
 from gedcom.element.individual import IndividualElement
 from gedcom.element.family import FamilyElement
+
+
+BEF_PATTERN = regex(r"^BEF ([0-9]{4})$")
+
+
+def parse_date(given_date: str | None) -> date:
+    """Given a date string, parse it into a date object
+
+    Args:
+        given_date (str): The date string
+
+    Returns:
+        date: The date object that represents the `given_date`
+    """
+    if given_date is None or given_date == "":
+        return None
+
+    is_bef = BEF_PATTERN.match(given_date)
+
+    if is_bef:
+        return datetime.strptime(
+            f"{is_bef.group(1)}-1-1", "%Y-%m-%d"
+        ).date()  # BEF 1863
+
+    return datetime.strptime(given_date, "%d %b %Y").date()  # 16 Mar 1864
 
 
 def parse_individual(individual: IndividualElement) -> SimpleNamespace:
@@ -24,8 +51,8 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
     return SimpleNamespace(
         given=individual.get_name()[0],
         surname=individual.get_name()[1],
-        birthdate=individual.get_birth_data()[0],
-        deathdate=individual.get_death_data()[0],
+        birthdate=parse_date(individual.get_birth_data()[0]),
+        deathdate=parse_date(individual.get_death_data()[0]),
         gender=individual.get_gender(),
         id=individual.get_pointer(),
         spouses=set(),
