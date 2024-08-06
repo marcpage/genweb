@@ -23,7 +23,9 @@ PARENTHESIS_PREFIX_PATTERN = regex(r"^\(.+\)\s*(.+)$")
 PARENTHESIS_SUFFIX_PATTERN = regex(r"^(.+)\s*\(.+\)$")
 
 
-def parse_date(given_date: str | None) -> date:
+def parse_date(  # pylint: disable=too-many-branches,too-many-return-statements
+    given_date: str | None,
+) -> date:
     """Given a date string, parse it into a date object
 
     Args:
