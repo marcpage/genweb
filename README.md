@@ -1,12 +1,24 @@
-![status sheild](https://img.shields.io/static/v1?label=status&message=starting...&color=inactive&style=plastic)
-![GitHub](https://img.shields.io/github/license/marcpage/genweb?style=plastic)
+![status sheild](https://img.shields.io/static/v1?label=status&message=starting...&color=blue&style=plastic)
+[![status sheild](https://img.shields.io/static/v1?label=released&message=none&color=active&style=plastic)](https://pypi.org/project/devopsdriver/0.1.45/)
+[![GitHub](https://img.shields.io/github/license/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb?tab=Unlicense-1-ov-file#readme)
+[![GitHub contributors](https://img.shields.io/github/contributors/marcpage/genweb?style=flat)](https://github.com/marcpage/genweb/graphs/contributors)
+[![PR's Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](http://makeapullrequest.com)
+
 [![commit sheild](https://img.shields.io/github/last-commit/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/commits)
 [![activity sheild](https://img.shields.io/github/commit-activity/m/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/commits)
-![GitHub top language](https://img.shields.io/github/languages/top/marcpage/genweb?style=plastic)
+[![GitHub top language](https://img.shields.io/github/languages/top/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb)
 [![size sheild](https://img.shields.io/github/languages/code-size/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb)
+
+[![example workflow](https://github.com/marcpage/genweb/actions/workflows/CI.yml/badge.svg)](https://github.com/marcpage/genweb/actions/workflows/CI.yml)
+[![status sheild](https://img.shields.io/static/v1?label=test+coverage&message=26%&color=active&style=plastic)](https://github.com/marcpage/genweb/blob/main/Makefile#L4)
 [![issues sheild](https://img.shields.io/github/issues-raw/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/marcpage/genweb?style=flat)](https://github.com/marcpage/genweb/pulls)
+
 [![follow sheild](https://img.shields.io/github/followers/marcpage?label=Follow&style=social)](https://github.com/marcpage?tab=followers)
 [![watch sheild](https://img.shields.io/github/watchers/marcpage/genweb?label=Watch&style=social)](https://github.com/marcpage/genweb/watchers)
+
+[![Python](https://img.shields.io/static/v1?label=&message=Pure%20Python&color=ffde57&style=plastic&logo=python)](https://python.org/)
+
 
 # genweb
 Generate a family history website
