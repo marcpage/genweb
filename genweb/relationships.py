@@ -26,10 +26,8 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
         surname=individual.get_name()[1],
         birthdate=individual.get_birth_data()[0],
         id=individual.get_pointer(),
-        husband=set(),
-        wife=set(),
-        father=None,
-        mother=None,
+        spouses=set(),
+        parents=set(),
     )
 
 
@@ -46,19 +44,19 @@ def get_field(family: FamilyElement, field: str) -> [str]:
     return [e.get_value() for e in family.get_child_elements() if e.get_tag() == field]
 
 
-def get_spouse(family: FamilyElement, wife: bool) -> str:
+def get_spouses(family: FamilyElement) -> [str]:
     """Get the husband or wife of the family
 
     Args:
         family (FamilyElement): The family to evaluate
-        wife (bool): Get the wife or the husband
 
     Returns:
         str: The identifier for the requested spouse, or None if not found
     """
-    spouse = get_field(family, "WIFE" if wife else "HUSB")
-    assert not spouse or len(spouse) == 1, family
-    return spouse[0] if spouse else None
+    spouses = set(get_field(family, "HUSB"))
+    spouses.update(set(get_field(family, "WIFE")))
+    assert len(spouses) in {0, 1, 2}, family
+    return spouses
 
 
 def parse_family(family: FamilyElement) -> dict:
@@ -71,8 +69,7 @@ def parse_family(family: FamilyElement) -> dict:
         dict: An object with wife, husband, and a list of children ids
     """
     return SimpleNamespace(
-        husband=get_spouse(family, wife=False),
-        wife=get_spouse(family, wife=True),
+        spouses=get_spouses(family),
         children=get_field(family, "CHIL"),
     )
 
@@ -103,27 +100,10 @@ def load_gedcom(path: str) -> dict[str, dict]:
     ]
 
     for family in families:
-        if family.wife and family.husband:
-            individuals[family.wife].husband.add(family.husband)
-            individuals[family.husband].wife.add(family.wife)
+        for spouse in family.spouses:
+            individuals[spouse].spouses |= family.spouses - {spouse}
 
         for child in family.children:
-            assert child in individuals, family
-            assert (
-                not individuals[child].mother
-                or not family.wife
-                or individuals[child].mother == family.wife
-            ), [family, child, individuals[child]]
-            assert (
-                not individuals[child].father
-                or not family.husband
-                or individuals[child].father == family.husband
-            ), [family, child, individuals[child]]
-            individuals[child].mother = (
-                family.wife if family.wife else individuals[child].mother
-            )
-            individuals[child].father = (
-                family.husband if family.husband else individuals[child].father
-            )
+            individuals[child].parents |= family.spouses
 
     return individuals
