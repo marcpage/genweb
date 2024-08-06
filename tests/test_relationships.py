@@ -19,6 +19,7 @@ def test_marriage() -> None:
     gedcom = load_gedcom(join(DATA_DIR, "SSMARR.GED"))
     assert len(gedcom) == 2, gedcom
     assert all(len(i.spouses) == 1 for i in gedcom.values()), gedcom
+    assert all(i.gender == "M" for i in gedcom.values())
 
 
 def test_remarriage() -> None:
@@ -27,6 +28,8 @@ def test_remarriage() -> None:
     assert any(i.spouses for i in gedcom.values()), gedcom
     assert sum(len(i.spouses) == 1 for i in gedcom.values()) == 2, gedcom
     assert sum(len(i.spouses) == 2 for i in gedcom.values()) == 1, gedcom
+    assert sum(i.gender == "M" for i in gedcom.values()) == 2, gedcom
+    assert sum(i.gender == "F" for i in gedcom.values()) == 1, gedcom
 
 
 def test_general() -> None:
@@ -34,6 +37,8 @@ def test_general() -> None:
     assert len(gedcom) == 3, gedcom
     assert sum(len(i.parents) == 2 for i in gedcom.values()) == 1, gedcom
     assert sum(len(i.spouses) for i in gedcom.values()) == 2, gedcom
+    assert sum(i.gender == "M" for i in gedcom.values()) == 2, gedcom
+    assert sum(i.gender == "F" for i in gedcom.values()) == 1, gedcom
 
 
 if __name__ == "__main__":

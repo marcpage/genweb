@@ -25,6 +25,8 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
         given=individual.get_name()[0],
         surname=individual.get_name()[1],
         birthdate=individual.get_birth_data()[0],
+        deathdate=individual.get_death_data()[0],
+        gender=individual.get_gender(),
         id=individual.get_pointer(),
         spouses=set(),
         parents=set(),
