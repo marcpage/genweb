@@ -13,6 +13,25 @@ class People:
         self.by_id = self._remap(people)
 
     @staticmethod
+    def _format_person(person: SimpleNamespace) -> str:
+        """creates the person identifier
+
+        Args:
+            person (SimpleNamespace): the person to format
+
+        Returns:
+            str: the partial canonical identifier
+        """
+        if person is None:
+            return "-"
+
+        given_names = person.given.split(" ")
+        first = given_names[0]
+        middle = given_names[1][0] if len(given_names) > 1 else ""
+        year = person.birthdate.strftime("%Y")
+        return f"{person.surname}{first}{middle}{year}"
+
+    @staticmethod
     def _identifier(person: SimpleNamespace, mother: SimpleNamespace | None) -> str:
         """Generates a canonical identifier given a person and their mother
 
@@ -23,7 +42,8 @@ class People:
         Returns:
             str: The canonical identifier for the person
         """
-        return f"{person.id}-{'' if mother is None else mother.id}"
+
+        return People._format_person(person) + People._format_person(mother)
 
     @staticmethod
     def _find_mother(
