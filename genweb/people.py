@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+
 """ Information about the people """
 
 
 from types import SimpleNamespace
+from re import compile as regex
+
+
+WHITESPACE = regex(r"\s+")
 
 
 class People:
@@ -25,10 +30,10 @@ class People:
         if person is None:
             return "-"
 
-        given_names = person.given.split(" ")
+        given_names = WHITESPACE.split(person.given.strip())
         first = given_names[0]
         middle = given_names[1][0] if len(given_names) > 1 else ""
-        year = person.birthdate.strftime("%Y")
+        year = "0000" if person.birthdate is None else person.birthdate.strftime("%Y")
         return f"{person.surname}{first}{middle}{year}"
 
     @staticmethod
@@ -59,7 +64,12 @@ class People:
             SimpleNamespace | None: Either the single female parent or None if none found
         """
         mothers = [people[i] for i in person.parents if people[i].gender == "F"]
-        assert len(mothers) in {0, 1}
+        if len(mothers)>1: 
+            print(f"WARNING: found multiple mothers for {person}")
+            print("\t" + "\n\t".join(str(m) for m in mothers))
+            
+            mothers = [m for m in mothers if m.surname != person.surname]
+            print(f"using: {mothers[0]}")
         return mothers[0] if mothers else None
 
     @staticmethod

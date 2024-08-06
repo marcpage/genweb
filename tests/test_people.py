@@ -54,6 +54,27 @@ def test_middle_initial() -> None:
     assert people["DoeJohnS1973-"].given == "John Smith", people["DoeJohnS1973-"].given
 
 
+def test_no_birthdate() -> None:
+    gedcom_list = [
+        SimpleNamespace(
+            id="1",
+            given="John Smith",
+            surname="Doe",
+            gender="M",
+            birthdate=None,
+            parents=set(),
+            spouses=set(),
+            children=set(),
+        ),
+    ]
+
+    gedcom = {p.id: p for p in gedcom_list}
+    assert len(gedcom) == len(gedcom_list)
+    people = People(gedcom)
+    assert len(people) == 1, people
+    assert "DoeJohnS0000-" in people, people
+    assert people["DoeJohnS0000-"].given == "John Smith", people["DoeJohnS0000-"].given
+
 def test_basic() -> None:
     gedcom_list = [
         SimpleNamespace(
@@ -119,3 +140,4 @@ if __name__ == "__main__":
     test_dict_operators()
     test_basic()
     test_middle_initial()
+    test_no_birthdate()
