@@ -11,6 +11,14 @@ from genweb.relationships import load_gedcom, parse_date
 DATA_DIR = join(dirname(__file__), "data")
 
 
+def test_bad_date_parse() -> None:
+    try:
+        _ = parse_date("garbage date")
+        raise AssertionError("We should have failed")
+    except ValueError:
+        pass
+
+
 def test_date_parse() -> None:
     dates = {
         "CHILD": date(1, 1, 1),
@@ -92,6 +100,7 @@ def test_general() -> None:
 
 
 if __name__ == "__main__":
+    test_bad_date_parse()
     test_date_parse()
     test_empty()
     test_marriage()

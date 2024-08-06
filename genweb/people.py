@@ -98,9 +98,6 @@ class People:
     def __len__(self) -> int:
         return len(self.by_id)
 
-    def __delitem__(self, key: str):
-        del self.by_id[key]
-
     def has_key(self, key: str) -> bool:
         """Is the given identifier available
 
