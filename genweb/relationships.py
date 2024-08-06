@@ -30,6 +30,7 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
         id=individual.get_pointer(),
         spouses=set(),
         parents=set(),
+        children=set(),
     )
 
 
@@ -72,7 +73,7 @@ def parse_family(family: FamilyElement) -> dict:
     """
     return SimpleNamespace(
         spouses=get_spouses(family),
-        children=get_field(family, "CHIL"),
+        children=set(get_field(family, "CHIL")),
     )
 
 
@@ -104,6 +105,7 @@ def load_gedcom(path: str) -> dict[str, dict]:
     for family in families:
         for spouse in family.spouses:
             individuals[spouse].spouses |= family.spouses - {spouse}
+            individuals[spouse].children |= family.children
 
         for child in family.children:
             individuals[child].parents |= family.spouses
