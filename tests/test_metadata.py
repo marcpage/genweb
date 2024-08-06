@@ -2,42 +2,28 @@
 
 """ Test parsing the yaml """
 
+
+from os.path import dirname, join
+
+
 from genweb.metadata import load
-from genweb import metadata
-
-EXAMPLE1 = """
-2019090600PageMichaelA2004IngramJamieL1971:
-    type: inline
-    file: 2019090600BrackenMadisonK2004PageDeborahA1976.src
-    title: Maddie and Kaden - 6 September 2019
-    people: [BrackenMadisonK2004PageDeborahA1976,BrackenKadenR2002PageDeborahA1976] 
-    mod_date: 2020-05-17
-
-2007080001HislopArthurQ1924EuansLauraM1904:
-    type: picture
-	path: HislopArthurQ1924EuansLauraM1904</path>
-	file: 2007080001HislopArthurQ1924EuansLauraM1904.jpg</file>
-	caption: Neil Clark, Dorothy, Art, Ann, Bob at the headstone of Arthur W. Hislop and Laura Mae Euans in Cissna Park Village, Pigeon Grove Township, Iroquois County, Illinois, United States - "Quaker Cemetery"</caption>
-	people:
-        - CecilHaroldE1934LeonardAmyI1910
-        - HislopRobertL1940EuansLauraM1904
-        - HislopDorothyC1935EuansLauraM1904
-        - HislopAnnaM1934EuansLauraM1904
-        - HislopArthurQ1924EuansLauraM1904
-"""
 
 
-class FileLike:
-    def __init__(self, path: str, mode: str, encoding: str):
-        self.path = path
-        self.mode = mode
-        self.encoding = encoding
+DATA_DIR = join(dirname(__file__), "data")
 
 
 def test_load() -> None:
-    metadata.OPEN = FileLike
-    load(EXAMPLE1)
+    metadata = load(join(DATA_DIR, "example.yml"))
+    assert len(metadata) == 3, ",".join(metadata.keys())
+    assert "0000000000SmithCaleb1765JonesMary1724" in metadata
+    assert len(metadata["0000000000SmithCaleb1765JonesMary1724"]["people"]) == 11
+    assert (
+        "BrownElisabeth1772-"
+        in metadata["0000000000SmithCaleb1765JonesMary1724"]["people"]
+    )
+    assert "1700000000WilliamsJohn1665DavisRebecca1639" in metadata
+    assert metadata["1700000000WilliamsJohn1665DavisRebecca1639"]["width"] == 600
 
 
 if __name__ == "__main__":
-    test_load()()
+    test_load()
