@@ -8,9 +8,11 @@
         % if is_linkable:
         <div class="person">
            <a href="../${person}/index.html"> 
-                <object data ="../${person}/${person}.jpg" type = "image/jpeg">
-                    <img src = "../silhouette.jpg" />
+                <object data ="../${person}/${person}.jpg" type = "image/jpeg" height=64>
+                    <img src = "../silhouette.jpg" height=64/>
                 </object>
+                <br/>
+                ${people[person].given.split(" ")[0]}
             </a>
         </div>
         % endif
