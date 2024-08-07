@@ -133,9 +133,6 @@ class People:
         """
         return self.by_id.items()
 
-    def __cmp__(self, other: dict) -> int:
-        return self.__cmp__(other)
-
     def __contains__(self, key: str) -> bool:
         return key in self.by_id
 

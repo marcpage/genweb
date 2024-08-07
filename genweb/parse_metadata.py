@@ -12,6 +12,10 @@ from yaml import dump
 from devopsdriver.settings import Settings
 
 
+PRINT = print
+RETURN_CODE = return_code
+
+
 def read_xml(path: str) -> dict:
     """reads and sanitizes an xml file
 
@@ -26,8 +30,7 @@ def read_xml(path: str) -> dict:
     nodes = {n.tag for n in root}
     result = {k: root.findall(k)[0].text for k in nodes}
     result["type"] = root.tag
-    assert all(len(root.findall(k)) == 1 for k in nodes), path
-
+    assert all(len(root.findall(k)) == 1 for k in nodes), f"Duplicate tags in {path}"
     result["width"] = int(result["width"]) if result.get("width", None) else None
     result["height"] = int(result["height"]) if result.get("height", None) else None
     result["people"] = (
@@ -36,21 +39,30 @@ def read_xml(path: str) -> dict:
     return {k: v for k, v in result.items() if v}
 
 
-def main() -> None:
-    """searches for xml files and merges into yml file"""
-    metadata = {}
-    settings = Settings(__file__)
+def validate_settings(settings: Settings):
+    """Validates that enough settings have been set.
+        If not all Settings have been set, then prints error message and exits with non-zero code.
 
+    Args:
+        settings (Settings): The settings to check
+    """
     if "xmldir" not in settings:
-        print("ERROR: Please make sure you add xmldir, srcdir, and finalyaml to:")
-        print(
+        PRINT("ERROR: Please make sure you add xmldir, srcdir, and finalyaml to:")
+        PRINT(
             "\t"
             + Settings.PREF_DIR.get(
                 system(), Settings.PREF_DIR[Settings.DEFAULT_PREF_DIR]
             )
             + "/parse_metadata.yml"
         )
-        return_code(1)
+        RETURN_CODE(1)
+
+
+def main() -> None:
+    """searches for xml files and merges into yml file"""
+    metadata = {}
+    settings = Settings(__file__)
+    validate_settings(settings)
 
     for root, _, files in walk(settings["xmldir"]):
         for file in [f for f in files if splitext(f)[1].lower() == ".xml"]:
