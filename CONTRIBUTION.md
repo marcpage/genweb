@@ -13,11 +13,14 @@ When you get a pull request review request:
 
 - Switch to the `main` branch (lower left corner of VS Code)
 - Click on the arrowed loop next to `main` in the lower left corner
-- Click on `main` and select the branch you're working on (or create a new branch)
+- Getting back to work on an existing branch
+- Starting new on a new branch
+    - Name a branch `users/pagerk/description of change`
+
+- Click on `main` (lower left corner) and select the branch you're working on (or create a new branch)
 - Press Ctl-Shift-P and type in `Git merge` and select `main`
 - Click on the arrowed loop next to your branch name
 - Run `make coverage` in `Termainl` tab in lower pane
-- When you name a branch `users/pagerk/description of change`
 
 
 ## Getting ready to submit
@@ -29,12 +32,12 @@ When you get a pull request review request:
 - Enter a description at the top of the Git list
 - Process `Commit & Push`
 - Open up [GitHub](https://github.com/marcpage/genweb/pulls)
-- Ckick on Green `Compare & pull request` button in yellow stripe at top of page
+- Click on Green `Compare & pull request` button in yellow stripe at top of page
 - Update the pull request title
-- add any notes to the description (optional)
+- Add any notes to the description (optional)
 - Add reviewers (click `request` next to Marc or click on `Reviewers` on far right)
 - Assign PR to yourself
-- Add any labels that are approrpiate
+- **Add any `Labels` that are approrpiate**
 - Click Green `Create pull request` button
 
 
