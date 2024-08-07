@@ -8,7 +8,9 @@
         % if is_linkable:
         <div class="person">
            <a href="../${person}/index.html"> 
-                <img src="../${person}/${person}.jpg"/>
+                <object data ="../${person}/${person}.jpg" type = "image/jpeg">
+                    <img src = "../silhouette.jpg" />
+                </object>
             </a>
         </div>
         % endif
