@@ -27,6 +27,13 @@
                 margin: 10px;
                 text-align: center;
             }
+
+            .controls{
+                position:fixed;
+                top:0;
+                right:0;
+            }
+            
             h1 {
                 text-align: center;
             }
@@ -38,6 +45,9 @@
              - ${'?' if person.birthdate is None else person.birthdate.strftime("%Y")}
              - ${'?' if person.deathdate is None else person.deathdate.strftime("%Y")}
         </h1>
+        <div class="controls">
+            <a href="../index.html">&#x1f3e0;</a>
+        </div>
 
         <div class="nav_area">
             <%include file="nav_area.html.mako" args="people_ids = person.parents,people=people,area_class='parent_area'"/>
