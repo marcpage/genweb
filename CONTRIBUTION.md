@@ -7,13 +7,14 @@
 - Starting new on a new branch
     - Click on `main` (lower left corner) and select `Create bew branch...` top-center
     - Name a branch `users/pagerk/description of change`
+    - Run `make coverage` in `Terminal` tab in lower pane
 - Getting back to work on an existing branch
     - Click on `main` (lower left corner) and select your branch (top-center)
     - Click on the arrowed loop next to your branch name
     - Press Ctl-Shift-P and type in `Git merge` and select `main`
-- Run `make coverage` in `Terminal` tab in lower pane
+    - Run `make coverage` in `Terminal` tab in lower pane
 
-## Create a new Pull Request
+## Review a Pull Request
 
 When you get a pull request review request:
 
@@ -36,7 +37,7 @@ When you get a pull request review request:
 - Add any notes to the description (optional)
 - Add reviewers (click `request` next to Marc or click on `Reviewers` on far right)
 - Assign PR to yourself
-- **Add any `Labels` that are approrpiate**
+- **Add any `Labels` that are appropriate**
 - Click Green `Create pull request` button
 
 
