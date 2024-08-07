@@ -1,5 +1,13 @@
-<html>
-    <body>
+<%page 
+    args="person"
+/><!DOCTYPE html>
+<html lang="en" translate="no" class="notranslate">
+	<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta charset="utf-8"/>
+		<meta name="google" content="notraslate"/>
+    </head>
+	<body class="notranslate">
         <h1>
             <a name="Top"></a>${person.surname}, ${person.given}
              - ${'?' if person.birthdate is None else person.birthdate.strftime("%Y")}

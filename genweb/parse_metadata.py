@@ -28,7 +28,10 @@ def read_xml(path: str) -> dict:
     doc = parse(path)
     root = doc.getroot()
     nodes = {n.tag for n in root}
-    result = {k: root.findall(k)[0].text for k in nodes}
+    result = {
+        k: root.findall(k)[0].text.strip() if root.findall(k)[0].text else None
+        for k in nodes
+    }
     result["type"] = root.tag
     assert all(len(root.findall(k)) == 1 for k in nodes), f"Duplicate tags in {path}"
     result["width"] = int(result["width"]) if result.get("width", None) else None

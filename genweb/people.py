@@ -64,10 +64,10 @@ class People:
             SimpleNamespace | None: Either the single female parent or None if none found
         """
         mothers = [people[i] for i in person.parents if people[i].gender == "F"]
-        if len(mothers)>1: 
+        if len(mothers) > 1:
             print(f"WARNING: found multiple mothers for {person}")
             print("\t" + "\n\t".join(str(m) for m in mothers))
-            
+
             mothers = [m for m in mothers if m.surname != person.surname]
             print(f"using: {mothers[0]}")
         return mothers[0] if mothers else None

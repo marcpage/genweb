@@ -131,6 +131,7 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
         spouses=set(),
         parents=set(),
         children=set(),
+        metadata=[],
     )
 
 
