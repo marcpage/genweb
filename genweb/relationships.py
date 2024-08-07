@@ -18,7 +18,6 @@ BEF_PATTERN = regex(
 RANGE_PATTERN = regex(r"^(FROM|BET) (.+) (TO|AND) (.+)$", IGNORECASE)
 CHOICE_PATTERN = regex(r"^(.+) OR (.+)$", IGNORECASE)
 SMALL_YEAR = regex(r"^\d{3}$")
-YEAR_RANGE_PATTERN = regex(r"^(\d{4})\s*[-–]\s*(\d{4})")
 PARENTHESIS_PREFIX_PATTERN = regex(r"^\(.+\)\s*(.+)$")
 PARENTHESIS_SUFFIX_PATTERN = regex(r"^(.+)\s*\(.+\)$")
 
@@ -58,7 +57,6 @@ def parse_date(  # pylint: disable=too-many-branches,too-many-return-statements
     is_choice = CHOICE_PATTERN.match(given_date)
     is_bef = BEF_PATTERN.match(given_date)
     is_small = SMALL_YEAR.match(given_date)
-    is_year_range = YEAR_RANGE_PATTERN.match(given_date)
     is_parenthesis_prefix = PARENTHESIS_PREFIX_PATTERN.match(given_date)
     is_parenthesis_suffix = PARENTHESIS_SUFFIX_PATTERN.match(given_date)
 
@@ -73,9 +71,6 @@ def parse_date(  # pylint: disable=too-many-branches,too-many-return-statements
 
     if is_bef:  # BEF 1863, CALC 1931
         return parse_date(is_bef.group(2))
-
-    if is_year_range:  # 1824–1825
-        return parse_date(is_year_range.group(1))
 
     if is_parenthesis_prefix:  # (OVER 70) 10 MAY 1807
         return parse_date(is_parenthesis_prefix.group(1))
