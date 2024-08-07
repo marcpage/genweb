@@ -1,5 +1,5 @@
 <%page 
-    args="person"
+    args="person,people"
 /><!DOCTYPE html>
 <html lang="en" translate="no" class="notranslate">
 	<head>
@@ -15,32 +15,10 @@
         </h1>
 
         <div class="nav_area">
-            <div class="parent_area">
-                % for parent in person.parents:
-                    <div class="person">
-                       <a href="../${parent}/index.html"> <img src="../${parent}/${parent}.jpg"/></a>
-                    </div>
+            <%include file="nav_area.html.mako" args="people_ids = person.parents,people=people,area_class='parent_area'"/>
+            <%include file="nav_area.html.mako" args="people_ids = person.spouses,people=people,area_class='spouse_area'"/>
+            <%include file="nav_area.html.mako" args="people_ids = person.children,people=people,area_class='child_area'"/>
 
-                % endfor
-            </div>
-            <div class="spouse_area">
-
-                % for spouse in person.spouses:
-                    <div class="person">
-                       <a href="../${spouse}/index.html"> <img src="../${spouse}/${spouse}.jpg"/></a>
-                    </div>
-                % endfor
-
-            </div>
-            <div class="child_area">
-
-                % for child in person.children:
-                    <div class="person">
-                       <a href="../${child}/index.html"> <img src="../${child}/${child}.jpg"/></a>
-                    </div>
-                % endfor
-                
-            </div>
         </div>
         <div class="image_area">
         </div>

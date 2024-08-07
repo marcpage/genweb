@@ -45,7 +45,7 @@ def main() -> None:
         person_dir = join(site_dir, person.id)
         makedirs(person_dir, exist_ok=True)
         index_path = join(person_dir, "index.html")
-        contents = render(template_path, person=person)
+        contents = render(template_path, person=person, people=people)
         with open(index_path, "w", encoding="utf-8") as index_file:
             index_file.write(contents)
 
