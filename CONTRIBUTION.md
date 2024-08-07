@@ -1,14 +1,5 @@
 # Contributing
 
-## Pull Requests
-
-When you get a pull request review request:
-
-- Open up [GitHub](https://github.com/marcpage/genweb/pulls)
-- Click on the pull request in the list
-- Click the green `Review changes` button in the upper right corner
-- As you review each file, click on the `Viewed` checkbox on the top-right of the file listing
-
 ## Getting ready to develop
 
 - Switch to the `main` branch (lower left corner of VS Code)
@@ -20,8 +11,16 @@ When you get a pull request review request:
     - Click on `main` (lower left corner) and select your branch (top-center)
     - Click on the arrowed loop next to your branch name
     - Press Ctl-Shift-P and type in `Git merge` and select `main`
-- Run `make coverage` in `Termainl` tab in lower pane
+- Run `make coverage` in `Terminal` tab in lower pane
 
+## Create a new Pull Request
+
+When you get a pull request review request:
+
+- Open up [GitHub](https://github.com/marcpage/genweb/pulls)
+- Click on the pull request in the list
+- Click the green `Review changes` button in the upper right corner
+- As you review each file, click on the `Viewed` checkbox on the top-right of the file listing
 
 ## Getting ready to submit
 
@@ -58,3 +57,9 @@ python3 -m genweb.genweb
 ```bash
 python3 -m genweb.parse_metadata
 ```
+
+## Helpfule files to edit
+
+On `Linux` these file can be found here:
+
+`~/devopsdriver
