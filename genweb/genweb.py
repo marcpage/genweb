@@ -48,6 +48,11 @@ def main() -> None:
         contents = render(template_path, person=person, people=people)
         with open(index_path, "w", encoding="utf-8") as index_file:
             index_file.write(contents)
+    root_index_path = join(site_dir, "index.html")
+    root_template_path = join(TEMPLATE_DIR, "top_level.html.mako")
+    root_contents = render(root_template_path, people=people)
+    with open(root_index_path, "w", encoding="utf-8") as index_file:
+        index_file.write(root_contents)
 
 
 if __name__ == "__main__":
