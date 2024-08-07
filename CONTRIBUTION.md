@@ -13,13 +13,13 @@ When you get a pull request review request:
 
 - Switch to the `main` branch (lower left corner of VS Code)
 - Click on the arrowed loop next to `main` in the lower left corner
-- Getting back to work on an existing branch
 - Starting new on a new branch
+    - Click on `main` (lower left corner) and select `Create bew branch...` top-center
     - Name a branch `users/pagerk/description of change`
-
-- Click on `main` (lower left corner) and select the branch you're working on (or create a new branch)
-- Press Ctl-Shift-P and type in `Git merge` and select `main`
-- Click on the arrowed loop next to your branch name
+- Getting back to work on an existing branch
+    - Click on `main` (lower left corner) and select your branch (top-center)
+    - Click on the arrowed loop next to your branch name
+    - Press Ctl-Shift-P and type in `Git merge` and select `main`
 - Run `make coverage` in `Termainl` tab in lower pane
 
 
