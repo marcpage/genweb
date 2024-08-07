@@ -18,9 +18,17 @@ def test_bad_date_parse() -> None:
     except ValueError:
         pass
 
+    try:
+        _ = parse_date("29 febuarky")
+        raise AssertionError("We should have failed")
+    except ValueError:
+        pass
+
 
 def test_date_parse() -> None:
     dates = {
+        "12 FEB": date(1, 2, 12),
+        "1824–1825": date(1824, 1, 1),
         "CHILD": date(1, 1, 1),
         "23 JULI 1875": date(1875, 7, 23),
         "AFTER 1880 CENSU": date(1880, 1, 1),
@@ -34,8 +42,6 @@ def test_date_parse() -> None:
         "INFANT": date(1, 1, 1),
         "@ 1740S ?": date(1740, 1, 1),
         "25 FEB 1747–8": date(1747, 2, 25),
-        "12 FEB": date(1, 2, 12),
-        "1824–1825": date(1824, 1, 1),
         "1626 OR 1627": date(1626, 1, 1),
         "5 JANUARY 1297": date(1297, 1, 5),
         "844": date(844, 1, 1),
