@@ -30,6 +30,13 @@ def test_dict_operators() -> None:
     assert "DoeJohnS1973-" in repr(people), repr(people)
     assert people.has_key("DoeJohnS1973-"), people
     assert "DoeJohnS1973-" in people.keys(), people
+    assert list(people.values())[0].given == "John Smith", people.values()
+    assert list(people.items())[0][0] == list(people.items())[0][1].id, people.items()
+    # people2 = People(gedcom)
+    # assert people == people2, [people, people2]
+    assert [i for i in people][0] == "DoeJohnS1973-"
+    assert people.get("false", None) is None
+    assert people.get("DoeJohnS1973-", None).id == "DoeJohnS1973-"
 
 
 def test_middle_initial() -> None:
