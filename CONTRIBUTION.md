@@ -12,7 +12,27 @@ When you get a pull request review request:
 ## Getting ready to develop
 
 - Switch to the `main` branch (lower left corner of VS Code)
-- Run `make coverage` to get the latest dependencies
-- Click on `main` in the lower left corner of VS Code
-- Select `Create branch`
-- Name your branch `users/pagerk/description of change`
+- Click on the arrowed loop next to `main` in the lower left corner
+- Click on `main` and select the branch you're working on (or create a new branch)
+- Press Ctl-Shift-P and type in `Git merge` and select `main`
+- Click on the arrowed loop next to your branch name
+- Run `make coverage` in `Termainl` tab in lower pane
+- When you name a branch `users/pagerk/description of change`
+
+
+## Getting ready to submit
+
+- In termainl type `make format lint`
+- Fix linting errors
+- Go to the Git icon on the far left and review the diff of all files
+- Any files that should be reverted can use the "undo" arrow when you hover over the file
+- Enter a description at the top of the Git list
+- Process `Commit & Push`
+- Open up [GitHub](https://github.com/marcpage/genweb/pulls)
+- Ckick on Green `Compare & pull request` button in yellow stripe at top of page
+- Update the pull request title
+- add any notes to the description (optional)
+- Add reviewers (click `request` next to Marc or click on `Reviewers` on far right)
+- Assign PR to yourself
+- Add any labels that are approrpiate
+- Click Green `Create pull request` button
