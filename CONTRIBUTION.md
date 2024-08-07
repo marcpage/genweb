@@ -36,3 +36,22 @@ When you get a pull request review request:
 - Assign PR to yourself
 - Add any labels that are approrpiate
 - Click Green `Create pull request` button
+
+
+## How to run
+
+Ideally you would press the play button in the upper right corner.
+
+If that doesn't work, try using the following in the terminal:
+
+### Run genweb.0y
+
+```bash
+python3 -m genweb.genweb
+```
+
+### Run parse_metadata.py
+
+```bash
+python3 -m genweb.parse_metadata
+```
