@@ -30,14 +30,14 @@ When you get a pull request review request:
 - Go to the Git icon on the far left and review the diff of all files
 - Any files that should be reverted can use the "undo" arrow when you hover over the file
 - Enter a description at the top of the Git list
-- Process `Commit & Push`
+- Press blue `Commit & Push` button
 - Open up [GitHub](https://github.com/marcpage/genweb/pulls)
 - Click on Green `Compare & pull request` button in yellow stripe at top of page
 - Update the pull request title
 - Add any notes to the description (optional)
 - Add reviewers (click `request` next to Marc or click on `Reviewers` on far right)
 - Assign PR to yourself
-- **Add any `Labels` that are appropriate**
+- ⭐ **Add any `Labels` that are appropriate** ⭐
 - Click Green `Create pull request` button
 
 
