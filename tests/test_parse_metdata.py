@@ -5,7 +5,7 @@
 
 from os.path import join, dirname
 
-from genweb.parse_metadata import read_xml, validate_settings
+from genweb.parse_metadata import read_xml, validate_settings, load_metadata
 from genweb import parse_metadata
 
 
@@ -58,5 +58,17 @@ def test_validate_settings() -> None:
     mock.reset()
 
 
+def test_load_metadata() -> None:
+    mock = Mock()
+
+    parse_metadata.PRINT = mock.mock_print
+    metadata = load_metadata(DATA_DIR)
+    assert "test" in metadata
+    assert metadata["test"]["type"] == "inline", metadata
+    assert metadata["test"]["path"] == "JonesCaleb1765SmithMary1724", metadata
+
+
 if __name__ == "__main__":
     test_basic()
+    test_load_metadata()
+    test_validate_settings()
