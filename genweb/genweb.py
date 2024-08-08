@@ -4,7 +4,7 @@
 """ This is the main website interface """
 
 
-from os import makedirs
+from os import makedirs, link
 from os.path import join, dirname
 from devopsdriver.settings import Settings
 
@@ -55,6 +55,15 @@ def generate_people_pages(
         render_to_file(
             index_path, template_path, person=person, people=people, metadata=metadata
         )
+
+
+def copy_static_files(files: dict[str, str], destination: str) -> None:
+    source_dir = join(dirname(__file__))
+
+    for source_path, dest_path in files.items():
+        destination_path = join(destination, dest_path)
+        makedirs(dirname(destination_path), exist_ok=True)
+        link(join(source_dir, source_path), destination_path)
 
 
 def main() -> None:
