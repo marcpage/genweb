@@ -8,6 +8,7 @@ from types import SimpleNamespace
 from datetime import date
 
 from genweb.people import People
+import genweb.people
 
 
 def test_dict_operators() -> None:
@@ -82,6 +83,7 @@ def test_no_birthdate() -> None:
     assert "DoeJohnS0000-" in people, people
     assert people["DoeJohnS0000-"].given == "John Smith", people["DoeJohnS0000-"].given
 
+
 def test_basic() -> None:
     gedcom_list = [
         SimpleNamespace(
@@ -143,8 +145,24 @@ def test_basic() -> None:
     ]
 
 
+def test_find_mother() -> None:
+    genweb.people.PRINT = lambda _: None
+    people = {
+        "1": SimpleNamespace(parents=["2", "3", "4", "5"], gender="F", surname="Smith"),
+        "2": SimpleNamespace(parents=[], gender="M", surname="Smith"),
+        "3": SimpleNamespace(parents=[], gender="F", surname="Smith"),
+        "4": SimpleNamespace(parents=[], gender="F", surname="Jones"),
+        "5": SimpleNamespace(parents=[], gender="F", surname="Brown"),
+    }
+    result = People._find_mother(  # pylint: disable=protected-access
+        people["1"], people
+    )
+    assert result.surname in {"Jones", "Brown"}, result
+
+
 if __name__ == "__main__":
     test_dict_operators()
     test_basic()
     test_middle_initial()
     test_no_birthdate()
+    test_find_mother()
