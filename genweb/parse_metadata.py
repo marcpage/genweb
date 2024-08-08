@@ -61,24 +61,30 @@ def validate_settings(settings: Settings):
         RETURN_CODE(1)
 
 
-def main() -> None:
-    """searches for xml files and merges into yml file"""
-    metadata = {}
-    settings = Settings(__file__)
-    validate_settings(settings)
+def load_metadata(search_dir: str) -> dict[str:dict]:
+    """Searchs a directory for XML files to load
 
-    for root, _, files in walk(settings["xmldir"]):
+    Returns:
+        dict[str:dict]: The metadata
+    """
+    metadata = {}
+
+    for root, _, files in walk(search_dir):
         for file in [f for f in files if splitext(f)[1].lower() == ".xml"]:
             try:
                 metadata[splitext(file)[0]] = read_xml(join(root, file))
 
             except (ParseError, IndexError, AssertionError) as error:
-                print(join(root, file))
-                print(error)
+                PRINT(f"{join(root, file)}: {error}")
 
-    for entry in metadata.values():
-        if entry["type"] == "inline":
-            pass
+    return metadata
+
+
+def main() -> None:
+    """searches for xml files and merges into yml file"""
+    settings = Settings(__file__)
+    validate_settings(settings)
+    metadata = load_metadata(settings["xmldir"])
 
     with open(settings["finalyaml"], "w", encoding="utf-8") as file:
         dump(metadata, file)

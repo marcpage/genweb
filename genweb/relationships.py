@@ -12,6 +12,7 @@ from gedcom.parser import Parser
 from gedcom.element.individual import IndividualElement
 from gedcom.element.family import FamilyElement
 
+
 BEF_PATTERN = regex(
     r"^(BEF|CALC|ABT|CA|AFT|EST|WFT EST.|SINCE|D|AFTER)\s+(.+?)\s*(CENSU)?$", IGNORECASE
 )
@@ -20,11 +21,53 @@ CHOICE_PATTERN = regex(r"^(.+) OR (.+)$", IGNORECASE)
 SMALL_YEAR = regex(r"^\d{3}$")
 PARENTHESIS_PREFIX_PATTERN = regex(r"^\(.+\)\s*(.+)$")
 PARENTHESIS_SUFFIX_PATTERN = regex(r"^(.+)\s*\(.+\)$")
+DATE_PARSING_FORMATS = [
+    "%d %b %Y",  # 16 Mar 1864
+    "%b %Y",  # NOV 1266
+    "%d %B %Y",  # 16 Mar 1864
+    "%Y",  # 1900
+]
 
 
-def parse_date(  # pylint: disable=too-many-branches,too-many-return-statements
-    given_date: str | None,
-) -> date:
+def parse_date_regex(given_date: str) -> date | None:
+    """Checks regular expressions to extract date to parse
+
+    Args:
+        given_date (str): The date to parse
+
+    Returns:
+        date | None: The parsed date or None if no regex matched
+    """
+    is_range = RANGE_PATTERN.match(given_date)
+    is_choice = CHOICE_PATTERN.match(given_date)
+    is_bef = BEF_PATTERN.match(given_date)
+    is_small = SMALL_YEAR.match(given_date)
+    is_parenthesis_prefix = PARENTHESIS_PREFIX_PATTERN.match(given_date)
+    is_parenthesis_suffix = PARENTHESIS_SUFFIX_PATTERN.match(given_date)
+    result = None
+
+    if is_small:  # 844
+        result = date(int(given_date), 1, 1)
+
+    elif is_range:  # FROM 5 OCT 1831 TO 8 MAY 1832
+        result = parse_date(is_range.group(2))
+
+    elif is_choice:  # 3 NOV 1726 OR 3 NOV 1727
+        result = parse_date(is_choice.group(1))
+
+    elif is_bef:  # BEF 1863, CALC 1931
+        result = parse_date(is_bef.group(2))
+
+    elif is_parenthesis_prefix:  # (OVER 70) 10 MAY 1807
+        result = parse_date(is_parenthesis_prefix.group(1))
+
+    elif is_parenthesis_suffix:  # 4 FEB 1784 (AE 49)
+        result = parse_date(is_parenthesis_suffix.group(1))
+
+    return result
+
+
+def parse_date(given_date: str | None) -> date:
     """Given a date string, parse it into a date object
 
     Args:
@@ -53,50 +96,16 @@ def parse_date(  # pylint: disable=too-many-branches,too-many-return-statements
         if character in given_date:  # 12 JAN 1727/8
             given_date = given_date.split(character)[0]
 
-    is_range = RANGE_PATTERN.match(given_date)
-    is_choice = CHOICE_PATTERN.match(given_date)
-    is_bef = BEF_PATTERN.match(given_date)
-    is_small = SMALL_YEAR.match(given_date)
-    is_parenthesis_prefix = PARENTHESIS_PREFIX_PATTERN.match(given_date)
-    is_parenthesis_suffix = PARENTHESIS_SUFFIX_PATTERN.match(given_date)
+    parsed = parse_date_regex(given_date)
 
-    if is_small:  # 844
-        return date(int(given_date), 1, 1)
+    if parsed:
+        return parsed
 
-    if is_range:  # FROM 5 OCT 1831 TO 8 MAY 1832
-        return parse_date(is_range.group(2))
-
-    if is_choice:  # 3 NOV 1726 OR 3 NOV 1727
-        return parse_date(is_choice.group(1))
-
-    if is_bef:  # BEF 1863, CALC 1931
-        return parse_date(is_bef.group(2))
-
-    if is_parenthesis_prefix:  # (OVER 70) 10 MAY 1807
-        return parse_date(is_parenthesis_prefix.group(1))
-
-    if is_parenthesis_suffix:  # 4 FEB 1784 (AE 49)
-        return parse_date(is_parenthesis_suffix.group(1))
-
-    try:
-        return datetime.strptime(given_date, "%d %b %Y").date()  # 16 Mar 1864
-    except ValueError:
-        pass
-
-    try:
-        return datetime.strptime(given_date, "%b %Y").date()  # NOV 1266
-    except ValueError:
-        pass
-
-    try:
-        return datetime.strptime(given_date, "%d %B %Y").date()  # 16 Mar 1864
-    except ValueError:
-        pass
-
-    try:
-        return datetime.strptime(given_date, "%Y").date()  # 1900
-    except ValueError:
-        pass
+    for date_format in DATE_PARSING_FORMATS:
+        try:
+            return datetime.strptime(given_date, date_format).date()
+        except ValueError:
+            pass
 
     try:  # 29 FEB 1897 - no leap years between 1896 and 1904
         if given_date.lower().startswith("29 feb"):

@@ -43,3 +43,18 @@ def render(template_path: str, *search_dirs, **args) -> str:
     )
     template = lookup.get_template(basename(template_path))
     return template.render(**args)
+
+
+def render_to_file(output_path: str, template_path: str, *search_dirs, **args) -> None:
+    """Render a template to a file on disk
+
+    Args:
+        output_path (str): The file to render into
+        template_path (str): The template to render
+        search_dirs (*str): Any directories to search for includes
+        args (**dict[str:any]): Arguments to pass to the template
+    """
+    contents = render(template_path, *search_dirs, **args)
+
+    with open(output_path, "w", encoding="utf-8") as output_file:
+        output_file.write(contents)

@@ -9,6 +9,7 @@ from re import compile as regex
 
 
 WHITESPACE = regex(r"\s+")
+PRINT = print
 
 
 class People:
@@ -79,7 +80,6 @@ class People:
         Returns:
             str: The canonical identifier for the person
         """
-
         return People._format_person(person) + People._format_person(mother)
 
     @staticmethod
@@ -96,12 +96,13 @@ class People:
             SimpleNamespace | None: Either the single female parent or None if none found
         """
         mothers = [people[i] for i in person.parents if people[i].gender == "F"]
-        if len(mothers) > 1:
-            print(f"WARNING: found multiple mothers for {person}")
-            print("\t" + "\n\t".join(str(m) for m in mothers))
 
+        if len(mothers) > 1:
+            PRINT(f"WARNING: found multiple mothers for {person}")
+            PRINT("\t" + "\n\t".join(str(m) for m in mothers))
             mothers = [m for m in mothers if m.surname != person.surname]
-            print(f"using: {mothers[0]}")
+            PRINT(f"using: {mothers[0]}")
+
         return mothers[0] if mothers else None
 
     @staticmethod
