@@ -58,6 +58,12 @@ def generate_people_pages(
 
 
 def copy_static_files(files: dict[str, str], destination: str) -> None:
+    """Copy any static files from the repo to the website
+
+    Args:
+        files (dict[str, str]): List of relative paths (dest->source) to copy
+        destination (str): website directory root
+    """
     source_dir = dirname(__file__)
 
     for dest_path, source_path in files.items():
