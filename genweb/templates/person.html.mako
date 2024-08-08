@@ -27,6 +27,14 @@
                 margin: 10px;
                 text-align: center;
             }
+            .label{
+                height:100%;
+                display:table-cell;
+                vertical-align: middle;
+                transform-origin:left;
+                transform: rotate(-90deg) translate(-100%,10px);
+                float: left;                
+            }
 
             .controls{
                 position:fixed;
@@ -50,9 +58,9 @@
         </div>
 
         <div class="nav_area">
-            <%include file="nav_area.html.mako" args="people_ids = person.parents,people=people,area_class='parent_area'"/>
-            <%include file="nav_area.html.mako" args="people_ids = person.spouses,people=people,area_class='spouse_area'"/>
-            <%include file="nav_area.html.mako" args="people_ids = person.children,people=people,area_class='child_area'"/>
+            <%include file="nav_area.html.mako" args="people_ids = person.parents,people=people,area_class='parent_area',label='PARENTS'"/>
+            <%include file="nav_area.html.mako" args="people_ids = person.spouses,people=people,area_class='spouse_area',label='SPOUSES'"/>
+            <%include file="nav_area.html.mako" args="people_ids = person.children,people=people,area_class='child_area',label='CHILDREN'"/>
 
         </div>
         <div class="image_area">
