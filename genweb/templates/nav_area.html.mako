@@ -11,7 +11,7 @@ display_people = [p for p in people_ids if p in people and people[p].metadata]
         <div class="person">
            <a href="../${person}/index.html"> 
                 <object data ="../${person}/${person}.jpg" type = "image/jpeg" height=64>
-                    <img src = "../silhouette.jpg" height=64/>
+                    <img src = "../static/silhouette.jpg" height=64/>
                 </object>
                 <br/>
                 ${people[person].given.split(" ")[0]}
