@@ -43,7 +43,7 @@ def test_generate_people_pages() -> None:
     }
 
     with TemporaryDirectory() as working_dir:
-        generate_people_pages(working_dir, people)
+        generate_people_pages(working_dir, people, {})
 
 
 def test_link_people_to_metadata() -> None:
