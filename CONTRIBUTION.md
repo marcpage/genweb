@@ -4,13 +4,13 @@
 
 - Switch to the `main` branch (lower left corner of VS Code)
 - Click on the arrowed loop next to `main` in the lower left corner
+- Click on the arrowed loop next to your branch name
 - Starting new on a new branch
     - Click on `main` (lower left corner) and select `Create bew branch...` top-center
     - Name a branch `users/pagerk/description of change`
     - Run `make coverage` in `Terminal` tab in lower pane
 - Getting back to work on an existing branch
     - Click on `main` (lower left corner) and select your branch (top-center)
-    - Click on the arrowed loop next to your branch name
     - Press Ctl-Shift-P and type in `Git merge` and select `main`
     - Run `make coverage` in `Terminal` tab in lower pane
 
