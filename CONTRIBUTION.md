@@ -23,7 +23,7 @@ When you get a pull request review request:
 - Click the green `Add your review` button in the upper right corner
 - As you review each file, click on the `Viewed` checkbox on the top-right of the file listing
 - Click on the green `Review changes` button in the upper right corner
-- Click Approve and then green button in lower right corner
+- Click Approve and then green `Submit review` button in lower right corner
 - Click `Rebase and merge` (or some other `...merge`) green button
 - Click `Confirm...` green button
 - Click `Delete branch` gray button on the right
