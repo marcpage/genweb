@@ -31,6 +31,9 @@ def link_people_to_metadata(people: People, metadata: dict[str, dict]) -> None:
                 continue
             people[personid].metadata.append(metadata_id)
 
+    with open("people ids.txt", "w", encoding="utf-8") as file:
+        file.write("\n".join(people.keys()))
+
 
 def main() -> None:
     """Generate the website"""

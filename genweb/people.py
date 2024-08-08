@@ -18,6 +18,38 @@ class People:
         self.by_id = self._remap(people)
 
     @staticmethod
+    def _all_substrings(text: str) -> list[str]:
+        """Finds all possible substrings in a given string
+
+        Args:
+            text (str): The text to evaluate
+
+        Returns:
+            list[str]: A list of all possible substrings in text
+        """
+        return sorted(
+            [text[i:j] for i in range(len(text)) for j in range(i + 1, len(text) + 1)],
+            key=len,
+        )
+
+    @staticmethod
+    def _match_score(first: str, second: str) -> float:
+        """Finds the percent match between two substrings
+
+        Args:
+            first (str): The first text to compare
+            second (str): The second text to compare
+
+        Returns:
+            float: 1.0 is an exact match and 0.0 is no match, and everything in between
+        """
+        first_subs = People._all_substrings(first)
+        second_subs = People._all_substrings(second)
+        first_matches = sum(s in second_subs for s in first_subs)
+        second_matches = sum(s in first_subs for s in second_subs)
+        return (first_matches / len(first_subs)) * (second_matches / len(second_subs))
+
+    @staticmethod
     def _format_person(person: SimpleNamespace) -> str:
         """creates the person identifier
 

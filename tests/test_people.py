@@ -82,6 +82,7 @@ def test_no_birthdate() -> None:
     assert "DoeJohnS0000-" in people, people
     assert people["DoeJohnS0000-"].given == "John Smith", people["DoeJohnS0000-"].given
 
+
 def test_basic() -> None:
     gedcom_list = [
         SimpleNamespace(
@@ -143,8 +144,42 @@ def test_basic() -> None:
     ]
 
 
+def test_match_score() -> None:
+    identifiers = [
+        ("hello", "hello", 1.0),
+        ("hello", "hello world", 0.25),
+        ("abc", "xyz", 0.0),
+        ("SmithZoeR2022AdamsenAndreaM0000", "SmithZoeR2022AdamsenAndreaM1987", 0.58),
+        (
+            "SmithAddison1819BarrPatty1786",
+            "SmithAddiSmithAddison1819BarrPatty1786son1820",
+            0.48,
+        ),
+    ]
+    for first, second, expected in identifiers:
+        score = People._match_score(first, second)
+        assert abs(score - expected) < 0.01, [first, second, score, expected]
+
+    with open("people ids.txt", "r", encoding="utf-8") as file:
+        ids = [l.strip() for l in file.readlines()]
+
+    scores = []
+
+    for first_index, first in enumerate(ids):
+        print(f"{first_index} / {len(ids)}")
+        for second in ids[first_index + 1 :]:
+            scores.append((People._match_score(first, second), first, second))
+
+    scores.sort(reverse=False)
+    scores = scores[-500:]
+    scores.sort(reverse=True)
+    with open("all scores.txt", "w", encoding="utf-8") as file:
+        file.write("\n".join(f"{s:0.2f}\t{o}\t{t}" for s, o, t in scores))
+
+
 if __name__ == "__main__":
     test_dict_operators()
     test_basic()
     test_middle_initial()
     test_no_birthdate()
+    test_match_score()
