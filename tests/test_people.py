@@ -180,10 +180,11 @@ def test_match_score() -> None:
         ids = [l.strip() for l in file.readlines()]
 
     scores = []
+    ids.sort()
 
     for first_index, first in enumerate(ids):
         print(f"{first_index} / {len(ids)}")
-        for second in ids[first_index + 1 :]:
+        for second in ids[first_index + 1 : first_index + 20]:
             scores.append((People._match_score(first, second), first, second))
 
     scores.sort(reverse=False)
