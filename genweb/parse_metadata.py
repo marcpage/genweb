@@ -61,7 +61,7 @@ def validate_settings(settings: Settings):
         RETURN_CODE(1)
 
 
-def load_metadata(search_dir: str) -> dict[str:dict]:
+def load_metadata(search_dir: str) -> dict[str, dict]:
     """Searchs a directory for XML files to load
 
     Returns:
@@ -80,11 +80,31 @@ def load_metadata(search_dir: str) -> dict[str:dict]:
     return metadata
 
 
+def load_inlines(metadata: dict[str, dict], src_search_dir: str):
+    """Loads .src file contents directly into the metadata
+
+    Args:
+        metadata (dict[str, dict]): The metadata to update
+        src_search_dir (str): The directory to search for .src files
+    """
+    existing_files = {f: join(r, f) for r, _, fs in walk(src_search_dir) for f in fs}
+
+    for entry in metadata.values():
+        if entry["type"] == "inline":
+            if entry["file"] not in existing_files:
+                print(f"WARNING: inline src missing: {entry['file']}")
+                continue
+
+            with open(existing_files[entry["file"]], "r", encoding="utf-8") as source:
+                entry["contents"] = source.read()
+
+
 def main() -> None:
     """searches for xml files and merges into yml file"""
     settings = Settings(__file__)
     validate_settings(settings)
     metadata = load_metadata(settings["xmldir"])
+    load_inlines(metadata, settings["srcdir"])
 
     with open(settings["finalyaml"], "w", encoding="utf-8") as file:
         dump(metadata, file)

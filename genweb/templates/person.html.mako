@@ -12,11 +12,14 @@ displayed_metadata=[metadata[i] for i in person.metadata]
         <link rel="stylesheet" href="../static/styles.css">
     </head>
 	<body class="notranslate">
-        <h1>
-            <a name="Top"></a>${person.surname}, ${person.given}
-             - ${'?' if person.birthdate is None else person.birthdate.strftime("%Y")}
-             - ${'?' if person.deathdate is None else person.deathdate.strftime("%Y")}
-        </h1>
+        <div class="header">
+            <div class="thumb"><img src="${person.id}.jpg" height=64 class="thumb_image"/></div>
+            <h1>
+                <a name="Top"></a>${person.surname}, ${person.given}
+                - ${'?' if person.birthdate is None else person.birthdate.strftime("%Y")}
+                - ${'?' if person.deathdate is None else person.deathdate.strftime("%Y")}
+            </h1>
+        </div>
         <div class="controls">
             <a href="../index.html">&#x1f3e0;</a>
         </div>
@@ -59,9 +62,14 @@ displayed_metadata=[metadata[i] for i in person.metadata]
                 </table>
                 
                 <div class="ReturnToTop"><a href="#Top"><span style="font-size:xxx-large">&#x1F51D;</span></a></div>
-
-              
-                    </div>
+            </div>
+            % elif element["type"] == "inline":
+            <div class="inline_element">
+                <a name="${element["file"]}"/>
+		        <H2  style="text-align:center;margin-left:auto;margin-right:auto;">${element.get("title", "Untitled")}</H2>
+        <p><a href="mailto:pagerk@gmail.com?subject=${element["file"]}" target="_blank"><span style="font-size:xxx-large">&#x1f4e7;</span></a></p>
+                ${element.get("contents", "<b>content missing</b>")}
+            </div>
             % endif
             % endfor
         </div>
