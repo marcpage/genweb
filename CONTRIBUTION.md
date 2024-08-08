@@ -30,8 +30,8 @@ When you get a pull request review request:
 
 ## Getting ready to submit
 
-- In termainl type `make format lint`
-- Fix linting errors
+- In termainl type `make format lint coverage`
+- Fix linting errors or broken tests
 - Go to the Git icon on the far left and review the diff of all files
 - Any files that should be reverted can use the "undo" arrow when you hover over the file
 - Enter a description at the top of the Git list
