@@ -36,7 +36,9 @@ def link_people_to_metadata(people: People, metadata: dict[str, dict]) -> None:
             people[personid].metadata.append(metadata_id)
 
 
-def generate_people_pages(site_dir: str, people: People) -> None:
+def generate_people_pages(
+    site_dir: str, people: People, metadata: dict[str, dict]
+) -> None:
     """Generates a page for each person with metadata
 
     Args:
@@ -50,7 +52,9 @@ def generate_people_pages(site_dir: str, people: People) -> None:
         person_dir = join(site_dir, person.id)
         makedirs(person_dir, exist_ok=True)
         index_path = join(person_dir, "index.html")
-        render_to_file(index_path, template_path, person=person, people=people)
+        render_to_file(
+            index_path, template_path, person=person, people=people, metadata=metadata
+        )
 
 
 def copy_static_files(files: dict[str, str], destination: str) -> None:
@@ -68,7 +72,7 @@ def main() -> None:
     people = People(load_gedcom(settings["gedcom_path"]))
     metadata = load_yaml(settings["metadata_yaml"])
     link_people_to_metadata(people, metadata)
-    generate_people_pages(settings["site_dir"], people)
+    generate_people_pages(settings["site_dir"], people, metadata)
     root_index_path = join(settings["site_dir"], "index.html")
     root_template_path = join(TEMPLATE_DIR, "top_level.html.mako")
     render_to_file(root_index_path, root_template_path, people=people)
