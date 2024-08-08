@@ -10,7 +10,7 @@
 [![size sheild](https://img.shields.io/github/languages/code-size/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb)
 
 [![example workflow](https://github.com/marcpage/genweb/actions/workflows/CI.yml/badge.svg)](https://github.com/marcpage/genweb/actions/workflows/CI.yml)
-[![status sheild](https://img.shields.io/static/v1?label=test+coverage&message=76%&color=active&style=plastic)](https://github.com/marcpage/genweb/blob/main/Makefile#L4)
+[![status sheild](https://img.shields.io/static/v1?label=test+coverage&message=73%&color=active&style=plastic)](https://github.com/marcpage/genweb/blob/main/Makefile#L4)
 [![issues sheild](https://img.shields.io/github/issues-raw/marcpage/genweb?style=plastic)](https://github.com/marcpage/genweb/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/marcpage/genweb?style=flat)](https://github.com/marcpage/genweb/pulls)
 
