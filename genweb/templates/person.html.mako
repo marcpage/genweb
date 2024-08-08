@@ -9,46 +9,7 @@ displayed_metadata=[metadata[i] for i in person.metadata]
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta charset="utf-8"/>
 		<meta name="google" content="notraslate"/>
-        <style>
-            .parent_area{
-                background-color: azure;
-                text-align: center;
-            }
-            .spouse_area{
-                background-color: FloralWhite;
-                text-align: center;
-            }
-            .child_area{
-                background-color: lavender;
-                text-align: center;
-            }
-            .person{
-                background-color: white;
-                display: inline-block;
-                border: 1px solid white;
-                border-radius: 15px;
-                margin: 10px;
-                text-align: center;
-            }
-            .label{
-                height:100%;
-                display:table-cell;
-                vertical-align: middle;
-                transform-origin:left;
-                transform: rotate(-90deg) translate(-100%,10px);
-                float: left;                
-            }
-
-            .controls{
-                position:fixed;
-                top:0;
-                right:0;
-            }
-            
-            h1 {
-                text-align: center;
-            }
-        </style>
+        <link rel="stylesheet" href="../static/styles.css">
     </head>
 	<body class="notranslate">
         <h1>
