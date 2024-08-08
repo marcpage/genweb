@@ -24,13 +24,35 @@
     vertical-align: middle;
     transform-origin:left;
     transform: rotate(-90deg) translate(-100%,10px);
-    float: left;                
+    float: left;
 }
 
 .controls{
     position:fixed;
-    top:0;
-    right:0;
+    top:15px;
+    right:30px;
+    font-size: xxx-large;
+}
+
+.inline_element {
+    margin:15px;
+    padding:15px;
+    border-radius: 15px;
+    background-color: antiquewhite;
+}
+
+.header {
+    height:96px;
+}
+
+.thumb {
+    position:fixed;
+    top:15px;
+    left:30px;
+}
+
+.thumb_image {
+    border-radius: 50%;
 }
 
 h1 {

@@ -41,7 +41,7 @@ def test_generate_people_pages() -> None:
         "4": SimpleNamespace(parents=[], gender="F", surname="Jones", metadata=[]),
         "5": SimpleNamespace(parents=[], gender="F", surname="Brown", metadata=[]),
     }
-    metadata = {"1": {"type": "inline"}, "2": {"type": "inline"}}
+    metadata = {"1": {"type": "dummy"}, "2": {"type": "dummy"}}
     with TemporaryDirectory() as working_dir:
         generate_people_pages(working_dir, people, metadata)
 
