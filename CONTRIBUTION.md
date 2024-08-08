@@ -20,7 +20,7 @@ When you get a pull request review request:
 
 - Open up [GitHub](https://github.com/marcpage/genweb/pulls)
 - Click on the pull request in the list
-- Click the green `Review changes` button in the upper right corner
+- Click the green `Review changes` or `Add your review` button in the upper right corner
 - As you review each file, click on the `Viewed` checkbox on the top-right of the file listing
 
 ## Getting ready to submit
