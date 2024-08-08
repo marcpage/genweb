@@ -58,9 +58,9 @@ def generate_people_pages(
 
 
 def copy_static_files(files: dict[str, str], destination: str) -> None:
-    source_dir = join(dirname(__file__))
+    source_dir = dirname(__file__)
 
-    for source_path, dest_path in files.items():
+    for dest_path, source_path in files.items():
         destination_path = join(destination, dest_path)
         makedirs(dirname(destination_path), exist_ok=True)
         link(join(source_dir, source_path), destination_path)
@@ -72,6 +72,7 @@ def main() -> None:
     people = People(load_gedcom(settings["gedcom_path"]))
     metadata = load_yaml(settings["metadata_yaml"])
     link_people_to_metadata(people, metadata)
+    copy_static_files(settings["copy files"], settings["site_dir"])
     generate_people_pages(settings["site_dir"], people, metadata)
     root_index_path = join(settings["site_dir"], "index.html")
     root_template_path = join(TEMPLATE_DIR, "top_level.html.mako")

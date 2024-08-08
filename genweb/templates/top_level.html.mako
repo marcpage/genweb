@@ -10,24 +10,9 @@ people_list = sorted(people.values(),key=lambda p:f'{p.surname}, {p.given}')
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta charset="utf-8"/>
 		<meta name="google" content="notraslate"/>
-        <style>
-            
-        </style>
+        <link rel="stylesheet" href="../static/styles.css">
         <script>
-        const closed = "▸";
-        const open = "▾";
-        function show_hide(identifier) {
-            var div = document.getElementById(identifier);
-            var button = document.getElementById(identifier+"-button");
-
-            if (button.innerText == closed) {
-                button.innerText = open;
-                div.style.display = "block";
-            } else {
-                button.innerText = closed;
-                div.style.display = "none";
-            }
-        }
+            <%include file="actions.js"/>
         </script>
     </head>
 	<body class="notranslate">

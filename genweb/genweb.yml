@@ -1,2 +1,3 @@
-copy files:
-  data/silhouette.jpg: static/silhouette.jpg
+copy files:  # destination: source
+  static/silhouette.jpg: data/silhouette.jpg
+  static/styles.css: data/styles.css
