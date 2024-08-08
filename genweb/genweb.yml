@@ -1,3 +1,5 @@
 copy files:  # destination: source
   static/silhouette.jpg: data/silhouette.jpg
   static/styles.css: data/styles.css
+
+unknown_thumbnail: static/silhouette.jpg

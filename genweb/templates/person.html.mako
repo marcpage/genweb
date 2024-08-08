@@ -44,7 +44,7 @@ displayed_metadata=[metadata[i] for i in person.metadata]
                             </tr>
                             <tr>
                                 <td ALIGN="CENTER" VALIGN="TOP">
-                                    <img src="${element["file"]}" target="Resource Window">
+                                    <img src="../${element["path"]}/${element["file"]}" target="Resource Window">
                                 </td>
                             </tr>
                             <tr>
