@@ -92,7 +92,7 @@ def load_inlines(metadata: dict[str, dict], src_search_dir: str):
     for entry in metadata.values():
         if entry["type"] == "inline":
             if entry["file"] not in existing_files:
-                print(f"WARNING: inline src missing: {entry['file']}")
+                PRINT(f"WARNING: inline src missing: {entry['file']}")
                 continue
 
             with open(existing_files[entry["file"]], "r", encoding="utf-8") as source:

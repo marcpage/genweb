@@ -4,8 +4,11 @@
 
 
 from os.path import join, dirname
+from tempfile import TemporaryDirectory
 
 from genweb.parse_metadata import read_xml, validate_settings, load_metadata
+from genweb.parse_metadata import load_inlines
+
 from genweb import parse_metadata
 
 
@@ -60,7 +63,6 @@ def test_validate_settings() -> None:
 
 def test_load_metadata() -> None:
     mock = Mock()
-
     parse_metadata.PRINT = mock.mock_print
     metadata = load_metadata(DATA_DIR)
     assert "test" in metadata
@@ -68,7 +70,30 @@ def test_load_metadata() -> None:
     assert metadata["test"]["path"] == "JonesCaleb1765SmithMary1724", metadata
 
 
+def test_load_inlines() -> None:
+    mock = Mock()
+    parse_metadata.PRINT = mock.mock_print
+
+    with TemporaryDirectory() as working_dir:
+        metadata = {
+            "1": {"file": "inline.src", "type": "inline"},
+            "2": {"file": "missing.src", "type": "inline"},
+        }
+
+        with open(join(working_dir, "inline.src"), "w", encoding="utf-8") as file:
+            file.write("the inline contents")
+
+        load_inlines(metadata, working_dir)
+        assert metadata["1"]["contents"] == "the inline contents", [
+            metadata["1"]["contents"]
+        ]
+        assert "contents" not in metadata["2"], metadata
+        assert "inline src missing" in mock.out, [mock.out]
+        assert "missing.src" in mock.out, [mock.out]
+
+
 if __name__ == "__main__":
     test_basic()
     test_load_metadata()
     test_validate_settings()
+    test_load_inlines()
