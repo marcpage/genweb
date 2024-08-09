@@ -4,7 +4,6 @@
 
 - Switch to the `main` branch (lower left corner of VS Code)
 - Click on the arrowed loop next to `main` in the lower left corner
-- Click on the arrowed loop next to your branch name
 - Starting new on a new branch
     - Click on `main` (lower left corner) and select `Create bew branch...` top-center
     - Name a branch `users/pagerk/description of change`
