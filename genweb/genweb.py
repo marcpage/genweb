@@ -5,7 +5,7 @@
 
 
 from os import makedirs, link, walk, unlink
-from os.path import join, dirname, isfile
+from os.path import join, dirname, isfile, relpath
 from shutil import copyfile
 
 from devopsdriver.settings import Settings
@@ -74,19 +74,18 @@ def copy_static_files(files: dict[str, str], destination: str) -> None:
         copyfile(join(source_dir, source_path), destination_path)
 
 
-def destination_file(dst_dir: str, subdir: str, filename: str) -> str:
+def destination_file(dst_dir: str, filename: str) -> str:
     """Given a root directory, subdirectory, and filename, ensure we can link a file there
 
     Args:
         dst_dir (str): The root directory
-        subdir (str): The subdirectory (person directory)
         filename (str): The filename that will be created
 
     Returns:
         str: The path to the file that can now be linked
     """
-    makedirs(join(dst_dir, subdir), exist_ok=True)
-    dest_file = join(dst_dir, subdir, filename)
+    makedirs(dst_dir, exist_ok=True)
+    dest_file = join(dst_dir, filename)
 
     if isfile(dest_file):
         unlink(dest_file)
@@ -116,7 +115,7 @@ def copy_metadata_pictures(
             PRINT(f'WARNING: {item["file"]} not found in {src_dir}')
             continue
 
-        dest_file = destination_file(dst_dir, item["path"], item["file"])
+        dest_file = destination_file(join(dst_dir, item["path"]), item["file"])
         link(existing_files[item["file"]], dest_file)
 
 
@@ -137,7 +136,7 @@ def copy_person_thumbnails(
         if not person.metadata:
             continue
 
-        dest_file = destination_file(dst_dir, person.id, f"{person.id}.jpg")
+        dest_file = destination_file(join(dst_dir, person.id), f"{person.id}.jpg")
 
         if f"{person.id}.jpg" not in existing_files:
             PRINT(f"WARNING: no thumbnail for {person.id}")
@@ -145,6 +144,37 @@ def copy_person_thumbnails(
             continue
 
         link(existing_files[f"{person.id}.jpg"], dest_file)
+
+
+def copy_metadata_hrefs(
+    metadata: dict[str, dict],
+    src_dir: str,
+    dst_dir: str,
+) -> None:
+    """copy the href dirs
+
+    Args:
+
+        metadata (dict[str, dict]): The metadata description
+        src_dir (str): The source directory
+        dst_dir (str): The destination directory (website)
+    """
+    for item in metadata.values():
+        if item["type"] != "href":
+            continue
+        hrefsource = join(src_dir, item["path"], item["folder"])
+        if not isfile(join(hrefsource, item["file"])):
+            PRINT(f'WARNING: {item["file"]} not found in {hrefsource}')
+            continue
+
+        hrefdest = join(dst_dir, item["path"], item["folder"])
+        for root, _, files in walk(hrefsource):
+            relativeroot = relpath(root, hrefsource)
+            for file in files:
+                sourcefile = join(root, file)
+                dest_file = destination_file(join(hrefdest, relativeroot), file)
+
+                link(sourcefile, dest_file)
 
 
 def copy_metadata_files(
@@ -163,6 +193,7 @@ def copy_metadata_files(
     """
     existing_files = {f: join(r, f) for r, _, fs in walk(sourcedir) for f in fs}
     copy_metadata_pictures(metadata, existing_files, sourcedir, dest_dir)
+    copy_metadata_hrefs(metadata, sourcedir, dest_dir)
     copy_person_thumbnails(people, existing_files, dest_dir, default_thumbnail)
 
 
