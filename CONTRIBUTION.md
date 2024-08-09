@@ -36,6 +36,7 @@ When you get a pull request review request:
 - Enter a description at the top of the Git list
 - Press blue `Commit & Push` button
 - Open up [GitHub](https://github.com/marcpage/genweb/pulls)
+- Click on the `Pull requests` tab (after `Code` and `Issues`)
 - Click on Green `Compare & pull request` button in yellow stripe at top of page
 - Update the pull request title
 - Add any notes to the description (optional)
