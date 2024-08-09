@@ -27,7 +27,7 @@ When you get a pull request review request:
 - Click `Confirm...` green button
 - Click `Delete branch` gray button on the right
 
-## Getting ready to submit
+## Getting ready to submit (Create a pull request)
 
 - In termainl type `make format lint coverage`
 - Fix linting errors or broken tests
