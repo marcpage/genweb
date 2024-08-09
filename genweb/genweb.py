@@ -74,6 +74,79 @@ def copy_static_files(files: dict[str, str], destination: str) -> None:
         copyfile(join(source_dir, source_path), destination_path)
 
 
+def destination_file(dst_dir: str, subdir: str, filename: str) -> str:
+    """Given a root directory, subdirectory, and filename, ensure we can link a file there
+
+    Args:
+        dst_dir (str): The root directory
+        subdir (str): The subdirectory (person directory)
+        filename (str): The filename that will be created
+
+    Returns:
+        str: The path to the file that can now be linked
+    """
+    makedirs(join(dst_dir, subdir), exist_ok=True)
+    dest_file = join(dst_dir, subdir, filename)
+
+    if isfile(dest_file):
+        unlink(dest_file)
+
+    return dest_file
+
+
+def copy_metadata_pictures(
+    metadata: dict[str, dict],
+    existing_files: dict[str, str],
+    src_dir: str,
+    dst_dir: str,
+) -> None:
+    """Copy all the picture metadata from a source directory to its destination
+
+    Args:
+        metadata (dict[str, dict]): The metadata description
+        existing_files (dict[str, str]): Map of filename to absolute path to that file in src_dir
+        src_dir (str): The source directory
+        dst_dir (str): The destination directory (website)
+    """
+    for item in metadata.values():
+        if item["type"] != "picture":
+            continue
+
+        if item["file"] not in existing_files:
+            PRINT(f'WARNING: {item["file"]} not found in {src_dir}')
+            continue
+
+        dest_file = destination_file(dst_dir, item["path"], item["file"])
+        link(existing_files[item["file"]], dest_file)
+
+
+def copy_person_thumbnails(
+    people: People, existing_files: dict[str, str], dst_dir: str, default_thumbnail: str
+) -> None:
+    """Copy each person's thumbnail to the website or use the default
+
+    Args:
+        people (People): The people to evaluate
+        existing_files (dict[str, str]): Map of names of all files in the source to
+                                            their absolute path
+        dst_dir (str): The destination directory (website)
+        default_thumbnail (str): The path to the default thumbnail to use if the person does
+                                    not have one
+    """
+    for person in people.values():
+        if not person.metadata:
+            continue
+
+        dest_file = destination_file(dst_dir, person.id, f"{person.id}.jpg")
+
+        if f"{person.id}.jpg" not in existing_files:
+            PRINT(f"WARNING: no thumbnail for {person.id}")
+            link(join(dst_dir, default_thumbnail), dest_file)
+            continue
+
+        link(existing_files[f"{person.id}.jpg"], dest_file)
+
+
 def copy_metadata_files(
     sourcedir: str,
     dest_dir: str,
@@ -89,32 +162,8 @@ def copy_metadata_files(
         metadata (dict[str, dict]): _description_
     """
     existing_files = {f: join(r, f) for r, _, fs in walk(sourcedir) for f in fs}
-
-    for item in metadata.values():
-        if item["type"] != "picture":
-            continue
-        if item["file"] not in existing_files:
-            print(f'WARNING: {item["file"]} not found in {sourcedir}')
-            continue
-        makedirs(join(dest_dir, item["path"]), exist_ok=True)
-        dest_file = join(dest_dir, item["path"], item["file"])
-
-        if isfile(dest_file):
-            unlink(dest_file)
-        link(existing_files[item["file"]], dest_file)
-
-    for person in people.values():
-        if not person.metadata:
-            continue
-        makedirs(join(dest_dir, person.id), exist_ok=True)
-        dest_file = join(dest_dir, person.id, f"{person.id}.jpg")
-        if isfile(dest_file):
-            unlink(dest_file)
-        if f"{person.id}.jpg" not in existing_files:
-            print(f"WARNING: no thumbnail for {person.id}")
-            link(join(dest_dir, default_thumbnail), dest_file)
-            continue
-        link(existing_files[f"{person.id}.jpg"], dest_file)
+    copy_metadata_pictures(metadata, existing_files, sourcedir, dest_dir)
+    copy_person_thumbnails(people, existing_files, dest_dir, default_thumbnail)
 
 
 def main() -> None:
