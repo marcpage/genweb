@@ -7,6 +7,7 @@ people_list = sorted(people.values(),key=lambda p:f'{p.surname}, {p.given}')
 %><!DOCTYPE html>
 <html lang="en" translate="no" class="notranslate">
 	<head>
+        <title>Family</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta charset="utf-8"/>
 		<meta name="google" content="notraslate"/>
@@ -16,13 +17,14 @@ people_list = sorted(people.values(),key=lambda p:f'{p.surname}, {p.given}')
         </script>
     </head>
 	<body class="notranslate">
+        <center><h1>Family</h1></center>
         % for letter in letters:
         <span id="letter-${letter}-button" onclick="show_hide('letter-${letter}')" style="font-size:xx-large">▸</span>
-        <span style="font-size:xxx-large">${letter}</span>
+        <span style="font-size:xxx-large" onclick="show_hide('letter-${letter}')">${letter}</span>
         <div id="letter-${letter}" style="display:none">
             % for surname in [s for s in surnames if s[0].upper() == letter]:
             <span id="surname-${surname}-button" onclick="show_hide('surname-${surname}')" style="font-size:xx-large">▸</span>
-            <span style="font-size:x-large">${surname}</span>
+            <span style="font-size:x-large" onclick="show_hide('surname-${surname}')">${surname}</span>
             <div id="surname-${surname}" style="display:none">
                 <ul>
                     % for person in [p for p in people_list if p.surname == surname]:
@@ -35,10 +37,8 @@ people_list = sorted(people.values(),key=lambda p:f'{p.surname}, {p.given}')
                     % endfor
                 </ul>
             </div>
-            <br/>
             % endfor
         </div>
-        <br/>
         % endfor
     </body>
 </html>

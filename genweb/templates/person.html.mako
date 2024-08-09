@@ -3,13 +3,19 @@
 />
 <%
 displayed_metadata=[metadata[i] for i in person.metadata]
+displayed_metadata.sort(key=lambda e:e.get("file", ""))
+years = sorted(set(e.get('file', "0000")[:4] for e in displayed_metadata))
 %><!DOCTYPE html>
 <html lang="en" translate="no" class="notranslate">
 	<head>
+        <title>${person.surname}, ${person.given}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta charset="utf-8"/>
 		<meta name="google" content="notraslate"/>
         <link rel="stylesheet" href="../static/styles.css">
+        <script>
+            <%include file="actions.js"/>
+        </script>
     </head>
 	<body class="notranslate">
         <div class="header">
@@ -25,52 +31,29 @@ displayed_metadata=[metadata[i] for i in person.metadata]
         </div>
 
         <div class="nav_area">
-            <%include file="nav_area.html.mako" args="people_ids = person.parents,people=people,area_class='parent_area',label='PARENTS'"/>
-            <%include file="nav_area.html.mako" args="people_ids = person.spouses,people=people,area_class='spouse_area',label='SPOUSES'"/>
-            <%include file="nav_area.html.mako" args="people_ids = person.children,people=people,area_class='child_area',label='CHILDREN'"/>
+            <%
+            from datetime import date
+            children = [i for i in person.children if i in people and people[i].metadata]
+            children.sort(key=lambda i:people[i].birthdate if people[i].birthdate else date.today(), reverse=False)
+            %>
+            <%include file="nav_area.html.mako" args="people_ids=person.parents,people=people,area_class='parent_area',label='PARENTS'"/>
+            <%include file="nav_area.html.mako" args="people_ids=person.spouses,people=people,area_class='spouse_area',label='SPOUSES'"/>
+            <%include file="nav_area.html.mako" args="people_ids=children,people=people,area_class='child_area',label='CHILDREN'"/>
 
         </div>
         <div class="image_area">
-            % for element in displayed_metadata:
-            % if element["type"] == "picture":
-            <div class="picture_element">
-
-                <a name="${element["file"]}"/>
-                <table WIDTH="600" Align="CENTER" NOBORDER COLS="2">
-                    <tr>
-                        <td ALIGN="CENTER" VALIGN="TOP">
-                        <table Align=CENTER BORDER CELLPADDING="4" CELLSPACING="4" COLS="1">
-                            <tr>
-                                <td ALIGN="CENTER" VALIGN="TOP">
-                                    <H2>${element.get("title","")}</H2>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td ALIGN="CENTER" VALIGN="TOP">
-                                    <img src="../${element["path"]}/${element["file"]}" target="Resource Window">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td ALIGN="CENTER" VALIGN="TOP">
-                                    <p>${element.get("caption","")}</p>
-        <p><a href="mailto:pagerk@gmail.com?subject=${element["file"]}" target="_blank"><span style="font-size:xxx-large">&#x1f4e7;</span></a></p>
-                                </td>
-                            </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-                
-                <div class="ReturnToTop"><a href="#Top"><span style="font-size:xxx-large">&#x1F51D;</span></a></div>
-            </div>
-            % elif element["type"] == "inline":
-            <div class="inline_element">
-                <a name="${element["file"]}"/>
-		        <H2  style="text-align:center;margin-left:auto;margin-right:auto;">${element.get("title", "Untitled")}</H2>
-        <p><a href="mailto:pagerk@gmail.com?subject=${element["file"]}" target="_blank"><span style="font-size:xxx-large">&#x1f4e7;</span></a></p>
-                ${element.get("contents", "<b>content missing</b>")}
-            </div>
-            % endif
+            % for year in years:
+                <span id="year-${year}-button" onclick="show_hide('year-${year}')" style="font-size:xx-large">▸</span>
+                <span style="font-size:xxx-large" onclick="show_hide('year-${year}')">${year}</span>
+                <div id="year-${year}" style="display:none">
+                % for element in [e for e in displayed_metadata if e.get("file", "0000").startswith(year)]:
+                % if element["type"] == "picture":
+                    <%include file="picture.html.mako" args="element=element"/>
+                % elif element["type"] == "inline":
+                    <%include file="inline.html.mako" args="element=element"/>
+                % endif
+                % endfor
+                </div>
             % endfor
         </div>
 
