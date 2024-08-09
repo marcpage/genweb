@@ -51,6 +51,9 @@ years = sorted(set(e.get('file', "0000")[:4] for e in displayed_metadata))
                     <%include file="picture.html.mako" args="element=element"/>
                 % elif element["type"] == "inline":
                     <%include file="inline.html.mako" args="element=element"/>
+                % elif element["type"] == "href":
+                    <%include file="href.html.mako" args="element=element"/>
+
                 % endif
                 % endfor
                 </div>
