@@ -27,14 +27,12 @@ def test_dict_operators() -> None:
 
     gedcom = {p.id: p for p in gedcom_list}
     assert len(gedcom) == len(gedcom_list)
-    people = People(gedcom)
+    people = People(gedcom, None)
     assert "DoeJohnS1973-" in repr(people), repr(people)
     assert people.has_key("DoeJohnS1973-"), people
     assert "DoeJohnS1973-" in people.keys(), people
     assert list(people.values())[0].given == "John Smith", people.values()
     assert list(people.items())[0][0] == list(people.items())[0][1].id, people.items()
-    # people2 = People(gedcom)
-    # assert people == people2, [people, people2]
     assert [i for i in people][0] == "DoeJohnS1973-"
     assert people.get("false", None) is None
     assert people.get("DoeJohnS1973-", None).id == "DoeJohnS1973-"
@@ -56,7 +54,7 @@ def test_middle_initial() -> None:
 
     gedcom = {p.id: p for p in gedcom_list}
     assert len(gedcom) == len(gedcom_list)
-    people = People(gedcom)
+    people = People(gedcom, None)
     assert len(people) == 1, people
     assert "DoeJohnS1973-" in people, people
     assert people["DoeJohnS1973-"].given == "John Smith", people["DoeJohnS1973-"].given
@@ -78,7 +76,7 @@ def test_no_birthdate() -> None:
 
     gedcom = {p.id: p for p in gedcom_list}
     assert len(gedcom) == len(gedcom_list)
-    people = People(gedcom)
+    people = People(gedcom, None)
     assert len(people) == 1, people
     assert "DoeJohnS0000-" in people, people
     assert people["DoeJohnS0000-"].given == "John Smith", people["DoeJohnS0000-"].given
@@ -129,7 +127,7 @@ def test_basic() -> None:
     ]
     gedcom = {p.id: p for p in gedcom_list}
     assert len(gedcom) == len(gedcom_list)
-    people = People(gedcom)
+    people = People(gedcom, None)
     assert len(people) == 4, people
     assert "DoeJohn1973-" in people, people
     assert "SmithSally1971-" in people, people

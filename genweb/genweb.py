@@ -200,7 +200,9 @@ def copy_metadata_files(
 def main() -> None:
     """Generate the website"""
     settings = Settings(__file__)
-    people = People(load_gedcom(settings["gedcom_path"]))
+    people = People(
+        load_gedcom(settings["gedcom_path"]), settings.get("alias_path", None)
+    )
     metadata = load_yaml(settings["metadata_yaml"])
     link_people_to_metadata(people, metadata)
     copy_static_files(settings["copy files"], settings["site_dir"])

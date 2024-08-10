@@ -7,6 +7,8 @@
 from types import SimpleNamespace
 from re import compile as regex
 
+from genweb.metadata import load_yaml
+
 
 WHITESPACE = regex(r"\s+")
 PRINT = print
@@ -15,8 +17,43 @@ PRINT = print
 class People:
     """A read-only dictionary like object that maps identifier to people"""
 
-    def __init__(self, people: dict[str, SimpleNamespace]):
-        self.by_id = self._remap(people)
+    def __init__(self, people: dict[str, SimpleNamespace], alias_path: str):
+        self.aliases = load_yaml(alias_path) if alias_path else {}
+        self.by_id = self._remap(people, self.aliases)
+
+    def cannonical_id(self, identifier: str) -> str:
+        """Looks up the canonical identifier
+
+        Args:
+            identifier (str): The (possibly) not canonical identifier
+
+        Returns:
+            str: The canonical identifier or the original identifier if it is cnanonical or unknown
+        """
+        if identifier in self.by_id:
+            return identifier
+
+        return People._fix_id(identifier, self.aliases)
+
+    @staticmethod
+    def _fix_id(identifier: str, aliases: dict[str : list[str]]) -> str:
+        """Given an identifier, sees if it is an alias and returns the canonical
+
+        Args:
+            identifier (str): Possibly not canonical identifier
+            aliases (_type_): Mapping of canonical identifiers ot potential aliases
+
+        Returns:
+            str: The canonical idenitifer or the original identifier if it is not a known alias
+        """
+        if identifier in aliases:
+            return identifier
+
+        possible = [
+            i for i, aliases in aliases.items() for a in aliases if a == identifier
+        ]
+        assert len(possible) in {0, 1}, identifier
+        return possible[0] if possible else identifier
 
     @staticmethod
     def _format_person(person: SimpleNamespace) -> str:
@@ -74,7 +111,9 @@ class People:
         return mothers[0] if mothers else None
 
     @staticmethod
-    def _remap(people: dict[str, SimpleNamespace]) -> dict[str, SimpleNamespace]:
+    def _remap(
+        people: dict[str, SimpleNamespace], aliases: dict[str : list[str]]
+    ) -> dict[str, SimpleNamespace]:
         """Given a map of old id to people, remap them to canonical id to people and fix links
 
         Args:
@@ -87,7 +126,9 @@ class People:
 
         # Calculate mapping of old id's to new id's
         id_mapping = {
-            p.id: People._identifier(p, People._find_mother(p, people))
+            p.id: People._fix_id(
+                People._identifier(p, People._find_mother(p, people)), aliases
+            )
             for p in people.values()
         }
 
@@ -101,7 +142,7 @@ class People:
         return {p.id: p for p in people.values()}
 
     def __getitem__(self, key: str) -> SimpleNamespace:
-        return self.by_id[key]
+        return self.by_id[self.cannonical_id(key)]
 
     def __repr__(self) -> str:
         return repr(self.by_id)
@@ -118,7 +159,7 @@ class People:
         Returns:
             bool: True if found
         """
-        return key in self.by_id
+        return self.cannonical_id(key) in self.by_id
 
     def keys(self) -> list[str]:
         """A list of the identifiers
@@ -145,7 +186,7 @@ class People:
         return self.by_id.items()
 
     def __contains__(self, key: str) -> bool:
-        return key in self.by_id
+        return self.cannonical_id(key) in self.by_id
 
     def __iter__(self):
         return iter(self.by_id)
@@ -163,4 +204,4 @@ class People:
         Returns:
             SimpleNamespace | None: _description_
         """
-        return self.by_id.get(key, default)
+        return self.by_id.get(self.cannonical_id(key), default)
