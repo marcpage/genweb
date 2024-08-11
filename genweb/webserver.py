@@ -12,7 +12,7 @@ from re import compile as regex
 
 from devopsdriver.settings import Settings
 
-from genweb.relationships import load_gedcom
+from genweb.relationships import load_gedcom, person_json
 from genweb.people import People
 from genweb.metadata import load_yaml
 from genweb.genweb import link_people_to_metadata
@@ -195,6 +195,19 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         if api_call.group(1) == "people" and not api_call.group(2):
             people = dumps([i for i in GLOBALS.people]).encode("utf-8")
             self.respond(people, mimetype="text/json")
+            return
+
+        if api_call.group(1) == "people" and api_call.group(3):
+            person = GLOBALS.people.get(api_call.group(3), None)
+
+            if not person:
+                self.respond(
+                    f"Person not found: {api_call.group(3)}".encode("utf-8"), code=404
+                )
+                return
+
+            info = dumps(person_json(person)).encode("utf-8")
+            self.respond(info, mimetype="text/json")
             return
 
         if api_call.group(1) == "metadata" and not api_call.group(2):
