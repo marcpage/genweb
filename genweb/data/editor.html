@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" translate="no" class="notranslate">
+	<head>
+        <title>genweb editor</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta charset="utf-8"/>
+		<meta name="google" content="notraslate"/>
+        <style>
+        </style>
+        <script>
+            var server_state = {people:undefined, metadata:undefined}
+            
+            function reset_select(field, values) {
+                var select = document.getElementById(field);
+
+                for (var i = 0; i < values.length; ++i) {
+                    var option = document.createElement("option");
+                    option.value = values[i];
+                    option.innerHTML = values[i];
+                    select.appendChild(option);
+                }
+            }
+            function server_state_updated(field, field_id) {
+                if (server_state[field]) {
+                    reset_select(field_id, server_state[field]);
+                }
+            }
+            function load_into(url, field, field_id) {
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        server_state[field] = JSON.parse(request.responseText);
+                        server_state_updated(field, field_id);
+                    }
+                }
+                request.open("GET", url, true);
+                request.send();
+            }
+            function load_values() {
+                load_into("/api/v1/people", "people", "people");
+                load_into("/api/v1/metadata", "metadata", "metadata");
+            }
+
+
+        </script>
+    </head>
+	<body class="notranslate" onload="load_values()">
+        <h1>genweb editor</h1>
+        API
+        <ul>
+            <li><a href="/api/v1/metadata">Metadata</a></li>
+            <li><a href ="/api/v1/people">People</a></li>
+        </ul>
+        <select name="people" id="people"></select>
+        <select name="metadata" id="metadata"></select>
+    </body>
+</html>
