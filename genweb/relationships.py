@@ -144,6 +144,21 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
     )
 
 
+def person_json(person: SimpleNamespace) -> dict[str, any]:
+    return {
+        "given": person.given,
+        "surname": person.surname,
+        "birthdate": person.birthdate.strftime("%Y-%m-%d"),
+        "deathdate": person.birthdate.strftime("%Y-%m-%d"),
+        "gender": person.gender,
+        "id": person.id,
+        "spouses": list(person.spouses),
+        "parents": list(person.parents),
+        "children": list(person.children),
+        "metadata": list(person.metadata),
+    }
+
+
 def get_field(family: FamilyElement, field: str) -> list[str]:
     """Given a GEDCOM family, extract the fields of the given type
 

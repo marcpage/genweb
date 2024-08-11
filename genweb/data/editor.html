@@ -6,11 +6,39 @@
         <meta charset="utf-8"/>
 		<meta name="google" content="notraslate"/>
         <style>
+            .table_label {
+                text-align: right;
+                font-weight: bold;
+            }
         </style>
         <script>
             const MAXIMUM_TYPE_AHEAD = 50;
-            var server_state = {people:undefined, metadata:undefined}
+            var server_state = {people:undefined, metadata:undefined};
+            const visible_fields = {
+                title:["inline", "href", "picture"],
+                path:["inline", "href", "picture"],
+                file:["inline", "href", "picture"],
+                people:["inline", "href", "picture"],
+                mod_date:["inline", "picture", "href"],
+                folder:["href"],
+                height:["picture"],
+                width:["picture"],
+                contents:["inline"],
+            };
             
+            function type_change(selector_id) {
+                var selector = document.getElementById(selector_id);
+                
+                for (const field in visible_fields) {
+                    var field_row = document.getElementById(field);
+
+                    if (visible_fields[field].includes(selector.value)) {
+                        field_row.style.display = "table-row";
+                    } else {
+                        field_row.style.display = "none";
+                    }
+                }
+            }
             function reset_select(field, values) {
                 var select = document.getElementById(field);
                 
@@ -83,11 +111,13 @@
                 input.value = options.value;
                 options.style.display = "none";
             }
+            function update_submit_name() {
 
+            }
 
         </script>
     </head>
-	<body class="notranslate" onload="load_values()">
+	<body class="notranslate" onload="load_values();type_change('type')">
         <h1>genweb editor</h1>
         API
         <ul>
@@ -102,9 +132,33 @@
             <select id="choose-person-options" style="display:none" size=5 onchange="select_type_ahead('choose-person')"></select>
         </div>
         <div style="background-color: aliceblue;border-radius: 15px; padding:30px" width="100">
-            <input id="choose-metadata" size=30 placeholder="Search for metadata id" type="text" onkeyup="type_ahead('choose-metadata', 'metadata')" onblur="blur_type_ahead('choose-metadata', 'metadata')"/>
+            <input id="choose-metadata" size=30 placeholder="Copy metadata" type="text" onkeyup="type_ahead('choose-metadata', 'metadata')" onblur="blur_type_ahead('choose-metadata', 'metadata')"/>
             <br/>
             <select id="choose-metadata-options" style="display:none" size=5 onchange="select_type_ahead('choose-metadata')"></select>
+        </div>
+        <div class="editor">
+            <table>
+                <tr>
+                    <th colspan=2>
+                        <select id="type" onchange="type_change('type')">
+                            <option>picture</option>
+                            <option>inline</option>
+                            <option>href</option>
+                        </select>
+                    </th>
+                </tr>
+                <tr id="id"><td class="table_label">Identifier</td><td><input placeholder="SurnameNameI0000SurnameNameI0000" size=30 onchange="update_submit_name()"/></td></tr>
+                <tr id="title"><td class="table_label">Title</td><td><input placeholder="Metadata Title" size="75"/></td></tr>
+                <tr id="path"><td class="table_label">Path</td><td><input placeholder="SurnameNameI0000SurnameNameI0000" ="30"/></td></tr>
+                <tr id="file"><td class="table_label">File</td><td><input placeholder="SurnameNameI0000SurnameNameI0000.ext" size="30"/></td></tr>
+                <tr id="mod_date"><td class="table_label">Mod Date</td><td><input type="date"/></td></tr>
+                <tr id="people"><td class="table_label">People</td><td><textarea readonly style="overflow-y: scroll;" rows="10" cols="30"></textarea></td></tr>
+                <tr id="folder"><td class="table_label">Folder</td><td><input placeholder="SubsiteFolder" size="30"/></td></tr>
+                <tr id="height"><td class="table_label">Height</td><td><input type="number" min="20" max="10000"/></td></tr>
+                <tr id="width"><td class="table_label">Width</td><td><input type="number" min="20" max="10000"/></td></tr>
+                <tr id="contents"><td class="table_label">Contents</td><td><textarea placeholder="Inline HTML content" rows="10" cols="120"></textarea></td></tr>
+                <tr><td></td><td style="text-align: center;"><input value="Add" type="submit"/></td></td></tr>
+            </table>
         </div>
     </body>
 </html>
