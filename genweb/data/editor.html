@@ -8,10 +8,15 @@
         <style>
         </style>
         <script>
+            const MAXIMUM_TYPE_AHEAD = 10;
             var server_state = {people:undefined, metadata:undefined}
             
             function reset_select(field, values) {
                 var select = document.getElementById(field);
+                
+                while (select.options.length > 0) {
+                    select.remove(select.options.length - 1);
+                }
 
                 for (var i = 0; i < values.length; ++i) {
                     var option = document.createElement("option");
@@ -40,6 +45,44 @@
                 load_into("/api/v1/people", "people", "people");
                 load_into("/api/v1/metadata", "metadata", "metadata");
             }
+            function words_match(words, value) {
+                const word_list = words.split(" ").map((x) => x.toLowerCase());;
+                const lower_value = value.toLowerCase();
+                const matches = word_list.filter((word) => lower_value.includes(word));
+                return matches.length == word_list.length;
+            }
+            function type_ahead(input_id, field) {
+                if (server_state[field]) {
+                    var input = document.getElementById(input_id);
+                    var options = document.getElementById(input_id+"-options");
+                    console.log(field);
+                    console.log(server_state[field].length);
+                    console.log(input);
+                    console.log(input.value);
+                    const matches = server_state[field].filter(function (i) {
+                        return words_match(input.value, i);
+                    }).slice(0,MAXIMUM_TYPE_AHEAD);
+                    reset_select(input_id+"-options", matches);
+                    options.style.display = matches ? "" : "none";
+                    options.size = matches.length;
+                }
+            }
+            function blur_type_ahead(input_id, field) {
+                var input = document.getElementById(input_id);
+                var options = document.getElementById(input_id+"-options");
+                setTimeout(() => { 
+                    options.style.display="none";
+                    if (!server_state[field].includes(input.value)) {
+                        input.value = "";
+                    }
+                }, 400);
+            }
+            function select_type_ahead(input_id) {
+                var input = document.getElementById(input_id);
+                var options = document.getElementById(input_id+"-options");
+                input.value = options.value;
+                options.style.display = "none";
+            }
 
 
         </script>
@@ -53,5 +96,9 @@
         </ul>
         <select name="people" id="people"></select>
         <select name="metadata" id="metadata"></select>
+        <br/>
+        <input id="choose" size=30 placeholder="Search for person id" type="text" onkeyup="type_ahead('choose', 'people')" onblur="blur_type_ahead('choose', 'people')"/>
+        <br/>
+        <select id="choose-options" style="display:none" size=5 onchange="select_type_ahead('choose')"></select>
     </body>
 </html>
