@@ -8,7 +8,7 @@
         <style>
         </style>
         <script>
-            const MAXIMUM_TYPE_AHEAD = 10;
+            const MAXIMUM_TYPE_AHEAD = 50;
             var server_state = {people:undefined, metadata:undefined}
             
             function reset_select(field, values) {
@@ -96,9 +96,15 @@
         </ul>
         <select name="people" id="people"></select>
         <select name="metadata" id="metadata"></select>
-        <br/>
-        <input id="choose" size=30 placeholder="Search for person id" type="text" onkeyup="type_ahead('choose', 'people')" onblur="blur_type_ahead('choose', 'people')"/>
-        <br/>
-        <select id="choose-options" style="display:none" size=5 onchange="select_type_ahead('choose')"></select>
+        <div style="background-color: beige;border-radius: 15px; padding:30px" width="100">
+            <input id="choose-person" size=30 placeholder="Search for person id" type="text" onkeyup="type_ahead('choose-person', 'people')" onblur="blur_type_ahead('choose-person', 'people')"/>
+            <br/>
+            <select id="choose-person-options" style="display:none" size=5 onchange="select_type_ahead('choose-person')"></select>
+        </div>
+        <div style="background-color: aliceblue;border-radius: 15px; padding:30px" width="100">
+            <input id="choose-metadata" size=30 placeholder="Search for metadata id" type="text" onkeyup="type_ahead('choose-metadata', 'metadata')" onblur="blur_type_ahead('choose-metadata', 'metadata')"/>
+            <br/>
+            <select id="choose-metadata-options" style="display:none" size=5 onchange="select_type_ahead('choose-metadata')"></select>
+        </div>
     </body>
 </html>
