@@ -1,9 +1,28 @@
 #!/usr/bin/env python3
 
+
 """ Web server for ui interface """
 
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from types import SimpleNamespace
+from os.path import join, dirname
+from json import dumps
+from re import compile as regex
+
+from devopsdriver.settings import Settings
+
+from genweb.relationships import load_gedcom
+from genweb.people import People
+from genweb.metadata import load_yaml
+from genweb.genweb import link_people_to_metadata
+
+
+GLOBALS = SimpleNamespace(people=None, metadata=None, settings=None)
+DATA_DIR = join(dirname(__file__), "data")
+STATIC_FILES = {"/": "editor.html"}
+API_V1 = "/api/v1/"
+V1_CALL = regex(rf"^{API_V1}(people|metadata)(/([^/]+))?$")
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -143,11 +162,82 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     """
 
+    def respond(
+        self, body: bytes, mimetype: str = "text/html", code: int = 200
+    ) -> None:
+        self.send_response(code)
+        self.send_header("Content-Size", len(body))
+        self.send_header("Content-Type", mimetype)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def send_file(self, path: str, mimetype: str = "text/html") -> None:
+        try:
+            with open(path, "rb") as file:
+                self.respond(file.read(), mimetype=mimetype)
+
+        except FileNotFoundError as error:
+            self.respond(
+                f"File not found: {self.path} ({path}): {error}".encode("utf-8"),
+                code=404,
+            )
+
+    def handle_people(self):
+        if self.path == "/api/v1/people":
+            people = dumps([i for i in GLOBALS.people]).encode("utf-8")
+            self.respond(people, mimetype="text/json")
+            return
+
+    def handle_api_v1(self):
+        api_call = V1_CALL.match(self.path)
+        assert api_call, self.path
+
+        if api_call.group(1) == "people" and not api_call.group(2):
+            people = dumps([i for i in GLOBALS.people]).encode("utf-8")
+            self.respond(people, mimetype="text/json")
+            return
+
+        if api_call.group(1) == "metadata" and not api_call.group(2):
+            people = dumps([i for i in GLOBALS.metadata]).encode("utf-8")
+            self.respond(people, mimetype="text/json")
+            return
+
+        if api_call.group(1) == "metadata" and api_call.group(3):
+            if api_call.group(3) not in GLOBALS.metadata:
+                self.respond(
+                    f"Metadata not found: {api_call.group(3)}".encode("utf-8"), code=404
+                )
+                return
+
+            metadata = dumps(GLOBALS.metadata[api_call.group(3)]).encode("utf-8")
+            self.respond(metadata, mimetype="text/json")
+            return
+
+        self.respond(
+            f"API not found: {self.path}".encode("utf-8"),
+            code=404,
+        )
+
     def do_GET(self):  # pylint: disable=invalid-name
         """Handle GET requests"""
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(f"Hello, World! {self.path}".encode("utf-8"))
+        try:
+            if self.path in STATIC_FILES:
+                self.send_file(join(DATA_DIR, STATIC_FILES[self.path]))
+                return
+
+            if self.path.startswith(API_V1):
+                self.handle_api_v1()
+                return
+
+            self.respond(
+                f"File not found: {self.path}".encode("utf-8"),
+                code=404,
+            )
+        except Exception as error:  # pylint: disable=broad-exception-caught
+            self.respond(
+                f"Internal server error {error}".encode("utf-8"),
+                code=500,
+            )
 
 
 def start_webserver(port=8000, host="") -> None:
@@ -157,7 +247,15 @@ def start_webserver(port=8000, host="") -> None:
         port (int, optional): The port to listen on. Defaults to 8000.
         host (str, optional): The host to listen on. Defaults to "", meaning all local addresses.
     """
+    GLOBALS.settings = Settings(__file__)
+    GLOBALS.people = People(
+        load_gedcom(GLOBALS.settings["gedcom_path"]),
+        GLOBALS.settings.get("alias_path", None),
+    )
+    GLOBALS.metadata = load_yaml(GLOBALS.settings["metadata_yaml"])
+    link_people_to_metadata(GLOBALS.people, GLOBALS.metadata)
     httpd = HTTPServer((host, port), SimpleHTTPRequestHandler)
+    print("Starting web server")
     httpd.serve_forever()
 
 
