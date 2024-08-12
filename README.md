@@ -78,6 +78,27 @@ Where `YYYY` is the four-digit year, `MM` is the two-digit month, `DD` is the tw
 
 ## %metadata_yaml%
 
+### %metadata_yaml% editor
+
+There is an editor in the works, but does not currently work yet.
+To run the editor:
+
+1. Execute `python3 -m genweb.webserver`
+2. Point your browser at [localhost:8000](http://localhost:8000)
+
+Here are the current features of the non-functional editor:
+
+- The `Metadata` link will take you to a page that shows all the metadata id's
+- The `People` link will take you to a page that shows all the people id's
+- Appending a metadata id onto the `Metadata` link will show you the info about the chosen metadata
+- Appending a person id onto the `People` link will show you the info about a person
+- The beige `Search for person id` is a proof-of-concept filter for finder a person id
+- The azure `Copy metadata` is a proof-of-concept filter for finding an existing metadata
+- The metadata type selector should change the appropriate fields shown in the editor for the chosen type
+- If the `Identifier` field is an existing metadata identifier, the submit button changes from `Add` to `Update`
+
+
+### %metadata_yaml% format
 The format for the `metadata.yml` file is (**Note**: All artifact identifiers should start with the year):
 
 ```yaml
