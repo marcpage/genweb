@@ -112,7 +112,16 @@
                 options.style.display = "none";
             }
             function update_submit_name() {
+                var id_row = document.getElementById("id");
+                var id_input = id_row.getElementsByTagName("input");
+                var submit_row = document.getElementById("submit");
+                var submit = submit_row.getElementsByTagName("input");
 
+                if (server_state.metadata.includes(id_input[0].value)) {
+                    submit[0].value = "Update";
+                } else {
+                    submit[0].value = "Add";
+                }
             }
 
         </script>
@@ -127,12 +136,12 @@
         <select name="people" id="people"></select>
         <select name="metadata" id="metadata"></select>
         <div style="background-color: beige;border-radius: 15px; padding:30px" width="100">
-            <input id="choose-person" size=30 placeholder="Search for person id" type="text" onkeyup="type_ahead('choose-person', 'people')" onblur="blur_type_ahead('choose-person', 'people')"/>
+            <input id="choose-person" size=40 placeholder="Search for person id" type="text" onkeyup="type_ahead('choose-person', 'people')" onblur="blur_type_ahead('choose-person', 'people')"/>
             <br/>
             <select id="choose-person-options" style="display:none" size=5 onchange="select_type_ahead('choose-person')"></select>
         </div>
         <div style="background-color: aliceblue;border-radius: 15px; padding:30px" width="100">
-            <input id="choose-metadata" size=30 placeholder="Copy metadata" type="text" onkeyup="type_ahead('choose-metadata', 'metadata')" onblur="blur_type_ahead('choose-metadata', 'metadata')"/>
+            <input id="choose-metadata" size=40 placeholder="Copy metadata" type="text" onkeyup="type_ahead('choose-metadata', 'metadata')" onblur="blur_type_ahead('choose-metadata', 'metadata')"/>
             <br/>
             <select id="choose-metadata-options" style="display:none" size=5 onchange="select_type_ahead('choose-metadata')"></select>
         </div>
@@ -147,17 +156,17 @@
                         </select>
                     </th>
                 </tr>
-                <tr id="id"><td class="table_label">Identifier</td><td><input placeholder="SurnameNameI0000SurnameNameI0000" size=30 onchange="update_submit_name()"/></td></tr>
+                <tr id="id"><td class="table_label">Identifier</td><td><input placeholder="SurnameNameI0000SurnameNameI0000" size=40 onchange="update_submit_name()"/></td></tr>
                 <tr id="title"><td class="table_label">Title</td><td><input placeholder="Metadata Title" size="75"/></td></tr>
-                <tr id="path"><td class="table_label">Path</td><td><input placeholder="SurnameNameI0000SurnameNameI0000" ="30"/></td></tr>
-                <tr id="file"><td class="table_label">File</td><td><input placeholder="SurnameNameI0000SurnameNameI0000.ext" size="30"/></td></tr>
+                <tr id="path"><td class="table_label">Path</td><td><input placeholder="SurnameNameI0000SurnameNameI0000 (owner)" ="40"/></td></tr>
+                <tr id="file"><td class="table_label">File</td><td><input placeholder="SurnameNameI0000SurnameNameI0000.ext" size="40"/></td></tr>
                 <tr id="mod_date"><td class="table_label">Mod Date</td><td><input type="date"/></td></tr>
-                <tr id="people"><td class="table_label">People</td><td><textarea readonly style="overflow-y: scroll;" rows="10" cols="30"></textarea></td></tr>
-                <tr id="folder"><td class="table_label">Folder</td><td><input placeholder="SubsiteFolder" size="30"/></td></tr>
+                <tr id="people"><td class="table_label">People</td><td><textarea style="overflow-y: scroll;" rows="10" cols="40"></textarea></td></tr>
+                <tr id="folder"><td class="table_label">Folder</td><td><input placeholder="SubsiteFolder" size="40"/></td></tr>
                 <tr id="height"><td class="table_label">Height</td><td><input type="number" min="20" max="10000"/></td></tr>
                 <tr id="width"><td class="table_label">Width</td><td><input type="number" min="20" max="10000"/></td></tr>
                 <tr id="contents"><td class="table_label">Contents</td><td><textarea placeholder="Inline HTML content" rows="10" cols="120"></textarea></td></tr>
-                <tr><td></td><td style="text-align: center;"><input value="Add" type="submit"/></td></td></tr>
+                <tr id="submit"><td></td><td style="text-align: center;"><input value="Add" type="submit"/></td></td></tr>
             </table>
         </div>
     </body>
