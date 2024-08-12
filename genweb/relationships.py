@@ -145,6 +145,14 @@ def parse_individual(individual: IndividualElement) -> SimpleNamespace:
 
 
 def person_json(person: SimpleNamespace) -> dict[str, any]:
+    """Gets a JSON representation of a person
+
+    Args:
+        person (SimpleNamespace): The person to describe
+
+    Returns:
+        dict[str, any]: The dictionary that is suitable to convert to JSON
+    """
     return {
         "given": person.given,
         "surname": person.surname,
