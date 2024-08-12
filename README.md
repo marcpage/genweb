@@ -83,8 +83,9 @@ Where `YYYY` is the four-digit year, `MM` is the two-digit month, `DD` is the tw
 There is an editor in the works, but does not currently work yet.
 To run the editor:
 
-1. Execute `python3 -m genweb.webserver`
-2. Point your browser at [localhost:8000](http://localhost:8000)
+1. Add `webserver.yml` next to `genweb.yml`
+2. Execute `python3 -m genweb.webserver`
+3. Point your browser at [localhost:8000](http://localhost:8000)
 
 Here are the current features of the non-functional editor:
 
@@ -99,6 +100,13 @@ Here are the current features of the non-functional editor:
 - The metadata type selector should change the appropriate fields shown in the editor for the chosen type
 - If the `Identifier` field is an existing metadata identifier, the submit button changes from `Add` to `Update`
 
+#### webserver.yml
+
+```yaml
+gedcom_path: /path/to/file.ged
+metadata_yaml: /path/to/file.yml
+alias_path: /path/to/file.yml
+```
 
 ### %metadata_yaml% format
 The format for the `metadata.yml` file is (**Note**: All artifact identifiers should start with the year):
