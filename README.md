@@ -90,6 +90,8 @@ Here are the current features of the non-functional editor:
 
 - The `Metadata` link will take you to a page that shows all the metadata id's
 - The `People` link will take you to a page that shows all the people id's
+- The person id pop-up demonstrates that a complete menu of all person id's is not workable
+- The metadata id pop-up demonstrates that a complete menu of all metadata id's is not workable
 - Appending a metadata id onto the `Metadata` link will show you the info about the chosen metadata
 - Appending a person id onto the `People` link will show you the info about a person
 - The beige `Search for person id` is a proof-of-concept filter for finder a person id
