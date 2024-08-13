@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from os.path import join, dirname
 from json import dumps
 from re import compile as regex
+from traceback import format_exc
 
 from devopsdriver.settings import Settings
 
@@ -68,7 +69,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         assert api_call, self.path
 
         if api_call.group(1) == "people" and not api_call.group(2):
-            people = dumps(list[GLOBALS.people]).encode("utf-8")
+            people = dumps([str(i) for i in GLOBALS.people]).encode("utf-8")
             self.respond(people, mimetype="text/json")
             return
 
@@ -123,7 +124,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             )
         except Exception as error:  # pylint: disable=broad-exception-caught
             self.respond(
-                f"Internal server error {error}".encode("utf-8"),
+                f"Internal server error {error}<br/><pre>{format_exc()}</pre>".encode(
+                    "utf-8"
+                ),
                 code=500,
             )
 
