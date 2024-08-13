@@ -156,8 +156,8 @@ def person_json(person: SimpleNamespace) -> dict[str, any]:
     return {
         "given": person.given,
         "surname": person.surname,
-        "birthdate": person.birthdate.strftime("%Y-%m-%d"),
-        "deathdate": person.birthdate.strftime("%Y-%m-%d"),
+        "birthdate": person.birthdate.strftime("%Y-%m-%d") if person.birthdate else "?",
+        "deathdate": person.deathdate.strftime("%Y-%m-%d") if person.deathdate else "?",
         "gender": person.gender,
         "id": person.id,
         "spouses": list(person.spouses),
