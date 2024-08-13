@@ -89,16 +89,12 @@ To run the editor:
 
 Here are the current features of the non-functional editor:
 
-- The `Metadata` link will take you to a page that shows all the metadata id's
-- The `People` link will take you to a page that shows all the people id's
-- The person id pop-up demonstrates that a complete menu of all person id's is not workable
-- The metadata id pop-up demonstrates that a complete menu of all metadata id's is not workable
-- Appending a metadata id onto the `Metadata` link will show you the info about the chosen metadata
-- Appending a person id onto the `People` link will show you the info about a person
-- The beige `Search for person id` is a proof-of-concept filter for finder a person id
-- The azure `Copy metadata` is a proof-of-concept filter for finding an existing metadata
 - The metadata type selector should change the appropriate fields shown in the editor for the chosen type
 - If the `Identifier` field is an existing metadata identifier, the submit button changes from `Add` to `Update`
+- Clicking the 🔎 button next to the `People` field will reveal a people search
+- Typing in the people search will filter the people ids
+- Clicking on a person in the filter list will display the person and their family
+- This will allow copy/pasting of people ids into the `People` field
 
 #### webserver.yml
 
