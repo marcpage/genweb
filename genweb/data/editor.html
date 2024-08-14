@@ -31,6 +31,18 @@
             const MAXIMUM_TYPE_AHEAD = 50;
             var server_state = {people:undefined, metadata:undefined};
             const input_types = ['input', 'select', 'textarea'];
+            const values_to_clear = [
+                "title",
+                "path",
+                "file",
+                "mod_date",
+                "people",
+                "caption",
+                "folder",
+                "height",
+                "width",
+                "contents"
+            ];
             const visible_fields = {
                 title:["inline", "href", "picture"],
                 path:["inline", "href", "picture"],
@@ -142,6 +154,20 @@
                 options.style.display = "none";
             }
 
+            function get_row_input(row_id) {
+                var row = document.getElementById(row_id);
+                var row_input = [];
+
+                for (var i = 0; i < input_types.length; ++i) {
+                    row_input = row.getElementsByTagName(input_types[i]);
+
+                    if (row_input.length > 0) {
+                        break;
+                    }
+                }
+
+                return row_input;
+            }
             function load_metadata_into(metadata_identifier) {
                 var request = new XMLHttpRequest();
                 
@@ -150,20 +176,16 @@
                         var metadata_info = JSON.parse(request.responseText);
                         var type_selector = document.getElementById("type-selector");
 
+                        for (var i = 0; i < values_to_clear.length; ++i) {
+                            var row_input = get_row_input(values_to_clear[i]);
+
+                            row_input[0].value = "";
+                        }
+
                         for(var field in metadata_info) {
-                            var row = document.getElementById(field);
-                            var row_input = [];
-
-                            for (var i = 0; i < input_types.length; ++i) {
-                                row_input = row.getElementsByTagName(input_types[i]);
-
-                                if (row_input.length > 0) {
-                                    break;
-                                }
-                            }
+                            var row_input = get_row_input(field);
 
                             if ( (row_input.length > 0) && field != 'id') {
-                                console.log(field + " = " + metadata_info[field]);
                                 row_input[0].value = metadata_info[field];
                             } else {
                                 console.log("Unknown field: " + field + " = " + metadata_info[field]);
