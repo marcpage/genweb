@@ -72,7 +72,15 @@ def load_metadata(search_dir: str) -> dict[str, dict]:
     for root, _, files in walk(search_dir):
         for file in [f for f in files if splitext(f)[1].lower() == ".xml"]:
             try:
-                metadata[splitext(file)[0]] = read_xml(join(root, file))
+                element = read_xml(join(root, file))
+                assert isinstance(element, dict), "Not an object"
+                assert "type" in element, "No type field"
+                assert element["type"] in {
+                    "picture",
+                    "inline",
+                    "href",
+                }, f"Unknown type: {element['type']}"
+                metadata[splitext(file)[0]] = element
 
             except (ParseError, IndexError, AssertionError) as error:
                 PRINT(f"{join(root, file)}: {error}")
