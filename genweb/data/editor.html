@@ -10,12 +10,14 @@
                 text-align: right;
                 font-weight: bold;
             }
+
             .editor {
                 background-color: azure;
                 border-radius: 30px;
                 padding: 30px;
                 /*display:inline-block;*/
             }
+
             #people_search {
                 display: none; /* inline-block */
                 background-color:blanchedalmond;
@@ -23,16 +25,12 @@
                 padding: 30px;
                 display: none;
             }
-            #example-code {
-                display: none;
-                background-color: gray; 
-                padding:30px; 
-                border-radius:30px
-            }
+            
         </style>
         <script>
             const MAXIMUM_TYPE_AHEAD = 50;
             var server_state = {people:undefined, metadata:undefined};
+            const input_types = ['input', 'select', 'textarea'];
             const visible_fields = {
                 title:["inline", "href", "picture"],
                 path:["inline", "href", "picture"],
@@ -41,6 +39,7 @@
                 mod_date:["inline", "picture", "href"],
                 folder:["href"],
                 height:["picture"],
+                caption:["picture"],
                 width:["picture"],
                 contents:["inline"],
             };
@@ -58,6 +57,7 @@
                     }
                 }
             }
+
             function reset_select(field, values) {
                 var select = document.getElementById(field);
                 
@@ -72,60 +72,112 @@
                     select.appendChild(option);
                 }
             }
-            function server_state_updated(field, field_id) {
-                if (server_state[field]) {
-                    reset_select(field_id, server_state[field]);
-                }
-            }
-            function load_into(url, field, field_id) {
+
+            function load_into(url, field) {
                 var request = new XMLHttpRequest();
+
                 request.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         server_state[field] = JSON.parse(request.responseText);
-                        server_state_updated(field, field_id);
                     }
                 }
+
                 request.open("GET", url, true);
                 request.send();
             }
+
             function load_values() {
-                load_into("/api/v1/people", "people", "people_list");
-                load_into("/api/v1/metadata", "metadata", "metadata_list");
+                load_into("/api/v1/people", "people");
+                load_into("/api/v1/metadata", "metadata");
             }
+
             function words_match(words, value) {
                 const word_list = words.split(" ").map((x) => x.toLowerCase());;
                 const lower_value = value.toLowerCase();
                 const matches = word_list.filter((word) => lower_value.includes(word));
+
                 return matches.length == word_list.length;
             }
-            function type_ahead(input_id, field) {
+
+            function type_ahead(input_id, field, autoshow) {
                 if (server_state[field]) {
                     var input = document.getElementById(input_id);
                     var options = document.getElementById(input_id+"-options");
                     const matches = server_state[field].filter(function (i) {
                         return words_match(input.value, i);
                     }).slice(0,MAXIMUM_TYPE_AHEAD);
-                    reset_select(input_id+"-options", matches);
-                    options.style.display = matches ? "" : "none";
-                    options.size = matches.length;
+
+                    reset_select(input_id+"-options", [""].concat(matches));
+
+                    if (autoshow) {
+                        options.style.display = matches ? "" : "none";
+                    }
+
+                    options.size = matches.length + 1;
                 }
             }
-            function blur_type_ahead(input_id, field) {
+
+            function blur_type_ahead(input_id, field, clearOnMismatch) {
                 var input = document.getElementById(input_id);
                 var options = document.getElementById(input_id+"-options");
-                setTimeout(() => { 
-                    options.style.display="none";
-                    if (!server_state[field].includes(input.value)) {
+
+                if (clearOnMismatch && !server_state[field].includes(input.value)) {
+                    setTimeout(() => { 
+                        options.style.display="none";
                         input.value = "";
-                    }
                 }, 400);
+            }
+        }
+
+            function set_focus(input_id) {
+                var input = document.getElementById(input_id);
+
+                input.focus();
             }
             function select_type_ahead(input_id) {
                 var input = document.getElementById(input_id);
                 var options = document.getElementById(input_id+"-options");
+
                 input.value = options.value;
                 options.style.display = "none";
             }
+
+            function load_metadata_into(metadata_identifier) {
+                var request = new XMLHttpRequest();
+                
+                request.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var metadata_info = JSON.parse(request.responseText);
+                        var type_selector = document.getElementById("type-selector");
+
+                        for(var field in metadata_info) {
+                            var row = document.getElementById(field);
+                            var row_input = [];
+
+                            for (var i = 0; i < input_types.length; ++i) {
+                                row_input = row.getElementsByTagName(input_types[i]);
+
+                                if (row_input.length > 0) {
+                                    break;
+                                }
+                            }
+
+                            if ( (row_input.length > 0) && field != 'id') {
+                                console.log(field + " = " + metadata_info[field]);
+                                row_input[0].value = metadata_info[field];
+                            } else {
+                                console.log("Unknown field: " + field + " = " + metadata_info[field]);
+                            }
+                        }
+
+                        type_change('type-selector');
+                    }
+                }
+
+                request.open("GET", "/api/v1/metadata/" + metadata_identifier, true);
+                request.send();
+            }
+            
             function update_submit_name() {
                 var id_row = document.getElementById("id");
                 var id_input = id_row.getElementsByTagName("input");
@@ -134,10 +186,12 @@
 
                 if (server_state.metadata.includes(id_input[0].value)) {
                     submit[0].value = "Update";
+                    load_metadata_into(id_input[0].value);
                 } else {
                     submit[0].value = "Add";
                 }
             }
+
             function toggle_display(element_id, phase1, phase2) {
                 var element = document.getElementById(element_id);
 
@@ -147,6 +201,7 @@
                     element.style.display = phase2;
                 }
             }
+
             function load_person_into(person_identifier, person, parents, spouses, children) {
                 var request = new XMLHttpRequest();
                 
@@ -165,11 +220,13 @@
                                 load_person_into(person_info.parents[i], parents, undefined, undefined, undefined);
                             }
                         }
+
                         if (spouses) {
                             for (var i = 0; i < person_info.spouses.length; ++i) {
                                 load_person_into(person_info.spouses[i], spouses, undefined, undefined, undefined);
                             }
                         }
+
                         if (children) {
                             for (var i = 0; i < person_info.children.length; ++i) {
                                 load_person_into(person_info.children[i], children, undefined, undefined, undefined);
@@ -177,9 +234,11 @@
                         }
                     }
                 }
+
                 request.open("GET", "/api/v1/people/" + person_identifier, true);
                 request.send();
             }
+            
             function load_person(person_element_id) {
                 var element = document.getElementById(person_element_id);
                 var person = document.getElementById('person_lookup');
@@ -201,13 +260,13 @@
 
         </script>
     </head>
-	<body class="notranslate" onload="load_values();type_change('type')">
+	<body class="notranslate" onload="load_values();type_change('type-selector')">
         <h1>genweb editor</h1>
         <div class="editor">
             <table>
-                <tr>
+                <tr id="type">
                     <th colspan=2>
-                        <select id="type" onchange="type_change('type')">
+                        <select id="type-selector" onchange="type_change('type-selector')">
                             <option>picture</option>
                             <option>inline</option>
                             <option>href</option>
@@ -217,7 +276,10 @@
                 <tr id="id">
                     <td class="table_label">Identifier</td>
                     <td>
-                        <input placeholder="SurnameNameI0000SurnameNameI0000" size=40 onchange="update_submit_name()"/>
+                        <input id="choose-metadata" placeholder="SurnameNameI0000SurnameNameI0000" size=40 onchange="update_submit_name()" onkeyup="type_ahead('choose-metadata', 'metadata', false)" onblur="blur_type_ahead('choose-metadata', 'metadata', false)"/>
+                        <button onclick="toggle_display('choose-metadata-options', '', 'none');type_ahead('choose-metadata', 'metadata', false);set_focus('choose-metadata')">🔎</button>
+                        <br/>
+                        <select id="choose-metadata-options" style="display:none" size=5 onchange="select_type_ahead('choose-metadata');update_submit_name()"></select>
                     </td>
                 </tr>
                 <tr id="title">
@@ -230,7 +292,7 @@
                 </tr>
                 <tr id="file">
                     <td class="table_label">File</td>
-                    <td><input placeholder="SurnameNameI0000SurnameNameI0000.ext" size="40"/></td>
+                    <td><input placeholder="SurnameNameI0000SurnameNameI0000.ext" size="50"/></td>
                 </tr>
                 <tr id="mod_date">
                     <td class="table_label">Mod Date</td>
@@ -242,6 +304,10 @@
                         <textarea style="overflow-y: scroll;" rows="10" cols="40"></textarea>
                         <button onclick="toggle_display('people_search', 'block', 'none')">🔎</button>
                     </td>
+                </tr>
+                <tr id="caption">
+                    <td class="table_label">Caption</td>
+                    <td><input placeholder="Metadata Caption" size="75"/></td>
                 </tr>
                 <tr id="folder">
                     <td class="table_label">Folder</td>
@@ -266,7 +332,7 @@
             </table>
         </div>
         <div id="people_search">
-            <input id="search-person" size=40 placeholder="Search for person id" type="text" onkeyup="type_ahead('search-person', 'people')" onblur="blur_type_ahead('search-person', 'people')"/>
+            <input id="search-person" size=40 placeholder="Search for person id" type="text" onkeyup="type_ahead('search-person', 'people', true)" onblur="blur_type_ahead('search-person', 'people', true)"/>
             <br/>
             <select id="search-person-options" style="display:none" size=5 onchange="load_person('search-person-options')"></select>
             <ul>
@@ -290,27 +356,5 @@
     </div>
 
         
-        <div id="example-code">
-            <h2>Proof of concept and example code</h2>
-
-            API
-            <ul>
-                <li><a href="/api/v1/metadata">Metadata</a></li>
-                <li><a href ="/api/v1/people">People</a></li>
-            </ul>
-            <select name="people" id="people_list"></select>
-            <select name="metadata" id="metadata_list"></select>
-            <div style="background-color: beige;border-radius: 15px; padding:30px" width="100">
-                <input id="choose-person" size=40 placeholder="Search for person id" type="text" onkeyup="type_ahead('choose-person', 'people')" onblur="blur_type_ahead('choose-person', 'people')"/>
-                <br/>
-                <select id="choose-person-options" style="display:none" size=5 onchange="select_type_ahead('choose-person')"></select>
-            </div>
-            <div style="background-color: aliceblue;border-radius: 15px; padding:30px" width="100">
-                <input id="choose-metadata" size=40 placeholder="Copy metadata" type="text" onkeyup="type_ahead('choose-metadata', 'metadata')" onblur="blur_type_ahead('choose-metadata', 'metadata')"/>
-                <br/>
-                <select id="choose-metadata-options" style="display:none" size=5 onchange="select_type_ahead('choose-metadata')"></select>
-            </div>
-        </div>
-
     </body>
 </html>
