@@ -11,6 +11,7 @@ from shutil import copytree, copy
 
 from genweb.genweb import link_people_to_metadata, generate_people_pages
 from genweb.genweb import copy_static_files, copy_metadata_files
+from genweb.inventory import Artifacts
 import genweb.genweb
 
 
@@ -79,6 +80,7 @@ def test_copy_metadata_files() -> None:
             join(dirname(__file__), "data", "test.xml"),
             join(dst_dir, "foo", "test.xml"),
         )
+        artifacts = Artifacts(src_dir)
         metadata = {
             "1": {"type": "picture", "file": "test.xml", "path": "foo"},
             "2": {"type": "unknown"},
@@ -90,7 +92,7 @@ def test_copy_metadata_files() -> None:
             "nosho": SimpleNamespace(id="nosho", metadata=[]),
         }
         default_thumbnail = join(src_dir, "data", "fake2.jpg")
-        copy_metadata_files(src_dir, dst_dir, metadata, people, default_thumbnail)
+        copy_metadata_files(artifacts, dst_dir, metadata, people, default_thumbnail)
         assert isfile(join(dst_dir, "foo", "test.xml"))
 
         with open(join(dst_dir, "1", "1.jpg"), "r", encoding="utf-8") as file_1:

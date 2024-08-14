@@ -4,8 +4,8 @@
 """ This is the main website interface """
 
 
-from os import makedirs, link, walk, unlink
-from os.path import join, dirname, isfile, relpath
+from os import makedirs, link, unlink
+from os.path import join, dirname, isfile, basename
 from shutil import copyfile
 
 from devopsdriver.settings import Settings
@@ -14,6 +14,7 @@ from genweb.relationships import load_gedcom
 from genweb.people import People
 from genweb.metadata import load_yaml
 from genweb.template import render_to_file
+from genweb.inventory import Artifacts
 
 
 TEMPLATE_DIR = join(dirname(__file__), "templates")
@@ -31,11 +32,13 @@ def link_people_to_metadata(people: People, metadata: dict[str, dict]) -> None:
         if "people" not in info:
             PRINT(f"WARNING: no info for metadata {metadata_id}")
             continue
-        for personid in info["people"]:
-            if personid not in people:
-                PRINT(f"WARNING: person {personid} missing for metadata {metadata_id}")
+
+        for person_id in info["people"]:
+            if person_id not in people:
+                PRINT(f"WARNING: person {person_id} missing for metadata {metadata_id}")
                 continue
-            people[personid].metadata.append(metadata_id)
+
+            people[person_id].metadata.append(metadata_id)
 
 
 def generate_people_pages(
@@ -95,8 +98,7 @@ def destination_file(dst_dir: str, filename: str) -> str:
 
 def copy_metadata_pictures(
     metadata: dict[str, dict],
-    existing_files: dict[str, str],
-    src_dir: str,
+    artifacts: Artifacts,
     dst_dir: str,
 ) -> None:
     """Copy all the picture metadata from a source directory to its destination
@@ -111,16 +113,23 @@ def copy_metadata_pictures(
         if item["type"] != "picture":
             continue
 
-        if item["file"] not in existing_files:
-            PRINT(f'WARNING: {item["file"]} not found in {src_dir}')
+        found = artifacts.paths(item["file"])
+
+        if not found:
+            PRINT(f'WARNING: {item["file"]} not found in {artifacts.directory}')
             continue
 
+        if len(found) > 1:
+            PRINT("WARNING: duplicates")
+            print("\t" + "\n\t".join(found))
+
         dest_file = destination_file(join(dst_dir, item["path"]), item["file"])
-        link(existing_files[item["file"]], dest_file)
+        link(join(artifacts.directory, found[0]), dest_file)
+        artifacts.add(found[0])
 
 
 def copy_person_thumbnails(
-    people: People, existing_files: dict[str, str], dst_dir: str, default_thumbnail: str
+    people: People, artifacts: Artifacts, dst_dir: str, default_thumbnail: str
 ) -> None:
     """Copy each person's thumbnail to the website or use the default
 
@@ -137,18 +146,24 @@ def copy_person_thumbnails(
             continue
 
         dest_file = destination_file(join(dst_dir, person.id), f"{person.id}.jpg")
+        found = artifacts.paths(f"{person.id}.jpg")
 
-        if f"{person.id}.jpg" not in existing_files:
+        if not found:
             PRINT(f"WARNING: no thumbnail for {person.id}")
             link(join(dst_dir, default_thumbnail), dest_file)
             continue
 
-        link(existing_files[f"{person.id}.jpg"], dest_file)
+        if len(found) != 1:
+            PRINT(f"WARNING: duplicate thumbnails for {person.id}")
+            print("\t" + "\n\t".join(found))
+
+        link(join(artifacts.directory, found[0]), dest_file)
+        artifacts.add(found[0])
 
 
 def copy_metadata_hrefs(
     metadata: dict[str, dict],
-    src_dir: str,
+    artifacts: Artifacts,
     dst_dir: str,
 ) -> None:
     """copy the href dirs
@@ -162,23 +177,27 @@ def copy_metadata_hrefs(
     for item in metadata.values():
         if item["type"] != "href":
             continue
-        hrefsource = join(src_dir, item["path"], item["folder"])
-        if not isfile(join(hrefsource, item["file"])):
-            PRINT(f'WARNING: {item["file"]} not found in {hrefsource}')
+
+        href_src = join(item["path"], item["folder"])
+        href_dst = join(dst_dir, item["path"], item["folder"])
+
+        if not artifacts.has_dir(href_src):
+            PRINT(f"WARNING: {href_src} not found")
             continue
 
-        hrefdest = join(dst_dir, item["path"], item["folder"])
-        for root, _, files in walk(hrefsource):
-            relativeroot = relpath(root, hrefsource)
-            for file in files:
-                sourcefile = join(root, file)
-                dest_file = destination_file(join(hrefdest, relativeroot), file)
+        if not artifacts.has_file(join(href_src, item["file"])):
+            PRINT(f'WARNING: {item["file"]} not found in {href_src}')
+            continue
 
-                link(sourcefile, dest_file)
+        for file in artifacts.files_under(href_src):
+            source_file = join(artifacts.directory, file)
+            dest_file = destination_file(dirname(join(href_dst, file)), basename(file))
+            link(source_file, dest_file)
+            artifacts.add(file)
 
 
 def copy_metadata_files(
-    sourcedir: str,
+    artifacts: Artifacts,
     dest_dir: str,
     metadata: dict[str, dict],
     people: People,
@@ -191,15 +210,40 @@ def copy_metadata_files(
         dest_dir (str): location of website
         metadata (dict[str, dict]): _description_
     """
-    existing_files = {f: join(r, f) for r, _, fs in walk(sourcedir) for f in fs}
-    copy_metadata_pictures(metadata, existing_files, sourcedir, dest_dir)
-    copy_metadata_hrefs(metadata, sourcedir, dest_dir)
-    copy_person_thumbnails(people, existing_files, dest_dir, default_thumbnail)
+    copy_metadata_pictures(metadata, artifacts, dest_dir)
+    copy_metadata_hrefs(metadata, artifacts, dest_dir)
+    copy_person_thumbnails(people, artifacts, dest_dir, default_thumbnail)
+
+
+def metadata_references(metadata: dict[str, dict], artifacts: Artifacts):
+    """Add references to any files that we haven't directly referenced yet
+
+    Args:
+        metadata (dict[str, dict]): The metadata to scan
+        artifacts (Artifacts): The artifacts to update
+    """
+    for identifier, entry in metadata.items():
+        if entry["type"] == "inline":  # add .src files that may exist
+            found = artifacts.paths(entry["file"])
+            artifacts.add(*found)
+
+            if len(found) not in {0, 1}:
+                print(f"WARNING: duplicate .src files for {identifier}")
+                print("\t" + "\n\t".join(found))
+
+        # add any .xml files that may exist
+        found = artifacts.paths(f"{identifier}.xml")
+        artifacts.add(*found)
+
+        if len(found) not in {0, 1}:
+            print(f"WARNING: duplicate .xml files for {identifier}")
+            print("\t" + "\n\t".join(found))
 
 
 def main() -> None:
     """Generate the website"""
     settings = Settings(__file__)
+    artifacts = Artifacts(settings["binaries_dir"])
     people = People(
         load_gedcom(settings["gedcom_path"]), settings.get("alias_path", None)
     )
@@ -207,7 +251,7 @@ def main() -> None:
     link_people_to_metadata(people, metadata)
     copy_static_files(settings["copy files"], settings["site_dir"])
     copy_metadata_files(
-        settings["binaries_dir"],
+        artifacts,
         settings["site_dir"],
         metadata,
         people,
@@ -217,6 +261,8 @@ def main() -> None:
     root_index_path = join(settings["site_dir"], "index.html")
     root_template_path = join(TEMPLATE_DIR, "top_level.html.mako")
     render_to_file(root_index_path, root_template_path, people=people)
+    metadata_references(metadata, artifacts)
+    print("\n".join(f"WARNING: Not referenced: {f}" for f in artifacts.lost()))
 
 
 if __name__ == "__main__":
