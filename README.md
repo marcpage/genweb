@@ -90,6 +90,7 @@ To run the editor:
 Here are the current features of the non-functional editor:
 
 - The metadata type selector should change the appropriate fields shown in the editor for the chosen type
+- Clicking the 🔎 button next to the `Identifier` field will allow you to search and load existing metadata
 - If the `Identifier` field is an existing metadata identifier, the submit button changes from `Add` to `Update`
 - Clicking the 🔎 button next to the `People` field will reveal a people search
 - Typing in the people search will filter the people ids
