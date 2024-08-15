@@ -251,7 +251,7 @@ def main() -> None:
                 ".xml",
                 regex(r'<\?(xml version="1.0")>'),
                 r"<?\1?>",
-                "path end tag missing <",
+                "xml header missing ending ?",
             ),
         ],
     )
