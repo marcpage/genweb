@@ -163,7 +163,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 ),
                 code=500,
             )
-            print(format_exc())
 
 
 def start_webserver(port=8000, host="") -> None:
