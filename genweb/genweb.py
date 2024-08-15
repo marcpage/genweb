@@ -12,7 +12,7 @@ from devopsdriver.settings import Settings
 
 from genweb.relationships import load_gedcom
 from genweb.people import People
-from genweb.metadata import load_yaml
+from genweb.metadata import Metadata
 from genweb.template import render_to_file
 from genweb.inventory import Artifacts
 
@@ -247,7 +247,7 @@ def main() -> None:
     people = People(
         load_gedcom(settings["gedcom_path"]), settings.get("alias_path", None)
     )
-    metadata = load_yaml(settings["metadata_yaml"])
+    metadata = Metadata(settings["metadata_yaml"])
     link_people_to_metadata(people, metadata)
     copy_static_files(settings["copy files"], settings["site_dir"])
     copy_metadata_files(

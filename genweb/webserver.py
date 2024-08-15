@@ -7,7 +7,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from types import SimpleNamespace
 from os.path import join, dirname
-from json import dumps
+from json import dumps, loads
 from re import compile as regex
 from traceback import format_exc
 
@@ -15,7 +15,7 @@ from devopsdriver.settings import Settings
 
 from genweb.relationships import load_gedcom, person_json
 from genweb.people import People
-from genweb.metadata import load_yaml
+from genweb.metadata import Metadata
 from genweb.genweb import link_people_to_metadata
 
 
@@ -24,6 +24,7 @@ DATA_DIR = join(dirname(__file__), "data")
 STATIC_FILES = {"/": "editor.html"}
 API_V1 = "/api/v1/"
 V1_CALL = regex(rf"^{API_V1}(people|metadata)(/([^/]+))?$")
+SEPARATOR_PATTERN = regex(r"[\s:;,]+")
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -63,17 +64,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 code=404,
             )
 
-    def handle_api_v1(self):
+    def handle_api_v1(self, method: str):
         """Handle any API calls"""
         api_call = V1_CALL.match(self.path)
         assert api_call, self.path
 
-        if api_call.group(1) == "people" and not api_call.group(2):
+        if api_call.group(1) == "people" and not api_call.group(2) and method == "GET":
             people = dumps([str(i) for i in GLOBALS.people]).encode("utf-8")
             self.respond(people, mimetype="text/json")
-            return
 
-        if api_call.group(1) == "people" and api_call.group(3):
+        elif api_call.group(1) == "people" and api_call.group(3) and method == "GET":
             person = GLOBALS.people.get(api_call.group(3), None)
 
             if not person:
@@ -82,16 +82,18 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
 
-            info = dumps(person_json(person)).encode("utf-8")
-            self.respond(info, mimetype="text/json")
-            return
+            metadata = dumps(person_json(person)).encode("utf-8")
+            self.respond(metadata, mimetype="text/json")
 
-        if api_call.group(1) == "metadata" and not api_call.group(2):
+        elif (
+            api_call.group(1) == "metadata"
+            and not api_call.group(2)
+            and method == "GET"
+        ):
             people = dumps(list(GLOBALS.metadata)).encode("utf-8")
             self.respond(people, mimetype="text/json")
-            return
 
-        if api_call.group(1) == "metadata" and api_call.group(3):
+        elif api_call.group(1) == "metadata" and api_call.group(3) and method == "GET":
             if api_call.group(3) not in GLOBALS.metadata:
                 self.respond(
                     f"Metadata not found: {api_call.group(3)}".encode("utf-8"), code=404
@@ -100,12 +102,24 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
             metadata = dumps(GLOBALS.metadata[api_call.group(3)]).encode("utf-8")
             self.respond(metadata, mimetype="text/json")
-            return
 
-        self.respond(
-            f"API not found: {self.path}".encode("utf-8"),
-            code=404,
-        )
+        elif api_call.group(1) == "metadata" and api_call.group(3) and method == "POST":
+            metadata = loads(self.rfile.read(int(self.headers["Content-Length"])))
+
+            for key in [k for k in metadata if not metadata[k]]:
+                del metadata[key]
+
+            if "people" in metadata:
+                metadata["people"] = SEPARATOR_PATTERN.split(metadata["people"])
+
+            print(dumps(metadata, indent=2))
+            self.respond(dumps(metadata, indent=2).encode("utf-8"))
+
+        else:
+            self.respond(
+                f"API not found: {self.path}".encode("utf-8"),
+                code=404,
+            )
 
     def do_GET(self):  # pylint: disable=invalid-name
         """Handle GET requests"""
@@ -115,7 +129,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 return
 
             if self.path.startswith(API_V1):
-                self.handle_api_v1()
+                self.handle_api_v1("GET")
                 return
 
             self.respond(
@@ -130,6 +144,27 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 code=500,
             )
 
+    def do_POST(self):  # pylint: disable=invalid-name
+        """Handle POSTing of data"""
+        try:
+            if self.path.startswith(API_V1):
+                self.handle_api_v1("POST")
+                return
+
+            self.respond(
+                f"File not found: {self.path}".encode("utf-8"),
+                code=404,
+            )
+
+        except Exception as error:  # pylint: disable=broad-exception-caught
+            self.respond(
+                f"Internal server error {error}<br/><pre>{format_exc()}</pre>".encode(
+                    "utf-8"
+                ),
+                code=500,
+            )
+            print(format_exc())
+
 
 def start_webserver(port=8000, host="") -> None:
     """Start the editor web server
@@ -143,7 +178,7 @@ def start_webserver(port=8000, host="") -> None:
         load_gedcom(GLOBALS.settings["gedcom_path"]),
         GLOBALS.settings.get("alias_path", None),
     )
-    GLOBALS.metadata = load_yaml(GLOBALS.settings["metadata_yaml"])
+    GLOBALS.metadata = Metadata(GLOBALS.settings["metadata_yaml"])
     link_people_to_metadata(GLOBALS.people, GLOBALS.metadata)
     httpd = HTTPServer((host, port), SimpleHTTPRequestHandler)
     print("Starting web server")
