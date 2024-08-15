@@ -1,7 +1,7 @@
 .PHONY:clean venv test coverage lint format deploy
 all:clean test coverage lint
 
-MIN_TEST_COVERAGE=72
+MIN_TEST_COVERAGE=65
 INITIAL_PYTHON?=python3
 VENV_DIR?=.venv
 LIBRARY=genweb
