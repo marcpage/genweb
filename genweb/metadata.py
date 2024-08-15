@@ -26,9 +26,9 @@ def load_yaml(path: str) -> dict[str, dict]:
 class Metadata:
     """read-only-dict-like object"""
 
-    def __init__(self, path: str):
-        self.path = path
-        self.original = Metadata.__load(path)
+    def __init__(self, path_pattern: str):
+        self.path = path_pattern
+        self.original = Metadata.__load(path_pattern)
         self.updated = {}
 
     @staticmethod
