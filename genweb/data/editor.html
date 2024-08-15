@@ -44,6 +44,7 @@
                 "contents"
             ];
             const visible_fields = {
+                id:["inline","href", "picture"],
                 title:["inline", "href", "picture"],
                 path:["inline", "href", "picture"],
                 file:["inline", "href", "picture"],
@@ -280,6 +281,37 @@
                 load_person_into(element.value, person, parents, spouses, children);
             }
 
+            function get_form_json() {
+                var results = {};
+
+                for (var field in visible_fields) {
+                    var value = get_row_input(field);
+
+                    console.log("field = " + field + " value = " + value[0].value);
+                    results[field] = value[0].value;
+                }
+
+                return JSON.stringify(results);
+            }
+
+            function save_form() {
+                var request = new XMLHttpRequest();
+                var form_info = get_form_json();
+                // disable button
+
+                request.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        // update server state
+                        // enable button
+                        // clear form
+                    }
+                }
+
+                request.open("POST", "/api/v1/metadata/" + form_info.id, true);
+                request.setRequestHeader("Content-Type", "text/json;charset=UTF-8");
+                request.send(form_info);
+            }
+
         </script>
     </head>
 	<body class="notranslate" onload="load_values();type_change('type-selector')">
@@ -349,7 +381,7 @@
                 </tr>
                 <tr id="submit">
                     <td></td>
-                    <td style="text-align: center;"><input value="Add" type="submit"/></td></td>
+                    <td style="text-align: center;"><input value="Add" type="submit" onclick="save_form()"/></td></td>
                 </tr>
             </table>
         </div>

@@ -6,14 +6,84 @@
 from os.path import dirname, join
 
 
-from genweb.metadata import load
+from genweb.metadata import load_yaml, Metadata
 
 
 DATA_DIR = join(dirname(__file__), "data")
 
 
-def test_load() -> None:
-    metadata = load(join(DATA_DIR, "example.yml"))
+def test_metadata_update() -> None:
+    metadata = Metadata(join(DATA_DIR, "layered.*.yml"))
+    metadata["0000000000PageMarcA1973HislopMickieL1949"] = {
+        "type": "inline",
+        "content": "hello",
+    }
+    original = metadata["0000000000JohnsonSamI1892MillerJane1860"]
+    assert "StoriesPersonal0000-" not in original["people"]
+    original["people"].append("StoriesPersonal0000-")
+    assert (
+        "StoriesPersonal0000-"
+        not in metadata["0000000000JohnsonSamI1892MillerJane1860"]["people"]
+    )
+    metadata["0000000000JohnsonSamI1892MillerJane1860"] = original
+    assert (
+        "StoriesPersonal0000-"
+        in metadata["0000000000JohnsonSamI1892MillerJane1860"]["people"]
+    )
+    assert "0000000000PageMarcA1973HislopMickieL1949" in metadata
+    assert metadata["0000000000PageMarcA1973HislopMickieL1949"]["content"] == "hello"
+    assert (
+        metadata.get("0000000000PageMarcA1973HislopMickieL1949")["content"] == "hello"
+    )
+
+
+def test_metadata() -> None:
+    metadata = Metadata(join(DATA_DIR, "layered.*.yml"))
+    assert "0000000000SmithCaleb1765JonesMary1724" in metadata
+    assert "0000000000JohnsonSamI1892MillerJane1860" in metadata
+    assert "1700000000WilliamsJohn1665DavisRebecca1639" in metadata
+    assert (
+        "StoriesPersonal0000-"
+        not in metadata["0000000000JohnsonSamI1892MillerJane1860"]["people"]
+    )
+    assert (
+        "JohnsonSamI1892MillerJane1860"
+        in metadata["0000000000JohnsonSamI1892MillerJane1860"]["people"]
+    )
+    assert len(metadata) == 3
+    assert "600" in repr(metadata), repr(metadata)
+    assert metadata.has_key("1700000000WilliamsJohn1665DavisRebecca1639")
+    assert "1700000000WilliamsJohn1665DavisRebecca1639" in metadata.keys()
+    assert (
+        metadata.get("0000000000SmithCaleb1765JonesMary1724", None)["mod_date"]
+        == "2015-03-21"
+    )
+    assert (
+        metadata.get("1700000000WilliamsJohn1665DavisRebecca1639", None)["width"] == 600
+    )
+    assert "1700000000WilliamsJohn1665DavisRebecca1639" in metadata.keys()
+    assert [v for v in metadata.values() if v["type"] == "picture"][0]["width"] == 600
+    assert [k for k, v in metadata.items() if v["type"] == "inline"][
+        0
+    ] == "0000000000SmithCaleb1765JonesMary1724"
+    assert "0000000000SmithCaleb1765JonesMary1724" in set(metadata)
+    assert (
+        metadata.get("0000000000SmithCaleb1765JonesMary1724", None)["path"]
+        == "SmithCaleb1765JonesMary1724"
+    )
+    assert metadata.get("false", None) is None
+    assert (
+        "StoriesPersonal0000-"
+        not in metadata.get("0000000000JohnsonSamI1892MillerJane1860", None)["people"]
+    )
+    assert (
+        "StoriesPersonal0000-"
+        not in metadata["0000000000JohnsonSamI1892MillerJane1860"]["people"]
+    )
+
+
+def test_load_yaml() -> None:
+    metadata = load_yaml(join(DATA_DIR, "example.yml"))
     assert len(metadata) == 3, ",".join(metadata.keys())
     assert "0000000000SmithCaleb1765JonesMary1724" in metadata
     assert len(metadata["0000000000SmithCaleb1765JonesMary1724"]["people"]) == 11
@@ -26,4 +96,6 @@ def test_load() -> None:
 
 
 if __name__ == "__main__":
-    test_load()
+    test_load_yaml()
+    test_metadata()
+    test_metadata_update()
