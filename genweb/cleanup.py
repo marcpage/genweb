@@ -129,6 +129,7 @@ def patchup(patchup_list: list[tuple]):
 
 
 def main() -> None:
+    """parses the directories and makes known needed fixes"""
     trash("PedigreeCharts")
     patchup(
         [
