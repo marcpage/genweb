@@ -6,8 +6,10 @@
 
 from glob import glob
 from copy import deepcopy
+from os.path import splitext
+from datetime import datetime
 
-from yaml import safe_load
+from yaml import safe_load, safe_dump
 
 
 def load_yaml(path: str) -> dict[str, dict]:
@@ -24,20 +26,47 @@ def load_yaml(path: str) -> dict[str, dict]:
 
 
 class Metadata:
-    """read-only-dict-like object"""
+    """dict-like object
+    When loading from file name.ext revisions are saved to name YYYY-MM-DD HH:MM:SS.ext
+    Revisions saved earlier are preserved, but overridden by later revisions
+    """
 
-    def __init__(self, path_pattern: str):
-        self.path = path_pattern
-        self.original = Metadata.__load(path_pattern)
+    def __init__(self, path: str):
+        self.path = path  # original file
+
+        # Calculate the file we will save any changes to
+        base, extension = splitext(path)
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.revision_path = f"{base} {now}{extension}"
+
+        # load all the revisions
+        self.original = Metadata.__load(path)
         self.updated = {}
 
+    def save(self) -> None:
+        """If there are changes saves them to the revision file"""
+        if not self.updated:
+            return
+
+        with open(self.revision_path, "w", encoding="utf-8") as revision_file:
+            safe_dump(self.updated, revision_file)
+
     @staticmethod
-    def __load(path_pattern: str) -> dict[str:dict]:
+    def __load(path: str) -> dict[str:dict]:
         result = {}
 
-        for path in sorted(glob(path_pattern)):
-            result.update(Metadata.__validate(load_yaml(path)))
+        # Revisions are stored as: base YYYY-mm-dd HH:MM:SS.ext
+        base, extension = splitext(path)
+        revisions = glob(base + "*" + extension)
+        # ensure we load the original file first
+        revisions.remove(path)
+        revisions.sort()
+        revisions.insert(0, path)
 
+        # load them in order to have later override earlier
+        for revision_path in revisions:
+            revision = Metadata.__validate(load_yaml(revision_path))
+            result.update(revision)
         return result
 
     @staticmethod
@@ -53,6 +82,8 @@ class Metadata:
             combined.update(self.updated)
 
         return combined
+
+    # MARK: dict methods
 
     def __getitem__(self, key: str) -> dict:
         if key in self.updated:

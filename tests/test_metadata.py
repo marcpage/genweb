@@ -4,6 +4,8 @@
 
 
 from os.path import dirname, join
+from shutil import copy
+from tempfile import TemporaryDirectory
 
 
 from genweb.metadata import load_yaml, Metadata
@@ -12,8 +14,33 @@ from genweb.metadata import load_yaml, Metadata
 DATA_DIR = join(dirname(__file__), "data")
 
 
+def test_metadata_save() -> None:
+    with TemporaryDirectory() as working_dir:
+        src_file = join(DATA_DIR, "example.yml")
+        metadata_file = join(working_dir, "example.yml")
+        copy(src_file, metadata_file)
+        metadata = Metadata(metadata_file)
+        johns_picture = metadata["1700000000WilliamsJohn1665DavisRebecca1639"]
+        johns_picture["width"] = 500
+        metadata["1700000000WilliamsJohn1665DavisRebecca1639"] = johns_picture
+        assert metadata["1700000000WilliamsJohn1665DavisRebecca1639"]["width"] == 500
+        metadata.save()
+
+        metadata = Metadata(metadata_file)
+        assert metadata["1700000000WilliamsJohn1665DavisRebecca1639"]["width"] == 500
+        metadata.save()
+
+        with open(src_file, "r", encoding="utf-8") as file:
+            original = file.read()
+
+        with open(metadata_file, "r", encoding="utf-8") as file:
+            copied = file.read()
+
+        assert original == copied, "base metadata file was modified"
+
+
 def test_metadata_update() -> None:
-    metadata = Metadata(join(DATA_DIR, "layered.*.yml"))
+    metadata = Metadata(join(DATA_DIR, "layered.yml"))
     metadata["0000000000PageMarcA1973HislopMickieL1949"] = {
         "type": "inline",
         "content": "hello",
@@ -38,7 +65,7 @@ def test_metadata_update() -> None:
 
 
 def test_metadata() -> None:
-    metadata = Metadata(join(DATA_DIR, "layered.*.yml"))
+    metadata = Metadata(join(DATA_DIR, "layered.yml"))
     assert "0000000000SmithCaleb1765JonesMary1724" in metadata
     assert "0000000000JohnsonSamI1892MillerJane1860" in metadata
     assert "1700000000WilliamsJohn1665DavisRebecca1639" in metadata
@@ -99,3 +126,4 @@ if __name__ == "__main__":
     test_load_yaml()
     test_metadata()
     test_metadata_update()
+    test_metadata_save()
