@@ -27,6 +27,8 @@
             }
             
         </style>
+        <!-- MARK: Javascript 
+         -->
         <script>
             const MAXIMUM_TYPE_AHEAD = 50;
             var server_state = {people:undefined, metadata:undefined};
@@ -147,6 +149,7 @@
 
                 input.focus();
             }
+
             function select_type_ahead(input_id) {
                 var input = document.getElementById(input_id);
                 var options = document.getElementById(input_id+"-options");
@@ -169,6 +172,7 @@
 
                 return row_input;
             }
+
             function load_metadata_into(metadata_identifier) {
                 var request = new XMLHttpRequest();
                 
@@ -185,9 +189,12 @@
 
                         for(var field in metadata_info) {
                             var row_input = get_row_input(field);
+                            const field_has_row = (row_input.length > 0);
 
-                            if ( (row_input.length > 0) && field != 'id') {
-                                row_input[0].value = metadata_info[field];
+                            if ( field_has_row && field == 'people') {
+                                row_input[0].value = metadata_info[field].join("\n");
+                            } else if ( field_has_row && field != 'id') {
+                                    row_input[0].value = metadata_info[field];
                             } else {
                                 console.log("Unknown field: " + field + " = " + metadata_info[field]);
                             }
@@ -316,6 +323,8 @@
     </head>
 	<body class="notranslate" onload="load_values();type_change('type-selector')">
         <h1>genweb editor</h1>
+        <!-- MARK: Editor Form
+         -->
         <div class="editor">
             <table>
                 <tr id="type">
@@ -330,7 +339,7 @@
                 <tr id="id">
                     <td class="table_label">Identifier</td>
                     <td>
-                        <input id="choose-metadata" placeholder="SurnameNameI0000SurnameNameI0000" size=40 onchange="update_submit_name()" onkeyup="type_ahead('choose-metadata', 'metadata', false)" onblur="blur_type_ahead('choose-metadata', 'metadata', false)"/>
+                        <input id="choose-metadata" placeholder="YYYYMMDDNNSurnameNameI0000SurnameNameI0000" size=50 onchange="update_submit_name()" onkeyup="type_ahead('choose-metadata', 'metadata', false)" onblur="blur_type_ahead('choose-metadata', 'metadata', false)"/>
                         <button onclick="toggle_display('choose-metadata-options', '', 'none');type_ahead('choose-metadata', 'metadata', false);set_focus('choose-metadata')">🔎</button>
                         <br/>
                         <select id="choose-metadata-options" style="display:none" size=5 onchange="select_type_ahead('choose-metadata');update_submit_name()"></select>
@@ -385,6 +394,9 @@
                 </tr>
             </table>
         </div>
+
+        <!-- MARK: People Search Form
+         -->
         <div id="people_search">
             <input id="search-person" size=40 placeholder="Search for person id" type="text" onkeyup="type_ahead('search-person', 'people', true)" onblur="blur_type_ahead('search-person', 'people', true)"/>
             <br/>
