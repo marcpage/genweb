@@ -21,6 +21,7 @@ class ApiV1:
     URL = "/api/v1/"
     CALL = regex(rf"^{URL}(people|metadata)(/([^/]+))?$")
     SEPARATOR_PATTERN = regex(r"[\s:;,]+")
+    INT_FIELDS = ["width", "height"]
 
     def __init__(self):
         self.settings: Settings = None
@@ -140,6 +141,10 @@ class ApiV1:
 
             if "people" in metadata:  # change people from string to list
                 metadata["people"] = ApiV1.SEPARATOR_PATTERN.split(metadata["people"])
+
+            for field in ApiV1.INT_FIELDS:
+                if field in metadata:
+                    metadata[field] = int(metadata[field])
 
             self.metadata[identifier] = metadata
             self.metadata.save()
