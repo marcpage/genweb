@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Module Doc """
+""" Web API v1 """
 
 
 from http.server import BaseHTTPRequestHandler as Handler

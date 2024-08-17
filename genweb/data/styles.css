@@ -2,14 +2,17 @@
     background-color: azure;
     text-align: center;
 }
+
 .spouse_area{
     background-color: FloralWhite;
     text-align: center;
 }
+
 .child_area{
     background-color: lavender;
     text-align: center;
 }
+
 .person{
     background-color: white;
     display: inline-block;
@@ -18,6 +21,7 @@
     margin: 10px;
     text-align: center;
 }
+
 .label{
     height:100%;
     display:table-cell;
@@ -57,4 +61,24 @@
 
 h1 {
     text-align: center;
+}
+
+.table_label {
+    text-align: right;
+    font-weight: bold;
+}
+
+.editor {
+    background-color: azure;
+    border-radius: 30px;
+    padding: 30px;
+    /*display:inline-block;*/
+}
+
+#people_search {
+    display: none; /* inline-block */
+    background-color:blanchedalmond;
+    border-radius: 30px;
+    padding: 30px;
+    display: none;
 }
