@@ -7,6 +7,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from os.path import join, dirname
 from traceback import format_exc
+from mimetypes import guess_type
 
 from devopsdriver.settings import Settings
 
@@ -15,7 +16,11 @@ from genweb.webapi_v1 import ApiV1
 
 API_V1 = ApiV1()
 DATA_DIR = join(dirname(__file__), "data")
-STATIC_FILES = {"/": "editor.html"}
+STATIC_FILES = {
+    "/": "editor.html",
+    "/styles.css": "styles.css",
+    "/editor.js": "editor.js",
+}
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -37,14 +42,15 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def send_file(self, path: str, mimetype: str = "text/html") -> None:
+    def send_file(self, path: str, mimetype: str = None) -> None:
         """Sends a file on disk as a response (or 404 if not found)
 
         Args:
             path (str): The path to the file to send
             mimetype (str, optional): The mimetype of the file. Defaults to "text/html".
         """
-        # TODO: If mimetype is None, guess from extension  # pylint: disable=fixme
+        mimetype = guess_type(path)[0] if mimetype is None else mimetype
+
         try:
             with open(path, "rb") as file:
                 self.respond(file.read(), mimetype=mimetype)
