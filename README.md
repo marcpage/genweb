@@ -80,14 +80,14 @@ Where `YYYY` is the four-digit year, `MM` is the two-digit month, `DD` is the tw
 
 ### %metadata_yaml% editor
 
-There is an editor in the works, but does not currently work yet.
+There is a web server editor.
 To run the editor:
 
 1. Add `webserver.yml` next to `genweb.yml`
 2. Execute `python3 -m genweb.webserver`
 3. Point your browser at [localhost:8000](http://localhost:8000)
 
-Here are the current features of the non-functional editor:
+Here are the current features of the editor:
 
 - The metadata type selector should change the appropriate fields shown in the editor for the chosen type
 - Clicking the 🔎 button next to the `Identifier` field will allow you to search and load existing metadata
@@ -96,6 +96,7 @@ Here are the current features of the non-functional editor:
 - Typing in the people search will filter the people ids
 - Clicking on a person in the filter list will display the person and their family
 - This will allow copy/pasting of people ids into the `People` field
+- Clicking the `Save` or `Update` button will create a new metadata file next to your existing one
 
 #### webserver.yml
 

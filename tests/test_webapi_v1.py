@@ -6,7 +6,6 @@
 
 from json import loads, dumps
 from types import SimpleNamespace
-from typing import Self
 from io import BytesIO
 
 from genweb.webapi_v1 import ApiV1
@@ -18,7 +17,7 @@ class MockHandler:
         self.headers = {}
         self.rfile = None
 
-    def set_body(self, body: bytes) -> Self:
+    def set_body(self, body: bytes):
         self.headers["Content-Length"] = len(body)
         self.rfile = BytesIO(body)
         return self
