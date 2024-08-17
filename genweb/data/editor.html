@@ -298,7 +298,7 @@
                     results[field] = value[0].value;
                 }
 
-                return JSON.stringify(results);
+                return results;
             }
 
             function save_form() {
@@ -316,7 +316,7 @@
 
                 request.open("POST", "/api/v1/metadata/" + form_info.id, true);
                 request.setRequestHeader("Content-Type", "text/json;charset=UTF-8");
-                request.send(form_info);
+                request.send(JSON.stringify(form_info));
             }
 
         </script>
