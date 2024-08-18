@@ -70,6 +70,15 @@ def test_copy_static_files() -> None:
         assert isfile(join(working_dir, "images", "unknown.jpg"))
 
 
+class MockMetadata(dict):
+    def __init__(self, contents: dict, copy_list: list[tuple[str, str]]):
+        self.copy_list = copy_list
+        super().__init__(contents)
+
+    def get_copy_list(self, _: Artifacts) -> list[tuple[str, str]]:
+        return self.copy_list
+
+
 def test_copy_metadata_files() -> None:
     genweb.genweb.PRINT = lambda _: None
 
@@ -81,11 +90,16 @@ def test_copy_metadata_files() -> None:
             join(dst_dir, "foo", "test.xml"),
         )
         artifacts = Artifacts(src_dir)
-        metadata = {
-            "1": {"type": "picture", "file": "test.xml", "path": "foo"},
-            "2": {"type": "unknown"},
-            "3": {"type": "picture", "file": "missing.xml", "path": "bar"},
-        }
+        metadata = MockMetadata(
+            {
+                "1": {"type": "picture", "file": "test.xml", "path": "foo"},
+                "2": {"type": "unknown"},
+                "3": {"type": "picture", "file": "missing.xml", "path": "bar"},
+            },
+            [
+                ("data/test.xml", "foot/test.xml"),
+            ],
+        )
         people = {
             "1": SimpleNamespace(id="1", metadata=["1"]),
             "fake": SimpleNamespace(id="fake", metadata=["1"]),
