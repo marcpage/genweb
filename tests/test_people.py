@@ -6,9 +6,48 @@
 
 from types import SimpleNamespace
 from datetime import date
+from os.path import join, dirname
 
 from genweb.people import People
 import genweb.people
+
+
+DATA_DIR = join(dirname(__file__), "data")
+
+
+def test_aliases() -> None:
+    gedcom_list = [
+        SimpleNamespace(
+            id="2",
+            given="Sally",
+            surname="Smith",
+            gender="F",
+            birthdate=date(1953, 3, 20),
+            parents=set(),
+            spouses=set(),
+            children=set(),
+        ),
+        SimpleNamespace(
+            id="1",
+            given="John Smith",
+            surname="Doe",
+            gender="M",
+            birthdate=date(1973, 6, 30),
+            parents=set("2"),
+            spouses=set(),
+            children=set(),
+        ),
+    ]
+
+    gedcom = {p.id: p for p in gedcom_list}
+    assert len(gedcom) == len(gedcom_list)
+    people = People(gedcom, join(DATA_DIR, "aliases.yml"))
+    assert "DoeJohnS1973-" in people
+    assert "DoeJohnS1973SmithSally1953" in people
+    assert "DoeJohnS1973SmithSally0000" in people
+    assert people["DoeJohnS1973-"] == people["DoeJohnS1973SmithSally1953"]
+    assert people["DoeJohnS1973-"] == people["DoeJohnS1973SmithSally0000"]
+    assert "DoeJohnS1973-" in people.keys()
 
 
 def test_dict_operators() -> None:
@@ -164,3 +203,4 @@ if __name__ == "__main__":
     test_middle_initial()
     test_no_birthdate()
     test_find_mother()
+    test_aliases()

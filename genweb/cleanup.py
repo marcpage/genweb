@@ -20,8 +20,9 @@ from re import compile as regex, DOTALL
 
 from devopsdriver.settings import Settings, load_yaml
 
-
 DRY_RUN = "-n" in argv
+MAKEDIRS = makedirs
+MOVE = move
 
 
 def unique_trash_name(path: str) -> str:
@@ -54,7 +55,6 @@ def pref() -> tuple[str, str]:
     settings = load_yaml(join(Settings.PREF_DIR[os_system()], "genweb.yml"))
     cleanup_dir = settings["binaries_dir"]
     trash_dir = join(dirname(dirname(cleanup_dir)), basename(cleanup_dir) + "_trash")
-    makedirs(trash_dir, exist_ok=True)
     return (cleanup_dir, trash_dir)
 
 
@@ -71,7 +71,7 @@ def trash(relative: str):
         return
 
     destination = unique_trash_name(join(trash_dir, relative))
-    makedirs(dirname(destination), exist_ok=True)
+    MAKEDIRS(dirname(destination), exist_ok=True)
 
     if DRY_RUN:
         print("DRY RUN:")
@@ -79,7 +79,7 @@ def trash(relative: str):
         print(f"\t   TO: {destination}")
         return
 
-    move(path, destination)
+    MOVE(path, destination)
 
 
 def patchup(patchup_list: list[tuple]):
