@@ -6,10 +6,13 @@
 
 from glob import glob
 from copy import deepcopy
-from os.path import splitext
+from os.path import splitext, join, relpath
 from datetime import datetime
+from re import compile as regex, DOTALL
 
 from yaml import safe_load, safe_dump
+
+from genweb.inventory import Artifacts
 
 
 def load_yaml(path: str) -> dict[str, dict]:
@@ -31,6 +34,9 @@ class Metadata:
     Revisions saved earlier are preserved, but overridden by later revisions
     """
 
+    PATH_PATTERN = regex(r'<(a|img)[^>]+(href|src)="([^"]+)"', DOTALL)
+    INVALID_PATTERN = regex(r"^(#|https?://|mailto:)")
+
     def __init__(self, path: str):
         self.path = path  # original file
 
@@ -50,6 +56,60 @@ class Metadata:
 
         with open(self.revision_path, "w", encoding="utf-8") as revision_file:
             safe_dump(self.updated, revision_file)
+
+    @staticmethod
+    def _inline_copy_list(  # pylint: disable=unused-argument
+        inline: dict, artifacts: Artifacts
+    ) -> list[tuple[str, str]]:
+        return []
+
+    @staticmethod
+    def _picture_copy_list(pict: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
+        picture_src = join(pict["path"], pict["file"])
+        picture_dst = join(pict["path"], pict["file"])
+
+        if not artifacts.has_file(picture_src):
+            return []  # TODO: handle in validate pict  # pylint: disable=fixme
+
+        return [(picture_src, picture_dst)]
+
+    @staticmethod
+    def _href_copy_list(href: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
+        href_src = join(href["path"], href["folder"])
+        href_dst = join(href["path"], href["folder"])
+
+        if not artifacts.has_dir(href_src):
+            return []  # TODO: handle in validate href  # pylint: disable=fixme
+
+        if not artifacts.has_file(join(href_src, href["file"])):
+            return []  # TODO: handle in validate href  # pylint: disable=fixme
+
+        return [
+            (file, join(href_dst, relpath(file, href_src)))
+            for file in artifacts.files_under(href_src)
+        ]
+
+    def get_copy_list(self, artifacts: Artifacts) -> list[tuple[str, str]]:
+        """Get the list of relative source and destination paths referenced in metadata
+
+        Args:
+            artifacts (Artifacts): The artifacts to look for files
+
+        Returns:
+            list[tuple[str, str]]: List of relative source and destination path pairs
+        """
+        to_copy = []
+        call = {
+            "href": Metadata._href_copy_list,
+            "picture": Metadata._picture_copy_list,
+            "inline": Metadata._inline_copy_list,
+        }
+
+        for item in self.values():
+            assert item["type"] in call, f"unknown type {item['type']}"
+            to_copy.extend(call[item["type"]](item, artifacts))
+
+        return to_copy
 
     @staticmethod
     def __load(path: str) -> dict[str:dict]:

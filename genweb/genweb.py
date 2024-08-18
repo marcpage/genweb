@@ -96,38 +96,6 @@ def destination_file(dst_dir: str, filename: str) -> str:
     return dest_file
 
 
-def copy_metadata_pictures(
-    metadata: dict[str, dict],
-    artifacts: Artifacts,
-    dst_dir: str,
-) -> None:
-    """Copy all the picture metadata from a source directory to its destination
-
-    Args:
-        metadata (dict[str, dict]): The metadata description
-        existing_files (dict[str, str]): Map of filename to absolute path to that file in src_dir
-        src_dir (str): The source directory
-        dst_dir (str): The destination directory (website)
-    """
-    for item in metadata.values():
-        if item["type"] != "picture":
-            continue
-
-        found = artifacts.paths(item["file"])
-
-        if not found:
-            PRINT(f'WARNING: {item["file"]} not found in {artifacts.directory}')
-            continue
-
-        if len(found) > 1:
-            PRINT("WARNING: duplicates")
-            print("\t" + "\n\t".join(found))
-
-        dest_file = destination_file(join(dst_dir, item["path"]), item["file"])
-        link(join(artifacts.directory, found[0]), dest_file)
-        artifacts.add(found[0])
-
-
 def copy_person_thumbnails(
     people: People, artifacts: Artifacts, dst_dir: str, default_thumbnail: str
 ) -> None:
@@ -149,51 +117,15 @@ def copy_person_thumbnails(
         found = artifacts.paths(f"{person.id}.jpg")
 
         if not found:
-            PRINT(f"WARNING: no thumbnail for {person.id}")
             link(join(dst_dir, default_thumbnail), dest_file)
             continue
 
         if len(found) != 1:
             PRINT(f"WARNING: duplicate thumbnails for {person.id}")
-            print("\t" + "\n\t".join(found))
+            PRINT("\t" + "\n\t".join(found))
 
         link(join(artifacts.directory, found[0]), dest_file)
         artifacts.add(found[0])
-
-
-def copy_metadata_hrefs(
-    metadata: dict[str, dict],
-    artifacts: Artifacts,
-    dst_dir: str,
-) -> None:
-    """copy the href dirs
-
-    Args:
-
-        metadata (dict[str, dict]): The metadata description
-        src_dir (str): The source directory
-        dst_dir (str): The destination directory (website)
-    """
-    for item in metadata.values():
-        if item["type"] != "href":
-            continue
-
-        href_src = join(item["path"], item["folder"])
-        href_dst = join(dst_dir, item["path"], item["folder"])
-
-        if not artifacts.has_dir(href_src):
-            PRINT(f"WARNING: {href_src} not found")
-            continue
-
-        if not artifacts.has_file(join(href_src, item["file"])):
-            PRINT(f'WARNING: {item["file"]} not found in {href_src}')
-            continue
-
-        for file in artifacts.files_under(href_src):
-            source_file = join(artifacts.directory, file)
-            dest_file = destination_file(dirname(join(href_dst, file)), basename(file))
-            link(source_file, dest_file)
-            artifacts.add(file)
 
 
 def copy_metadata_files(
@@ -210,8 +142,14 @@ def copy_metadata_files(
         dest_dir (str): location of website
         metadata (dict[str, dict]): _description_
     """
-    copy_metadata_pictures(metadata, artifacts, dest_dir)
-    copy_metadata_hrefs(metadata, artifacts, dest_dir)
+    copy_list = metadata.get_copy_list(artifacts)
+
+    for src_path, dst_path in copy_list:
+        proposed_dst = join(dest_dir, dst_path)
+        final_dst = destination_file(dirname(proposed_dst), basename(proposed_dst))
+        link(join(artifacts.directory, src_path), final_dst)
+        artifacts.add(src_path)
+
     copy_person_thumbnails(people, artifacts, dest_dir, default_thumbnail)
 
 
