@@ -38,6 +38,17 @@ class Artifacts:
         """
         return [f for f in self.accounted | self.unaccounted if basename(f) == filename]
 
+    def suffixed(self, suffix: str) -> list[str]:
+        """Finds all relative file paths that end with the given suffix
+
+        Args:
+            suffix (str): The end of the path to look for (may include path separators)
+
+        Returns:
+            list[str]: The list of relative paths that end with the given suffix
+        """
+        return [f for f in self.accounted | self.unaccounted if f.endswith(suffix)]
+
     def has_file(self, file_path: str) -> bool:
         """See if this file exists
 
