@@ -18,7 +18,8 @@ class People:
     """A read-only dictionary like object that maps identifier to people"""
 
     def __init__(self, people: dict[str, SimpleNamespace], alias_path: str):
-        self.aliases = load_yaml(alias_path) if alias_path else {}
+        aliases = load_yaml(alias_path) if alias_path else {}
+        self.aliases = aliases if aliases else {}
         self.by_id = self._remap(people, self.aliases)
 
     def cannonical_id(self, identifier: str) -> str:

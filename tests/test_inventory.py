@@ -9,6 +9,11 @@ from os.path import dirname, relpath, basename
 from genweb.inventory import Artifacts
 
 
+def test_suffixed() -> None:
+    artifacts = Artifacts(dirname(__file__))
+    assert "data/fake.jpg" in artifacts.suffixed("ta/fake.jpg")
+
+
 def test_basic() -> None:
     artifacts = Artifacts(dirname(__file__))
     assert relpath(__file__, artifacts.directory) in artifacts.lost(), [
@@ -58,3 +63,4 @@ def test_basic() -> None:
 
 if __name__ == "__main__":
     test_basic()
+    test_suffixed()
