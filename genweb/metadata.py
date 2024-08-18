@@ -61,7 +61,7 @@ class Metadata:
     def _inline_copy_list(  # pylint: disable=unused-argument
         inline: dict, artifacts: Artifacts
     ) -> list[tuple[str, str]]:
-        return []
+        return []  # TODO: detect files to copy from contents  # pylint: disable=fixme
 
     @staticmethod
     def _picture_copy_list(pict: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
