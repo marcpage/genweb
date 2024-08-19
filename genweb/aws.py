@@ -24,7 +24,12 @@ class AWS:
             aws_secret_access_key=settings["aws_secret_access_key"],
         )
 
-    def listing(self) -> list[str]:
+    def listing(self) -> list[SimpleNamespace]:
+        """Get a list of files in S3
+
+        Returns:
+            list[SimpleNamespace]: List of objects with filenames of o.Key
+        """
         found = []
         params = {"Bucket": self.settings["image_s3_bucket"]}
 
@@ -39,6 +44,11 @@ class AWS:
         return found
 
     def upload(self, path: str):
+        """Puts an object up in S3
+
+        Args:
+            path (str): Path to the file to upload
+        """
         with open(path, "rb") as contents:
             self.storage.put_object(
                 ACL="public-read",
