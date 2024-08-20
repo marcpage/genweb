@@ -1,7 +1,7 @@
 .PHONY:clean venv test coverage lint format deploy
 all:clean test coverage lint
 
-MIN_TEST_COVERAGE=65
+MIN_TEST_COVERAGE=70
 INITIAL_PYTHON?=python3
 VENV_DIR?=.venv
 LIBRARY=genweb
@@ -47,10 +47,10 @@ coverage: $(COVERAGE_FILE)
 $(FORMAT_FILE): $(VENV_DIR)/touchfile $(SOURCES)
 	@$(SET_ENV); $(PIP_INSTALL) ".[dev]"
 	@$(SET_ENV); $(VENV_PYTHON) -m black $(LIBRARY) &> $@
-	@perl -i -pe's/test\+coverage\&message=..%/test\+coverage\&message=$(MIN_TEST_COVERAGE)%/g' README.md
 
 format: $(FORMAT_FILE)
 	@cat $^
+	@perl -i -pe's/test\+coverage\&message=..%/test\+coverage\&message=$(MIN_TEST_COVERAGE)%/g' README.md
 
 $(LINT_FILE): $(VENV_DIR)/touchfile $(SOURCES)
 	@$(SET_ENV); $(PIP_INSTALL) ".[dev]"
