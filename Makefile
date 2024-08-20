@@ -47,6 +47,7 @@ coverage: $(COVERAGE_FILE)
 $(FORMAT_FILE): $(VENV_DIR)/touchfile $(SOURCES)
 	@$(SET_ENV); $(PIP_INSTALL) ".[dev]"
 	@$(SET_ENV); $(VENV_PYTHON) -m black $(LIBRARY) &> $@
+	@perl -i -pe's/test\+coverage\&message=..%/test\+coverage\&message=$(MIN_TEST_COVERAGE)%/g' README.md
 
 format: $(FORMAT_FILE)
 	@cat $^
