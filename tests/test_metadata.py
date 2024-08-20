@@ -122,8 +122,34 @@ def test_load_yaml() -> None:
     assert metadata["1700000000WilliamsJohn1665DavisRebecca1639"]["width"] == 600
 
 
+class MockArtifacts:
+    def __init__(self):
+        self.has_dir_result = True
+        self.has_file_result = True
+
+    def has_dir(self, path: str) -> bool:
+        return self.has_dir_result
+
+    def has_file(self, path: str) -> bool:
+        return self.has_file_result
+
+    def files_under(self, path: str) -> list:
+        return []
+
+
+def test_get_copy_list() -> None:
+    metadata = Metadata(join(DATA_DIR, "example.yml"))
+    artifacts = MockArtifacts()
+    _ = metadata.get_copy_list(artifacts)
+    artifacts.has_file_result = False
+    _ = metadata.get_copy_list(artifacts)
+    artifacts.has_dir_result = False
+    _ = metadata.get_copy_list(artifacts)
+
+
 if __name__ == "__main__":
     test_load_yaml()
     test_metadata()
     test_metadata_update()
     test_metadata_save()
+    test_get_copy_list()
