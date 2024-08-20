@@ -9,6 +9,8 @@ from os.path import basename
 
 from boto3 import client
 
+AWS_CLIENT = client
+
 
 class AWS:
     """Amazon connection
@@ -17,7 +19,7 @@ class AWS:
 
     def __init__(self, settings):
         self.settings = settings
-        self.storage = client(
+        self.storage = AWS_CLIENT(
             "s3",
             region_name=settings["image_s3_region"],
             aws_access_key_id=settings["aws_access_key_id"],
