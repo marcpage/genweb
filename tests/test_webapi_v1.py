@@ -9,6 +9,8 @@ from types import SimpleNamespace
 from io import BytesIO
 
 from genweb.webapi_v1 import ApiV1
+import genweb.genweb
+import genweb.webapi_v1
 
 
 class MockHandler:
@@ -110,7 +112,13 @@ def test_post_metadata() -> None:
     api.people = {}
     api.metadata = MockMetadata()
     handler = MockHandler(ApiV1.URL + "metadata/metadata1")
-    post_metadata = {"a": 1, "b": 2, "people": "a,b, c\r\nd\ne f;g:h", "c": ""}
+    post_metadata = {
+        "a": 1,
+        "b": 2,
+        "people": "a,b, c\r\nd\ne f;g:h",
+        "c": "",
+        "width": "50",
+    }
     handler.set_body(dumps(post_metadata).encode("utf-8"))
     body, mime, code = api.handle_post(handler)
     metadata = loads(body)
@@ -119,6 +127,7 @@ def test_post_metadata() -> None:
     assert metadata["b"] == post_metadata["b"], body
     assert "c" not in metadata, body
     assert set(metadata["people"]) == set("abcdefgh"), body
+    assert metadata["width"] == 50, body
     assert mime == "text/json"
     assert code == 200
     assert api.metadata.saved
@@ -250,6 +259,31 @@ def test_is_call() -> None:
     assert not api.is_call(MockHandler(ApiV1.URL + "metadata/metadata1/"))
 
 
+def test_load() -> None:
+    genweb.genweb.PRINT = lambda _: None
+    people = {
+        "p1": SimpleNamespace(
+            id="1",
+            parents=[],
+            given="John",
+            surname="Doe",
+            birthdate=None,
+            deathdate=None,
+            metadata=[],
+            children=[],
+            spouses=[],
+        )
+    }
+    metadata = {"m1": {"people": ["p1", "p2"]}, "m2": {}}
+    genweb.webapi_v1.load_gedcom = lambda _: people
+    genweb.webapi_v1.Metadata = lambda _: metadata
+    settings = {"gedcom_path": None, "metadata_yaml": None}
+    api = ApiV1()
+    api.load(settings)
+    assert len(api.people) == 1
+    assert "DoeJohn0000-" in api.people, api.people
+
+
 if __name__ == "__main__":
     test_list_people()
     test_list_metadata()
@@ -260,3 +294,4 @@ if __name__ == "__main__":
     test_metadata_404()
     test_person_404()
     test_is_call()
+    test_load()
