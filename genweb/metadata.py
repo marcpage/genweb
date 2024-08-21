@@ -6,7 +6,7 @@
 
 from glob import glob
 from copy import deepcopy
-from os.path import splitext, join, relpath
+from os.path import splitext, join, relpath, normpath
 from datetime import datetime
 from re import compile as regex, DOTALL
 
@@ -34,8 +34,21 @@ class Metadata:
     Revisions saved earlier are preserved, but overridden by later revisions
     """
 
-    PATH_PATTERN = regex(r'<(a|img)[^>]+(href|src)="([^"]+)"', DOTALL)
+    PATH_PATTERN = regex(
+        r'<(a|img|source)[^>]+(src|alt|href|background|name|title)="([^"]+)"', DOTALL
+    )
     INVALID_PATTERN = regex(r"^(#|https?://|mailto:)")
+    VALID_EXTENSIONS = {
+        ".epub",
+        ".gif",
+        ".jpeg",
+        ".jpg",
+        ".mov",
+        ".mp3",
+        ".mp4",
+        ".pdf",
+        ".png",
+    }
 
     def __init__(self, path: str):
         self.path = path  # original file
@@ -58,10 +71,28 @@ class Metadata:
             safe_dump(self.updated, revision_file)
 
     @staticmethod
-    def _inline_copy_list(  # pylint: disable=unused-argument
-        inline: dict, artifacts: Artifacts
-    ) -> list[tuple[str, str]]:
-        return []  # TODO: detect files to copy from contents  # pylint: disable=fixme
+    def _inline_copy_list(inline: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
+        if "contents" not in inline:
+            return []  # TODO: handle in validate href  # pylint: disable=fixme
+
+        found = []
+        paths = [
+            m.group(3).strip()
+            for m in Metadata.PATH_PATTERN.finditer(inline["contents"])
+            if not Metadata.INVALID_PATTERN.match(m.group(3).strip())
+            and splitext(m.group(3))[1].lower() in Metadata.VALID_EXTENSIONS
+        ]
+
+        for path in paths:
+            item_src = normpath(join(inline["path"], path))
+            item_dst = normpath(join(inline["path"], path))
+
+            if not artifacts.has_file(item_src):
+                continue  # TODO: handle in validate  # pylint: disable=fixme
+
+            found.append((item_src, item_dst))
+
+        return found
 
     @staticmethod
     def _picture_copy_list(pict: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
