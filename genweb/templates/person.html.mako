@@ -38,7 +38,7 @@ years = sorted(set(e.get('file', "0000")[:4] for e in displayed_metadata))
             %>
             <%include file="nav_area.html.mako" args="people_ids=person.parents,people=people,area_class='parent_area',label='PARENTS'"/>
             <%include file="nav_area.html.mako" args="people_ids=person.spouses,people=people,area_class='spouse_area',label='SPOUSES'"/>
-            <%include file="nav_area.html.mako" args="people_ids=children,people=people,area_class='child_area',label='CHILDREN'"/>
+            <%include file="nav_area.html.mako" args="people_ids=sorted(children, key=lambda i:people[i].birthdate if birthdate else date.today()),people=people,area_class='child_area',label='CHILDREN'"/>
 
         </div>
         <div class="image_area">
