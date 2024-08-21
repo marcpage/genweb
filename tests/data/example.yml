@@ -28,6 +28,28 @@
   title: Sam I Johnson (1892-1984) Bio
   type: href
 
+0000000001JohnsonSamI1892MillerJane1860:
+  file: 0000000001JohnsonSamI1892MillerJane1860.src
+  mod_date: '2015-03-28'
+  path: JohnsonSamI1892MillerJane1860
+  people:
+  - JohnsonSamI1892MillerJane1860
+  - StoriesPersonal0000-
+  title: Sam I Johnson (1892-1984) Bio
+  contents: |
+    Inline html with <img src="../media/image.jpg"/> images.
+  type: inline
+
+0000000002JohnsonSamI1892MillerJane1860:
+  file: 0000000002JohnsonSamI1892MillerJane1860.src
+  mod_date: '2015-03-28'
+  path: JohnsonSamI1892MillerJane1860
+  people:
+  - JohnsonSamI1892MillerJane1860
+  - StoriesPersonal0000-
+  title: Sam I Johnson (1892-1984) Bio
+  type: href
+
 1700000000WilliamsJohn1665DavisRebecca1639:
   file: 1700000000WilliamsJohn1665DavisRebecca1639.jpg
   path: WilliamsJohn1665DavisRebecca1639

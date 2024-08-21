@@ -111,7 +111,7 @@ def test_metadata() -> None:
 
 def test_load_yaml() -> None:
     metadata = load_yaml(join(DATA_DIR, "example.yml"))
-    assert len(metadata) == 3, ",".join(metadata.keys())
+    assert len(metadata) == 5, ",".join(metadata.keys())
     assert "0000000000SmithCaleb1765JonesMary1724" in metadata
     assert len(metadata["0000000000SmithCaleb1765JonesMary1724"]["people"]) == 11
     assert (
