@@ -12,7 +12,9 @@ const values_to_clear = [
     "folder",
     "height",
     "width",
-    "contents"
+    "contents",
+    "references",
+    "original"
 ];
 const visible_fields = {
     id:["inline","href", "picture"],
@@ -22,10 +24,12 @@ const visible_fields = {
     people:["inline", "href", "picture"],
     mod_date:["inline", "picture", "href"],
     folder:["href"],
+    original:["picture"],
     height:["picture"],
     caption:["picture"],
     width:["picture"],
     contents:["inline"],
+    references:["inline"],
 };
 
 // MARK: Helpers
@@ -171,7 +175,7 @@ function load_metadata_into(metadata_identifier) {
                 var row_input = get_row_input(field);
                 const field_has_row = (row_input.length > 0);
 
-                if ( field_has_row && field == 'people') {
+                if ( field_has_row && (field == 'people' || field == 'references')) {
                     row_input[0].value = metadata_info[field].join("\n");
                 } else if ( field_has_row && field != 'id') {
                         row_input[0].value = metadata_info[field];
@@ -299,6 +303,9 @@ function save_form(button_id) {
             }
 
             clear_form();
+        }
+        
+        if (this.readyState == 4) {
             submit_button.disabled = false;
         }
     }
