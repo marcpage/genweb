@@ -154,3 +154,4 @@ class ApiV1:
         self.metadata[identifier] = metadata
         self.metadata.save()
         body = dumps(metadata).encode("utf-8")
+        return body, mimetype, response_code

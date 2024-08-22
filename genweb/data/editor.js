@@ -63,6 +63,17 @@ function reset_select(field, values) {
     }
 }
 
+function report_if_errors(request) {
+    if (request.readyState == 4 && request.status != 200) {
+        var errors = document.getElementById("errors");
+        var error_area = document.getElementById("error_area");
+        const nowUTC = new Date();
+        const now_str = nowUTC.toLocaleString("en-US", {timezone: Intl.DateTimeFormat().resolvedOptions().timeZone})
+            
+        errors.value = now_str + "\n" + request.responseText + "\n\n" + errors.value;
+        error_area.style.display = "block";
+    }
+}
 // MARK: Loading initial state
 
 function load_into(url, field) {
@@ -72,6 +83,8 @@ function load_into(url, field) {
         if (this.readyState == 4 && this.status == 200) {
             server_state[field] = JSON.parse(request.responseText);
         }
+
+        report_if_errors(this);
     }
 
     request.open("GET", url, true);
@@ -179,13 +192,15 @@ function load_metadata_into(metadata_identifier) {
                     row_input[0].value = metadata_info[field].join("\n");
                 } else if ( field_has_row && field != 'id') {
                         row_input[0].value = metadata_info[field];
-                } else {
+                } else if ( field != 'id') {
                     console.log("Unknown field: " + field + " = " + metadata_info[field]);
                 }
             }
 
             type_change('type-selector');
         }
+
+        report_if_errors(this);
     }
 
     request.open("GET", "/api/v1/metadata/" + metadata_identifier, true);
@@ -249,6 +264,8 @@ function load_person_into(person_identifier, person, parents, spouses, children)
                 }
             }
         }
+
+        report_if_errors(this);
     }
 
     request.open("GET", "/api/v1/people/" + person_identifier, true);
@@ -277,12 +294,12 @@ function load_person(person_element_id) {
 // MARK: Save Metadata
 
 function get_form_json() {
-    var results = {};
+    var type_input = get_row_input("type");
+    var results = {type: type_input[0].value};
 
     for (var field in visible_fields) {
         var value = get_row_input(field);
 
-        console.log("field = " + field + " value = " + value[0].value);
         results[field] = value[0].value;
     }
 
@@ -298,12 +315,12 @@ function save_form(button_id) {
 
     request.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            if (server_state.metadata.includes(form_info.id)) {
-                server_state.metadata.append(form_info.id);
+            if (!server_state.metadata.includes(form_info.id)) {
+                server_state.metadata.push(form_info.id);
             }
-
-            clear_form();
         }
+
+        report_if_errors(this);
         
         if (this.readyState == 4) {
             submit_button.disabled = false;
