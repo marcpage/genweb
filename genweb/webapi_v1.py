@@ -22,6 +22,7 @@ class ApiV1:
     CALL = regex(rf"^{URL}(people|metadata)(/([^/]+))?$")
     SEPARATOR_PATTERN = regex(r"[\s:;,]+")
     INT_FIELDS = ["width", "height"]
+    LIST_FIELDS = ["people", "references"]
 
     def __init__(self):
         self.settings: Settings = None
@@ -130,25 +131,26 @@ class ApiV1:
         mimetype = "text/json"
         response_code = 200
 
+        if category != "metadata" or not identifier:
+            assert body is not None, f"Not an API call {handler.path}"
+            return body, mimetype, response_code
+
         # upload a metadata entry
-        if category == "metadata" and identifier:
-            body_bytes = int(handler.headers["Content-Length"])
-            metadata = loads(handler.rfile.read(body_bytes))
+        body_bytes = int(handler.headers["Content-Length"])
+        metadata = loads(handler.rfile.read(body_bytes))
 
-            # delete any empty entries
-            for key in [k for k in metadata if not metadata[k]]:
-                del metadata[key]
+        # delete any empty entries
+        for key in [k for k in metadata if not metadata[k]]:
+            del metadata[key]
 
-            if "people" in metadata:  # change people from string to list
-                metadata["people"] = ApiV1.SEPARATOR_PATTERN.split(metadata["people"])
+        for key in ApiV1.LIST_FIELDS:
+            if key in metadata:  # change people from string to list
+                metadata[key] = ApiV1.SEPARATOR_PATTERN.split(metadata[key])
 
-            for field in ApiV1.INT_FIELDS:
-                if field in metadata:
-                    metadata[field] = int(metadata[field])
+        for field in ApiV1.INT_FIELDS:
+            if field in metadata:
+                metadata[field] = int(metadata[field])
 
-            self.metadata[identifier] = metadata
-            self.metadata.save()
-            body = dumps(metadata).encode("utf-8")
-
-        assert body is not None, f"Not an API call {handler.path}"
-        return body, mimetype, response_code
+        self.metadata[identifier] = metadata
+        self.metadata.save()
+        body = dumps(metadata).encode("utf-8")

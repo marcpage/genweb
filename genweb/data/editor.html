@@ -63,6 +63,10 @@
                     <td class="table_label">Folder</td>
                     <td><input placeholder="SubsiteFolder" size="40"/></td>
                 </tr>
+                <tr id="original">
+                    <td class="table_label">Original</td>
+                    <td><input placeholder="+SurnameNameI0000SurnameNameI0000.jpg" size="50"/></td>
+                </tr>
                 <tr id="height">
                     <td class="table_label">Height</td>
                     <td><input type="number" min="20" max="10000"/></td>
@@ -75,9 +79,15 @@
                     <td class="table_label">Contents</td>
                     <td><textarea placeholder="Inline HTML content" rows="10" cols="120"></textarea></td>
                 </tr>
+                <tr id="references">
+                    <td class="table_label">References</td>
+                    <td>
+                        <textarea style="overflow-y: scroll;" rows="5" cols="80"></textarea>
+                    </td>
+                </tr>
                 <tr id="submit">
                     <td></td>
-                    <td style="text-align: center;"><input value="Add" type="submit" onclick="save_form()"/></td></td>
+                    <td style="text-align: center;"><input value="Add" id="submit_button" type="submit" onclick="save_form('submit_button')"/></td></td>
                 </tr>
             </table>
         </div>
