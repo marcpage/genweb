@@ -38,6 +38,8 @@
   title: Sam I Johnson (1892-1984) Bio
   contents: |
     Inline html with <img src="../media/image.jpg"/> images.
+  references:
+  - media/image.jpg
   type: inline
 
 0000000002JohnsonSamI1892MillerJane1860:
@@ -57,5 +59,15 @@
   people:
   - WilliamsJohn1665DavisRebecca1639
   title: Williams Home
+  original: +1700000000WilliamsJohn1665DavisRebecca1639.jpg
   type: picture
   width: 600
+
+1700000001WilliamsJohn1665DavisRebecca1639:
+  file: 1700000001WilliamsJohn1665DavisRebecca1639.jpg
+  path: WilliamsJohn1665DavisRebecca1639
+  people:
+  - WilliamsJohn1665DavisRebecca1639
+  title: Williams Home
+  type: picture
+  height: 300

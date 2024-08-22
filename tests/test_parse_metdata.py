@@ -3,11 +3,12 @@
 """ Test functionality in parsing the metadata """
 
 
+from os import makedirs
 from os.path import join, dirname
 from tempfile import TemporaryDirectory
 
 from genweb.parse_metadata import read_xml, validate_settings, load_metadata
-from genweb.parse_metadata import load_inlines
+from genweb.parse_metadata import load_external
 
 from genweb import parse_metadata
 
@@ -76,14 +77,15 @@ def test_load_inlines() -> None:
 
     with TemporaryDirectory() as working_dir:
         metadata = {
-            "1": {"file": "inline.src", "type": "inline"},
-            "2": {"file": "missing.src", "type": "inline"},
+            "1": {"file": "inline.src", "path": "1", "type": "inline"},
+            "2": {"file": "missing.src", "path": "2", "type": "inline"},
         }
+        makedirs(join(working_dir, "1"))
 
-        with open(join(working_dir, "inline.src"), "w", encoding="utf-8") as file:
+        with open(join(working_dir, "1", "inline.src"), "w", encoding="utf-8") as file:
             file.write("the inline contents")
 
-        load_inlines(metadata, working_dir)
+        load_external(metadata, working_dir)
         assert metadata["1"]["contents"] == "the inline contents", [
             metadata["1"]["contents"]
         ]

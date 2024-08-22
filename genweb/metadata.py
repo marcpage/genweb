@@ -6,9 +6,8 @@
 
 from glob import glob
 from copy import deepcopy
-from os.path import splitext, join, relpath, normpath
+from os.path import splitext, join, relpath
 from datetime import datetime
-from re import compile as regex, DOTALL
 
 from yaml import safe_load, safe_dump
 
@@ -34,22 +33,6 @@ class Metadata:
     Revisions saved earlier are preserved, but overridden by later revisions
     """
 
-    PATH_PATTERN = regex(
-        r'<(a|img|source)[^>]+(src|alt|href|background|name|title)="([^"]+)"', DOTALL
-    )
-    INVALID_PATTERN = regex(r"^(#|https?://|mailto:)")
-    VALID_EXTENSIONS = {
-        ".epub",
-        ".gif",
-        ".jpeg",
-        ".jpg",
-        ".mov",
-        ".mp3",
-        ".mp4",
-        ".pdf",
-        ".png",
-    }
-
     def __init__(self, path: str):
         self.path = path  # original file
 
@@ -72,25 +55,16 @@ class Metadata:
 
     @staticmethod
     def _inline_copy_list(inline: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
-        if "contents" not in inline:
-            return []  # TODO: handle in validate href  # pylint: disable=fixme
+        if "references" not in inline:
+            return []
 
         found = []
-        paths = [
-            m.group(3).strip()
-            for m in Metadata.PATH_PATTERN.finditer(inline["contents"])
-            if not Metadata.INVALID_PATTERN.match(m.group(3).strip())
-            and splitext(m.group(3))[1].lower() in Metadata.VALID_EXTENSIONS
-        ]
 
-        for path in paths:
-            item_src = normpath(join(inline["path"], path))
-            item_dst = normpath(join(inline["path"], path))
-
-            if not artifacts.has_file(item_src):
+        for referenced in inline["references"]:
+            if not artifacts.has_file(referenced):
                 continue  # TODO: handle in validate  # pylint: disable=fixme
 
-            found.append((item_src, item_dst))
+            found.append((referenced, referenced))
 
         return found
 
@@ -98,11 +72,25 @@ class Metadata:
     def _picture_copy_list(pict: dict, artifacts: Artifacts) -> list[tuple[str, str]]:
         picture_src = join(pict["path"], pict["file"])
         picture_dst = join(pict["path"], pict["file"])
+        found = []
 
         if not artifacts.has_file(picture_src):
             return []  # TODO: handle in validate pict  # pylint: disable=fixme
 
-        return [(picture_src, picture_dst)]
+        found.append((picture_src, picture_dst))
+
+        if not "original" in pict:
+            return found
+
+        original_src = join(pict["path"], pict["original"])
+        original_dst = join(pict["path"], pict["original"])
+
+        if not artifacts.has_file(original_src):
+            return found  # TODO: handle in validate pict  # pylint: disable=fixme
+
+        found.append((original_src, original_dst))
+
+        return found
 
     @staticmethod
     def _href_copy_list(href: dict, artifacts: Artifacts) -> list[tuple[str, str]]:

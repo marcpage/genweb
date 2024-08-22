@@ -82,6 +82,20 @@ def trash(relative: str):
     MOVE(path, destination)
 
 
+def remove_todo():
+    """Trash directories named ToDo"""
+    cleanup_dir, _ = pref()
+    remove = [
+        relpath(join(r, d), cleanup_dir)
+        for r, ds, _ in walk(cleanup_dir)
+        for d in ds
+        if d.lower() == "todo"
+    ]
+
+    for path in remove:
+        trash(path)
+
+
 def patchup(patchup_list: list[tuple]):
     """Given a list of file extension, regex, replacement, and description, apply them to files.
         If
@@ -131,6 +145,7 @@ def patchup(patchup_list: list[tuple]):
 def main() -> None:
     """parses the directories and makes known needed fixes"""
     trash("PedigreeCharts")
+    remove_todo()
     patchup(
         [
             (
