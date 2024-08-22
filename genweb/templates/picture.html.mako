@@ -14,6 +14,11 @@
                 <tr>
                     <td ALIGN="CENTER" VALIGN="TOP">
                         <img src="../${element["path"]}/${element["file"]}" target="Resource Window">
+                        % if "original" in element:
+                        <a href="../${element["path"]}/${element["original"]}" target="Resource Window">
+                        <font size="18"> &#x1F50D;</font>
+                        </a>
+                        % endif
                     </td>
                 </tr>
                 <tr>

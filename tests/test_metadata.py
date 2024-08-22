@@ -111,7 +111,7 @@ def test_metadata() -> None:
 
 def test_load_yaml() -> None:
     metadata = load_yaml(join(DATA_DIR, "example.yml"))
-    assert len(metadata) == 5, ",".join(metadata.keys())
+    assert len(metadata) == 6, ",".join(metadata.keys())
     assert "0000000000SmithCaleb1765JonesMary1724" in metadata
     assert len(metadata["0000000000SmithCaleb1765JonesMary1724"]["people"]) == 11
     assert (
@@ -126,11 +126,15 @@ class MockArtifacts:
     def __init__(self):
         self.has_dir_result = True
         self.has_file_result = True
+        self.has_file_plus_result = True
 
     def has_dir(self, path: str) -> bool:
         return self.has_dir_result
 
     def has_file(self, path: str) -> bool:
+        if "/+" in path:
+            return self.has_file_plus_result
+
         return self.has_file_result
 
     def files_under(self, path: str) -> list:
@@ -140,6 +144,8 @@ class MockArtifacts:
 def test_get_copy_list() -> None:
     metadata = Metadata(join(DATA_DIR, "example.yml"))
     artifacts = MockArtifacts()
+    _ = metadata.get_copy_list(artifacts)
+    artifacts.has_file_plus_result = False
     _ = metadata.get_copy_list(artifacts)
     artifacts.has_file_result = False
     _ = metadata.get_copy_list(artifacts)

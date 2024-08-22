@@ -4,9 +4,10 @@
 
 from xml.etree.ElementTree import parse, ParseError
 from os import walk
-from os.path import join, splitext
+from os.path import join, splitext, isfile, normpath
 from platform import system
 from sys import exit as return_code
+from re import compile as regex, DOTALL
 
 from yaml import dump
 from devopsdriver.settings import Settings
@@ -14,6 +15,21 @@ from devopsdriver.settings import Settings
 
 PRINT = print
 RETURN_CODE = return_code
+PATH_PATTERN = regex(
+    r'<(a|img|source)[^>]+(src|alt|href|background|name|title)="([^"]+)"', DOTALL
+)
+INVALID_PATTERN = regex(r"^(#|https?://|mailto:)")
+VALID_EXTENSIONS = {
+    ".epub",
+    ".gif",
+    ".jpeg",
+    ".jpg",
+    ".mov",
+    ".mp3",
+    ".mp4",
+    ".pdf",
+    ".png",
+}
 
 
 def read_xml(path: str) -> dict:
@@ -88,23 +104,75 @@ def load_metadata(search_dir: str) -> dict[str, dict]:
     return metadata
 
 
-def load_inlines(metadata: dict[str, dict], src_search_dir: str):
+def load_picture(entry: dict, src_search_dir: str):
+    """Looks for an original file ("+" prefix) and adds "original" key
+
+    Args:
+        entry (dict): The picture description
+        src_search_dir (str): The directory to search for the original file
+    """
+    if entry["type"] != "picture":
+        return
+
+    original_path = join(src_search_dir, entry["path"], "+" + entry["file"])
+
+    if not isfile(original_path):
+        return
+
+    entry["original"] = "+" + entry["file"]
+
+
+def load_references(entry: dict):
+    """Parses the inline html for files that are expected to be
+           in the website.
+
+    Args:
+        entry (dict): The inline entry
+        src_search_dir (str): The directory to search for files
+    """
+    if "contents" not in entry or entry["type"] != "inline":
+        return
+
+    entry["references"] = [
+        normpath(join(entry["path"], m.group(3).strip()))
+        for m in PATH_PATTERN.finditer(entry["contents"])
+        if not INVALID_PATTERN.match(m.group(3).strip())
+        and splitext(m.group(3))[1].lower() in VALID_EXTENSIONS
+    ]
+
+
+def load_inline(entry: dict, src_search_dir: str):
+    """Load the .src file for an inline and add references
+
+    Args:
+        entry (dict): The inline item to add
+        src_search_dir (str): The directory to load .src file from
+    """
+    if entry["type"] != "inline":
+        return
+
+    src_path = join(src_search_dir, entry["path"], entry["file"])
+
+    if not isfile(src_path):
+        PRINT(f"WARNING: inline src missing: {src_path}")
+        return
+
+    with open(src_path, "r", encoding="utf-8") as source:
+        entry["contents"] = source.read()
+
+    load_references(entry)
+
+
+def load_external(metadata: dict[str, dict], src_search_dir: str):
     """Loads .src file contents directly into the metadata
 
     Args:
         metadata (dict[str, dict]): The metadata to update
         src_search_dir (str): The directory to search for .src files
     """
-    existing_files = {f: join(r, f) for r, _, fs in walk(src_search_dir) for f in fs}
-
     for entry in metadata.values():
-        if entry["type"] == "inline":
-            if entry["file"] not in existing_files:
-                PRINT(f"WARNING: inline src missing: {entry['file']}")
-                continue
-
-            with open(existing_files[entry["file"]], "r", encoding="utf-8") as source:
-                entry["contents"] = source.read()
+        load_inline(entry, src_search_dir)
+        load_picture(entry, src_search_dir)
 
 
 def main() -> None:
@@ -112,7 +180,7 @@ def main() -> None:
     settings = Settings(__file__)
     validate_settings(settings)
     metadata = load_metadata(settings["xmldir"])
-    load_inlines(metadata, settings["srcdir"])
+    load_external(metadata, settings["srcdir"])
 
     with open(settings["finalyaml"], "w", encoding="utf-8") as file:
         dump(metadata, file)
