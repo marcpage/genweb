@@ -9,6 +9,8 @@ from os.path import join, dirname, isfile, basename, relpath, commonpath
 from shutil import copyfile
 from shlex import quote
 from sys import stdout
+from datetime import datetime
+from re import compile as regex, MULTILINE
 
 from devopsdriver.settings import Settings
 from fabric import Connection
@@ -22,6 +24,31 @@ from genweb.inventory import Artifacts
 
 TEMPLATE_DIR = join(dirname(__file__), "templates")
 PRINT = print
+STAT_PATTERNS = [
+    # The default format displays the st_dev, st_ino, st_mode, st_nlink, st_uid, st_gid, st_rdev,
+    # st_size, st_atime, st_mtime, st_ctime, st_birthtime, st_blksize, st_blocks, and
+    # st_flags fields, in that order
+    # 16777223 12886583161 -rw-r--r-- 1 marcp staff 0 62639182 "Jun  1 09:56:25 2005"
+    # "Jun  1 09:56:25 2005" "Aug  8 21:58:42 2023" "Jun  1 09:56:25 2005" 4096 122344 0
+    # /file/path
+    regex(
+        r"^\d+ \d+ \S+ \d+ \S+ \S+ \d+ "
+        + r'(?P<size>\d+) "[^"]+" "(?P<mod>[^"]+)" "[^"]+" "[^"]+" \d+ \d+ \d+ (?P<path>.+)$',
+        MULTILINE,
+    ),
+    # File: /file/path
+    # Size: 45514961  	Blocks: 88904      IO Block: 4096   regular file
+    # Device: ca01h/51713d	Inode: 257728      Links: 1
+    # Access: (0664/-rw-rw-r--)  Uid: ( 1000/  ubuntu)   Gid: ( 1000/  ubuntu)
+    # Access: 2024-08-04 18:44:18.708000000 +0000
+    # Modify: 2021-12-18 20:03:06.452670888 +0000
+    # Change: 2021-12-18 20:03:06.452670888 +0000
+    # Birth: -
+    regex(
+        r"^\s*File:\s+(?P<path>.+)\s+Size:\s+(?P<size>\d+).*?\s+Modify:\s+(?P<mod>\S+ \S+)",
+        MULTILINE,
+    ),
+]
 
 
 def link_people_to_metadata(people: People, metadata: dict[str, dict]) -> None:
@@ -181,6 +208,20 @@ def metadata_references(metadata: dict[str, dict], artifacts: Artifacts):
             print("\t" + "\n\t".join(found))
 
 
+def remote_run(
+    connection: Connection, *command, fail_on_stderr=False
+) -> tuple[str, str]:
+    command = " ".join(quote(a) for a in command)
+    result = connection.run(command)
+
+    if fail_on_stderr:
+        assert not result.stderr, [command, result.stderr]
+
+    assert result.exited == 0, [command, result.exited]
+    assert result.ok, command
+    return result.stdout, result.stderr
+
+
 def display_percent(item_index: int, items: list, last_percent: int) -> int:
     new_percent = int(100 * item_index / len(items))
     if new_percent <= last_percent:
@@ -191,9 +232,31 @@ def display_percent(item_index: int, items: list, last_percent: int) -> int:
     return new_percent
 
 
+def get_manifest(
+    connection: Connection,
+    settings: Settings,
+) -> dict[str, tuple[int, datetime]]:
+    output = remote_run(
+        connection,
+        "find",
+        settings["remote_path"],
+        "-type",
+        "f",
+        "-exec",
+        "stat",
+        "{}",
+        ";",
+        fail_on_stderr=True,
+    )
+
+    return [
+        {m.group("path"): (m.group("size"), m.group("mod"))}
+        for p in STAT_PATTERNS
+        for m in p.finditer(output)
+    ]
+
+
 def copy_site(settings: Settings) -> None:
-    # find Desktop -print -exec stat -f "'%Sm %z'" -t "%Y%m%d%H%M%S" "'{}'" "\;"
-    # macOS
     if "remote_server" not in settings or "remote_path" not in settings:
         return
 
@@ -222,11 +285,10 @@ def copy_site(settings: Settings) -> None:
                 continue
 
             remote_dir = join(settings["remote_path"], directory)
-            result = connection.run(f"mkdir -p {quote(remote_dir)}")
-            assert not result.stderr, result.stderr
-            assert not result.stdout, result.stdout
-            assert result.exited == 0, result.exited
-            assert result.ok
+            output, _ = remote_run(
+                connection, "mkdir", "-p", remote_dir, fail_on_stderr=True
+            )
+            assert not output, output
             created_dirs.add(directory)
             last_percent = display_percent(dir_index, directories, last_percent)
 
@@ -242,7 +304,14 @@ def copy_site(settings: Settings) -> None:
 
 def main() -> None:
     """Generate the website"""
+    settings = {"remote_server": "awsnano", "remote_path": "public_html"}
+    settings = {"remote_server": "libernet", "remote_path": "Desktop"}
+    with Connection(settings["remote_server"]) as connection:
+        manifest = get_manifest(connection, settings)
+        print(__import__("json").dumps(manifest))
+
     settings = Settings(__file__)
+    raise Exception("Done")
     artifacts = Artifacts(settings["binaries_dir"])
     people = People(
         load_gedcom(settings["gedcom_path"]), settings.get("alias_path", None)
