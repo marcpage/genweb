@@ -4,11 +4,14 @@
 """ This is the main website interface """
 
 
-from os import makedirs, link, unlink
-from os.path import join, dirname, isfile, basename
+from os import makedirs, link, unlink, walk
+from os.path import join, dirname, isfile, basename, relpath, commonpath
 from shutil import copyfile
+from shlex import quote
+from sys import stdout
 
 from devopsdriver.settings import Settings
+from fabric import Connection
 
 from genweb.relationships import load_gedcom
 from genweb.people import People
@@ -178,6 +181,65 @@ def metadata_references(metadata: dict[str, dict], artifacts: Artifacts):
             print("\t" + "\n\t".join(found))
 
 
+def display_percent(item_index: int, items: list, last_percent: int) -> int:
+    new_percent = int(100 * item_index / len(items))
+    if new_percent <= last_percent:
+        return last_percent
+
+    stdout.write(".")
+    stdout.flush()
+    return new_percent
+
+
+def copy_site(settings: Settings) -> None:
+    # find Desktop -print -exec stat -f "'%Sm %z'" -t "%Y%m%d%H%M%S" "'{}'" "\;"
+    # macOS
+    if "remote_server" not in settings or "remote_path" not in settings:
+        return
+
+    elements = [e for e in walk(settings["site_dir"])]
+    directories = sorted(
+        [
+            relpath(join(r, d), settings["site_dir"])
+            for r, ds, _ in elements
+            for d in ds
+        ],
+        key=len,
+        reverse=True,
+    )
+    files = [
+        relpath(join(r, f), settings["site_dir"]) for r, _, fs in elements for f in fs
+    ]
+    created_dirs = set()
+
+    with Connection(settings["remote_server"]) as connection:
+
+        print("Creating directories")
+        last_percent = 0
+
+        for dir_index, directory in enumerate(directories):
+            if any(commonpath((directory, d)) == directory for d in created_dirs):
+                continue
+
+            remote_dir = join(settings["remote_path"], directory)
+            result = connection.run(f"mkdir -p {quote(remote_dir)}")
+            assert not result.stderr, result.stderr
+            assert not result.stdout, result.stdout
+            assert result.exited == 0, result.exited
+            assert result.ok
+            created_dirs.add(directory)
+            last_percent = display_percent(dir_index, directories, last_percent)
+
+        print("\nCopying files")
+        last_percent = 0
+
+        for file_index, file in enumerate(files):
+            connection.put(
+                join(settings["site_dir"], file), join(settings["remote_path"], file)
+            )
+            last_percent = display_percent(file_index, files, last_percent)
+
+
 def main() -> None:
     """Generate the website"""
     settings = Settings(__file__)
@@ -200,7 +262,8 @@ def main() -> None:
     root_template_path = join(TEMPLATE_DIR, "top_level.html.mako")
     render_to_file(root_index_path, root_template_path, people=people)
     metadata_references(metadata, artifacts)
-    print("\n".join(f"WARNING: Not referenced: {f}" for f in artifacts.lost()))
+    copy_site(settings)
+    # print("\n".join(f"WARNING: Not referenced: {f}" for f in artifacts.lost()))
 
 
 if __name__ == "__main__":
