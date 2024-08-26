@@ -15,6 +15,7 @@ years = sorted(set(e.get('file', "0000")[:4] for e in displayed_metadata))
         <link rel="stylesheet" href="../static/styles.css">
         <script>
             <%include file="actions.js"/>
+            <%include file="video.js"/>
         </script>
     </head>
 	<body class="notranslate">
