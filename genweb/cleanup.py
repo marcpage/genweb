@@ -23,6 +23,13 @@ from devopsdriver.settings import Settings, load_yaml
 DRY_RUN = "-n" in argv
 MAKEDIRS = makedirs
 MOVE = move
+DELETE_NAMES = [  # files or dirs with these names will be moved to a "_trash" folder
+    "todo",
+    "HourGlass.html",
+    "Thumbs.db",
+    ".DS_Store",
+    "PedigreeCharts",
+]
 
 
 def unique_trash_name(path: str) -> str:
@@ -82,14 +89,15 @@ def trash(relative: str):
     MOVE(path, destination)
 
 
-def remove_todo():
+def remove_names(*names):
     """Trash directories named ToDo"""
     cleanup_dir, _ = pref()
+    removal_names = {n.lower() for n in names}
     remove = [
-        relpath(join(r, d), cleanup_dir)
-        for r, ds, _ in walk(cleanup_dir)
-        for d in ds
-        if d.lower() == "todo"
+        relpath(join(r, n), cleanup_dir)
+        for r, ds, fs in walk(cleanup_dir)
+        for n in [*ds, *fs]
+        if n.lower() in removal_names
     ]
 
     for path in remove:
@@ -144,8 +152,7 @@ def patchup(patchup_list: list[tuple]):
 
 def main() -> None:
     """parses the directories and makes known needed fixes"""
-    trash("PedigreeCharts")
-    remove_todo()
+    remove_names(*DELETE_NAMES)
     patchup(
         [
             (
