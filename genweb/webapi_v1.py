@@ -9,10 +9,10 @@ from re import compile as regex
 
 from devopsdriver.settings import Settings
 
-from genweb.relationships import load_gedcom, person_json
+from genweb.relationships import person_json
 from genweb.people import People
 from genweb.metadata import Metadata
-from genweb.genweb import link_people_to_metadata
+from genweb.genweb import load_startup_data
 
 
 class ApiV1:
@@ -26,22 +26,17 @@ class ApiV1:
 
     def __init__(self):
         self.settings: Settings = None
+        self.artifacts = None
         self.people: People = None
         self.metadata: Metadata = None
 
-    def load(self, settings: Settings) -> None:
+    def load(self) -> None:
         """Load all the information needed to run the web server
 
         Args:
             location (str): Pass __file__
         """
-        self.settings = settings
-        self.people = People(
-            load_gedcom(self.settings["gedcom_path"]),
-            self.settings.get("alias_path", None),
-        )
-        self.metadata = Metadata(self.settings["metadata_yaml"])
-        link_people_to_metadata(self.people, self.metadata)
+        self.settings, self.artifacts, self.people, self.metadata = load_startup_data()
 
     def parse_call(self, handler: Handler) -> tuple[str | None, str | None]:
         """Get the category and (possibly) the identifier from the call
