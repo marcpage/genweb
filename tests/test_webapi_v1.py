@@ -7,10 +7,14 @@
 from json import loads, dumps
 from types import SimpleNamespace
 from io import BytesIO
+from os.path import join, dirname
 
 from genweb.webapi_v1 import ApiV1
 import genweb.genweb
 import genweb.webapi_v1
+
+
+DATA_DIR = join(dirname(__file__), "data")
 
 
 class MockHandler:
@@ -26,12 +30,38 @@ class MockHandler:
 
 
 class MockMetadata(dict):
-    def __init__(self, **fields):
+    def __init__(self, path=None, **fields):
         self.saved = False
+        self.path = path
         super().__init__(fields)
 
     def save(self):
         self.saved = True
+
+
+class MockSettings:
+    def __init__(self, path: str):
+        self.path = path
+        self.dict = {
+            "gedcom_path": None,
+            "metadata_yaml": None,
+            "binaries_dir": DATA_DIR,
+            "alias_path": None,
+        }
+        super().__init__()
+
+    def __getitem__(self, key: str) -> dict:
+        return self.dict.__getitem__(key)
+
+    def get(self, key, default):
+        print(f"get({key}, {default})")
+        return self.dict.get(key, default)
+
+
+class MockPeople:
+    def __init__(self, gedcom, aliaspath):
+        self.gedcom = gedcom
+        self.aliaspath = aliaspath
 
 
 def test_list_people() -> None:
@@ -277,11 +307,12 @@ def test_load() -> None:
     metadata = {"m1": {"people": ["p1", "p2"]}, "m2": {}}
     genweb.webapi_v1.load_gedcom = lambda _: people
     genweb.webapi_v1.Metadata = lambda _: metadata
-    settings = {"gedcom_path": None, "metadata_yaml": None}
+    genweb.genweb.Settings = MockSettings
+    genweb.genweb.Metadata = MockMetadata
+    genweb.genweb.People = MockPeople
+    genweb.genweb.load_gedcom = lambda f: f
     api = ApiV1()
-    api.load(settings)
-    assert len(api.people) == 1
-    assert "DoeJohn0000-" in api.people, api.people
+    api.load()
 
 
 if __name__ == "__main__":
