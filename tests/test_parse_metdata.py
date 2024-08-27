@@ -90,7 +90,7 @@ def test_load_inlines() -> None:
             metadata["1"]["contents"]
         ]
         assert "contents" not in metadata["2"], metadata
-        assert "inline src missing" in mock.out, [mock.out]
+        assert "inline src file not found" in mock.out, [mock.out]
         assert "missing.src" in mock.out, [mock.out]
 
 
