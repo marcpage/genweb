@@ -35,7 +35,7 @@ def link_people_to_metadata(people: People, metadata: dict[str, dict]) -> None:
 
         for person_id in info["people"]:
             if person_id not in people:
-                PRINT(f"WARNING: person {person_id} missing for metadata {metadata_id}")
+                PRINT(f"WARNING: unknown person {person_id} in metadata {metadata_id}")
                 continue
 
             people[person_id].metadata.append(metadata_id)
@@ -178,8 +178,8 @@ def metadata_references(metadata: dict[str, dict], artifacts: Artifacts):
             print("\t" + "\n\t".join(found))
 
 
-def main() -> None:
-    """Generate the website"""
+def load_startup_data():
+    """Loads all the startup data"""
     settings = Settings(__file__)
     artifacts = Artifacts(settings["binaries_dir"])
     people = People(
@@ -187,6 +187,12 @@ def main() -> None:
     )
     metadata = Metadata(settings["metadata_yaml"])
     link_people_to_metadata(people, metadata)
+    return settings, artifacts, people, metadata
+
+
+def main() -> None:
+    """Generate the website"""
+    settings, artifacts, people, metadata = load_startup_data()
     copy_static_files(settings["copy files"], settings["site_dir"])
     copy_metadata_files(
         artifacts,
@@ -199,6 +205,8 @@ def main() -> None:
     root_index_path = join(settings["site_dir"], "index.html")
     root_template_path = join(TEMPLATE_DIR, "top_level.html.mako")
     render_to_file(root_index_path, root_template_path, people=people)
+    print("*** Website Rendered and Ready ***")
+    print("Checking for unused files ...")
     metadata_references(metadata, artifacts)
     print("\n".join(f"WARNING: Not referenced: {f}" for f in artifacts.lost()))
 

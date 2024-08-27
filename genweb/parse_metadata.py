@@ -141,7 +141,7 @@ def load_references(entry: dict):
     ]
 
 
-def load_inline(entry: dict, src_search_dir: str):
+def load_inline(entry: dict, src_search_dir: str, identifier: str):
     """Load the .src file for an inline and add references
 
     Args:
@@ -151,10 +151,14 @@ def load_inline(entry: dict, src_search_dir: str):
     if entry["type"] != "inline":
         return
 
+    if "path" not in entry:
+        print(f"WARNING: inline path missing for {identifier}")
+        return
+
     src_path = join(src_search_dir, entry["path"], entry["file"])
 
     if not isfile(src_path):
-        PRINT(f"WARNING: inline src missing: {src_path}")
+        PRINT(f"WARNING: inline src file not found for {identifier}: {src_path}")
         return
 
     with open(src_path, "r", encoding="utf-8") as source:
@@ -170,8 +174,8 @@ def load_external(metadata: dict[str, dict], src_search_dir: str):
         metadata (dict[str, dict]): The metadata to update
         src_search_dir (str): The directory to search for .src files
     """
-    for entry in metadata.values():
-        load_inline(entry, src_search_dir)
+    for identifier, entry in metadata.items():
+        load_inline(entry, src_search_dir, identifier)
         load_picture(entry, src_search_dir)
 
 

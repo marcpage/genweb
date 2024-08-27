@@ -9,8 +9,6 @@ from os.path import join, dirname
 from traceback import format_exc
 from mimetypes import guess_type
 
-from devopsdriver.settings import Settings
-
 from genweb.webapi_v1 import ApiV1
 
 
@@ -108,7 +106,7 @@ def start_webserver(port=8000, host="") -> None:
         port (int, optional): The port to listen on. Defaults to 8000.
         host (str, optional): The host to listen on. Defaults to "", meaning all local addresses.
     """
-    API_V1.load(Settings(__file__))
+    API_V1.load()
     httpd = HTTPServer((host, port), SimpleHTTPRequestHandler)
     print("Starting web server")
     httpd.serve_forever()
