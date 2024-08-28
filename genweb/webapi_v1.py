@@ -125,10 +125,8 @@ class ApiV1:
         body = None
         mimetype = "text/json"
         response_code = 200
-
-        if category != "metadata" or not identifier:
-            assert body is not None, f"Not an API call {handler.path}"
-            return body, mimetype, response_code
+        assert category == "metadata", f"Only POST metadata supported, not {category}"
+        assert identifier, "POST metadata requires an identifier in the URI"
 
         # upload a metadata entry
         body_bytes = int(handler.headers["Content-Length"])

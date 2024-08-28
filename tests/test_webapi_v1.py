@@ -54,7 +54,6 @@ class MockSettings:
         return self.dict.__getitem__(key)
 
     def get(self, key, default):
-        print(f"get({key}, {default})")
         return self.dict.get(key, default)
 
 
@@ -315,6 +314,39 @@ def test_load() -> None:
     api.load()
 
 
+def test_post():
+    api = ApiV1()
+    api.settings = {}
+    api.people = {}
+    api.metadata = MockMetadata()
+    handler = MockHandler(ApiV1.URL + "people")
+
+    try:
+        api.handle_post(handler)
+        raise AssertionError("Expected an exception")
+
+    except AssertionError:
+        pass
+
+    handler = MockHandler(ApiV1.URL + "people/people1")
+
+    try:
+        api.handle_post(handler)
+        raise AssertionError("Expected an exception")
+
+    except AssertionError:
+        pass
+
+    handler = MockHandler(ApiV1.URL + "metadata")
+
+    try:
+        api.handle_post(handler)
+        raise AssertionError("Expected an exception")
+
+    except AssertionError:
+        pass
+
+
 if __name__ == "__main__":
     test_list_people()
     test_list_metadata()
@@ -326,3 +358,4 @@ if __name__ == "__main__":
     test_person_404()
     test_is_call()
     test_load()
+    test_post()
