@@ -126,6 +126,40 @@ class Artifacts:
 
         return entry.hash
 
+    def _populate_all_stats(self):
+        """42,787 files in 0.05 - 0.06 seconds on MacBook Pro M2"""
+        no_size = [p for p, i in self.inventory.items() if i.size is None]
+
+        for path in no_size:
+            Artifacts._update_stat(self.inventory[path], join(self.directory, path))
+
+    def get_files_of_size(self, size: int) -> list[str]:
+        """Finds all files with a given file size
+
+        Args:
+            size (int): The number of bytes in the file(s) we're looking for
+
+        Returns:
+            list[str]: The list of relative paths to the files with that size
+        """
+        self._populate_all_stats()
+        return [p for p, i in self.inventory.items() if i.size == size]
+
+    def lookup_hashes(self, hash_sizes: dict[str, int]) -> dict[str, list[str]]:
+        """Given a list of hashes and the file size it represents, get the list of paths.
+            The size is an optimization to prevent the need to hash every file.
+
+        Args:
+            hash_sizes (dict[str, int]): Map of hash to filesize
+
+        Returns:
+            dict[str, list[str]]: Map of hash to list of relative paths that match that hash
+        """
+        return {
+            h: [p for p in self.get_files_of_size(s) if self.hash(p) == h]
+            for h, s in hash_sizes.items()
+        }
+
     def refresh(self) -> None:
         """Looks for new files in the artifacts directory"""
         all_files = {
