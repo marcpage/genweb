@@ -116,8 +116,38 @@ def test_hash() -> None:
         assert artifacts.hash("file1.txt") == hash_empty, artifacts.hash("file1.txt")
 
 
+def test_get_files_of_size() -> None:
+    artifacts = Artifacts(dirname(__file__))
+    files = artifacts.get_files_of_size(19)
+    assert "data/fake.jpg" in files, files
+
+
+def test_lookup_hashes() -> None:
+    with TemporaryDirectory() as working_dir:
+        artifacts = Artifacts(dirname(__file__), cache_dir=working_dir)
+        search = {
+            "109bc4102df941d25c700824514023fc0f7ece6a1d389e3133046ae6f270793e": 19,
+            "83a74d057cb0648281a004a6b70f2824a08a8b818c194a5282317f946191b603": 22,
+        }
+        results = artifacts.lookup_hashes(search)
+        assert (
+            "data/fake.jpg"
+            in results[
+                "109bc4102df941d25c700824514023fc0f7ece6a1d389e3133046ae6f270793e"
+            ]
+        ), results
+        assert (
+            "data/fake2.jpg"
+            in results[
+                "83a74d057cb0648281a004a6b70f2824a08a8b818c194a5282317f946191b603"
+            ]
+        ), results
+
+
 if __name__ == "__main__":
     test_basic()
     test_suffixed()
     test_add()
     test_hash()
+    test_get_files_of_size()
+    test_lookup_hashes()
