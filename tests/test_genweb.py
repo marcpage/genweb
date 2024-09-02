@@ -85,6 +85,11 @@ def test_copy_metadata_files() -> None:
     with TemporaryDirectory() as src_dir, TemporaryDirectory() as dst_dir:
         copytree(join(dirname(__file__), "data"), join(src_dir, "data"))
         makedirs(join(dst_dir, "foo"))
+        makedirs(join(src_dir, "1"))
+        copy(
+            join(dirname(__file__), "data", "fake.jpg"),
+            join(src_dir, "1", "1.jpg"),
+        )
         copy(
             join(dirname(__file__), "data", "test.xml"),
             join(dst_dir, "foo", "test.xml"),
@@ -109,17 +114,15 @@ def test_copy_metadata_files() -> None:
         copy_metadata_files(artifacts, dst_dir, metadata, people, default_thumbnail)
         assert isfile(join(dst_dir, "foo", "test.xml"))
 
-        with open(join(dst_dir, "1", "1.jpg"), "r", encoding="utf-8") as file_1:
+        with open(join(dst_dir, "fake", "fake.jpg"), "r", encoding="utf-8") as file_1:
             fake2_contents = file_1.read()
 
-        assert fake2_contents.startswith("default")
+        assert fake2_contents.startswith("default"), fake2_contents
 
-        with open(
-            join(dst_dir, "fake", "fake.jpg"), "r", encoding="utf-8"
-        ) as file_fake:
+        with open(join(dst_dir, "1", "1.jpg"), "r", encoding="utf-8") as file_fake:
             fake_contents = file_fake.read()
 
-        assert fake_contents.startswith("not really an image")
+        assert fake_contents.startswith("not really an image"), fake_contents
 
 
 if __name__ == "__main__":

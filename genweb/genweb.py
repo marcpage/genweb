@@ -114,18 +114,14 @@ def copy_person_thumbnails(
             continue
 
         dest_file = destination_file(join(dst_dir, person.id), f"{person.id}.jpg")
-        found = artifacts.paths(f"{person.id}.jpg")
+        source_file = join(person.id, f"{person.id}.jpg")
 
-        if not found:
+        if not artifacts.has_file(source_file):
             link(join(dst_dir, default_thumbnail), dest_file)
             continue
 
-        if len(found) != 1:
-            PRINT(f"WARNING: duplicate thumbnails for {person.id}")
-            PRINT("\t" + "\n\t".join(found))
-
-        link(join(artifacts.directory, found[0]), dest_file)
-        artifacts.add(found[0])
+        link(join(artifacts.directory, source_file), dest_file)
+        artifacts.add(source_file)
 
 
 def copy_metadata_files(
