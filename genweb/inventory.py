@@ -4,7 +4,7 @@
 """ Keep track of artifact files """
 
 
-from os import walk, stat, makedirs
+from os import walk, stat, makedirs, unlink, rename
 from os.path import join, relpath, isfile, basename, commonpath
 from types import SimpleNamespace
 from hashlib import new as Hasher
@@ -19,6 +19,7 @@ class Artifacts:
     def __init__(self, directory: str, cache_dir: str = None):
         self.cache_dir = cache_dir if cache_dir else join(directory, "metadata")
         self.directory = directory
+        self.hash_cache_needs_save = False
         self.inventory = {}
         self.refresh()
         self._load_cache()
@@ -58,8 +59,17 @@ class Artifacts:
         }
         makedirs(self.cache_dir, exist_ok=True)
 
-        with open(self._cache_path(), "w", encoding="utf-8") as cache_file:
+        final_path = self._cache_path()
+        temp_path = final_path + ".temp"
+
+        with open(temp_path, "w", encoding="utf-8") as cache_file:
             dump(cache_data, cache_file)
+
+        if isfile(final_path):
+            unlink(final_path)
+
+        rename(temp_path, final_path)
+        self.hash_cache_needs_save = False
 
     @staticmethod
     def _hash_file(path: str) -> str:
@@ -97,7 +107,7 @@ class Artifacts:
         entry.size = file_info.st_size
         entry.modified = file_info.st_mtime
 
-    def hash(self, path: str) -> str:
+    def hash(self, path: str, update_cache=True) -> str:
         """Gets the hash of the given file.
             Hashes are cached along with mdoficiation timestamp and size.
             If the size and modification timestamp from the cache match
@@ -122,7 +132,10 @@ class Artifacts:
         if not Artifacts._hash_valid(full_path, entry):
             entry.hash = Artifacts._hash_file(full_path)
             Artifacts._update_stat(entry, full_path)
-            self._save_cache()
+            self.hash_cache_needs_save = True
+
+            if update_cache:
+                self._save_cache()
 
         return entry.hash
 
@@ -154,11 +167,29 @@ class Artifacts:
 
         Returns:
             dict[str, list[str]]: Map of hash to list of relative paths that match that hash
+
+        9,779 hashed items found took:
+            - 0:23 cached
+            - 0:49 uncached with one save at the end
+            - 0:51 uncached saving cache every 100
+            - 3:25 uncached with a save after every hash
         """
-        return {
-            h: [p for p in self.get_files_of_size(s) if self.hash(p) == h]
-            for h, s in hash_sizes.items()
-        }
+        results = {}
+
+        for file_count, (file_hash, size) in enumerate(hash_sizes.items()):
+            results[file_hash] = []
+            save_cache = file_count % 100 == 99
+
+            for path in self.get_files_of_size(size):
+                if self.hash(path, update_cache=save_cache) != file_hash:
+                    continue
+
+                results[file_hash].append(path)
+
+        if self.hash_cache_needs_save:
+            self._save_cache()
+
+        return results
 
     def refresh(self) -> None:
         """Looks for new files in the artifacts directory"""

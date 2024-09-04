@@ -31,6 +31,7 @@ class AWS:
 
         Returns:
             list[SimpleNamespace]: List of objects with filenames of o.Key
+                typical fields: Key:str, LastModified:datetime, ETag:str, Size:str, StorageClass:str
         """
         found = []
         params = {"Bucket": self.settings["image_s3_bucket"]}

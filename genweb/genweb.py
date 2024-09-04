@@ -5,7 +5,7 @@
 
 
 from os import makedirs, link, unlink
-from os.path import join, dirname, isfile, basename
+from os.path import join, dirname, isfile, basename, splitext
 from shutil import copyfile
 
 from devopsdriver.settings import Settings
@@ -15,6 +15,7 @@ from genweb.people import People
 from genweb.metadata import Metadata
 from genweb.template import render_to_file
 from genweb.inventory import Artifacts
+from genweb.aws import AWS
 
 
 TEMPLATE_DIR = join(dirname(__file__), "templates")
@@ -186,9 +187,26 @@ def load_startup_data():
     return settings, artifacts, people, metadata
 
 
+def aws_mappings(
+    settings: dict, artifacts: Artifacts, metadata: Metadata
+) -> dict[str, str]:
+    try:
+        aws = AWS(settings)
+        aws_listing = aws.listing()
+        by_hash = {splitext(f.Key)[0]: f for f in aws_listing}
+        local_matches = artifacts.lookup_hashes({h: f.Size for h, f in by_hash.items()})
+        # we found 0 through 6 local copies of items in AWS
+        return {p: by_hash[h].Key for h, ps in local_matches.items() for p in ps}
+    except KeyError:
+        return {}  # no AWS settings
+
+
 def main() -> None:
     """Generate the website"""
     settings, artifacts, people, metadata = load_startup_data()
+    in_aws = aws_mappings(settings, artifacts, metadata)
+    print(__import__("json").dumps(in_aws, indent=2))
+    raise Exception("Done")
     copy_static_files(settings["copy files"], settings["site_dir"])
     copy_metadata_files(
         artifacts,
